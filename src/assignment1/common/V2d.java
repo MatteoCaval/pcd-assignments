@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package pcd.assignment1.common;
+package assignment1.common;
 
 /**
  *

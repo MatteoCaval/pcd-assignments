@@ -1,4 +1,4 @@
-package pcd.assignment1.common;
+package assignment1.common;
 
 /**
  *
@@ -21,6 +21,10 @@ public class P2d implements java.io.Serializable {
 
     public V2d sub(P2d v){
         return new V2d(x-v.x,y-v.y);
+    }
+
+    public double getDistance (P2d p) {
+        return Math.sqrt( this.x * p.x + this.y * p.y );
     }
 
     public String toString(){

@@ -2,7 +2,7 @@
  * Created on Feb 10, 2005
  *
  */
-package pcd.assignment1;
+package assignment1;
 
 /**
  * @author aricci

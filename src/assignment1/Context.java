@@ -3,10 +3,7 @@ package assignment1;
 import assignment1.common.V2d;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Context {
 
@@ -41,7 +38,7 @@ public class Context {
     }
 
     private V2d getParticleForce(Particle particle, ArrayList<Particle> particleList) {
-        return particleList.stream().map( p -> particle.getForceFromParticle( p, K_CONST ) ).reduce( V2d::sum ).get();
+        return particleList.stream().map( p -> ParticleUtils.getForceBetweenParticle( p, particle, K_CONST )).reduce( V2d::sum ).get();
     }
 
     private ArrayList<Particle> getOtherParticles(Particle particle) {

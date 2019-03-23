@@ -20,16 +20,7 @@ public class Particle {
         return new P2d( position.x, position.y );
     }
 
-    public V2d getForceFromParticle(Particle particle, int k) {
-        double dist = position.getDistance( particle.position );
-        double d3 = dist * dist * dist;
-        double fx = k * ALPHA_CONST * particle.getAlpha() / d3 * (this.position.x - particle.position.x);
-        double fy = k * ALPHA_CONST * particle.getAlpha() / d3 * (this.position.y - particle.position.y);
-
-        return new V2d( fx, fy );
-    }
-
-    private int getAlpha() {
+    public int getAlpha() {
         return ALPHA_CONST;
     }
 

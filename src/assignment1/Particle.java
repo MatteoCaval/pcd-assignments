@@ -5,22 +5,22 @@ import assignment1.common.V2d;
 
 public class Particle {
 
-    private static final int ALPHA_CONST = 1;
-    private static final int M_CONST = 1;
+    private static final double ALPHA_CONST = 1;
+    private static final double M_CONST = 1;
 
     private P2d position;
-    private V2d speed;
-    private V2d force = new V2d( 0,0 );
+    private V2d speed = new V2d(0, 0);
+    private V2d force = new V2d(0, 0);
 
     public Particle(double x, double y) {
-        this.position = new P2d( x, y );
+        this.position = new P2d(x, y);
     }
 
     public P2d getPosition() {
-        return new P2d( position.x, position.y );
+        return this.position;
     }
 
-    public int getAlpha() {
+    public double getAlpha() {
         return ALPHA_CONST;
     }
 
@@ -36,5 +36,17 @@ public class Particle {
 
     public V2d getForce() {
         return this.force;
+    }
+
+    public V2d getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(V2d speed) {
+        this.speed = speed;
+    }
+
+    public double getmConst() {
+        return M_CONST;
     }
 }

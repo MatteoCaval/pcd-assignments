@@ -5,13 +5,24 @@ public class SmartPositioning {
         Context context = new Context();
         //context.createNParticles( 2 );
 
-        context.createParticle( 5, 3 );
-        context.createParticle( 5, 6 );
+        context.createParticle( 1, 1 );
+        context.createParticle( 2, 2 );
+        context.createParticle(3,1);
 
 
         context.printAllParticles();
-        context.calculateForces();
+
+        context.doStep(1);
+
         context.printAllParticles();
+
+        context.doStep(1);
+
+        context.printAllParticles();
+//
+//        context.doStep(1);
+//
+//        context.printAllParticles();
 
     }
 }

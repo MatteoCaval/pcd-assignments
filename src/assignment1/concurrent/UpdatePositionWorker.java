@@ -8,14 +8,14 @@ public class UpdatePositionWorker extends ParticleWorker {
 
     private int timeElapsed = 2; //TODO: sistemare better
 
-    public UpdatePositionWorker(int from, int nparticles, List<Particle> particles) {
-        super(from, nparticles, particles);
+    public UpdatePositionWorker(int from, int to, List<Particle> particles) {
+        super(from, to, particles);
     }
 
     @Override
     public void run() {
 
-        int to = from + nparticles;
+        System.out.println("PW from " + from + " to " + to);
 
         particles.subList(from, to).forEach(particle -> {
             particle.getPosition().x += timeElapsed * particle.getSpeed().x;

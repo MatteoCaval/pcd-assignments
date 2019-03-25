@@ -4,7 +4,9 @@ package assignment1.concurrent;
 import assignment1.Boundary;
 import assignment1.Particle;
 import assignment1.ParticleUtils;
+import assignment1.common.Cron;
 import assignment1.common.V2d;
+import sun.security.krb5.KdcComm;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,8 +19,8 @@ public class ConcurrentContext {
 
     private final Boundary boundary;
     private final ArrayList<Particle> particles;
-    private ArrayList<ForceCalculatorWorker> forceCalculatorWorkers;
-    private ArrayList<UpdatePositionWorker> updatePositionWorkers;
+    private ArrayList<ForceCalculatorWorker> forceCalculatorWorkers = new ArrayList<>();
+    private ArrayList<UpdatePositionWorker> updatePositionWorkers = new ArrayList<>();
 
     public ConcurrentContext() {
         this.boundary = new Boundary(0, 0, 10, 10);
@@ -27,23 +29,26 @@ public class ConcurrentContext {
 
     public void start() throws InterruptedException {
 
-        createParticle(1, 2);
-        createParticle(4, 2);
+        int numOfParticle = 32000;
+        int nThread = 4;
+        createNParticles(numOfParticle);
+
+        Cron cron = new Cron();
+
+        nThread = Math.min(numOfParticle, nThread);
+
+        int particlePerThread = numOfParticle / nThread;
 
         printAllParticles();
 
-        doAndPrint();
+        cron.start();
 
-        Thread.sleep(100);
+        calculateForcesAndPrint(nThread, particlePerThread);
+        updatePositionsAndPrint(nThread, particlePerThread);
 
-        doAndPrint();
+        cron.stop();
 
-
-        Thread.sleep(100);
-        doAndPrint();
-
-        Thread.sleep(100);
-        doAndPrint();
+        System.out.println(cron.getTime());
 
     }
 
@@ -52,31 +57,50 @@ public class ConcurrentContext {
     PROBLEMA: se faccio start-join su i 2 thread e poi rifaccio partire si piant perchè non posso richiamare 2 volte start sullo stesso thread
     serve meccanismo per fare in modo che tutti i forcecalculatore eseguano - si fermini - tutti i poscalculator - si fermini  eccc...
      */
-    private void doAndPrint() throws InterruptedException {
+    private void calculateForcesAndPrint(int nthread, int particlePerThread) throws InterruptedException {
+        for (int i = 0; i < nthread - 1; i++) {
+            forceCalculatorWorkers.add(new ForceCalculatorWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), particles, K_CONST));
+            forceCalculatorWorkers.get(forceCalculatorWorkers.size() - 1).start();
+        }
 
+        forceCalculatorWorkers.add(new ForceCalculatorWorker((nthread - 1) * particlePerThread, particles.size(), particles, K_CONST));
+        forceCalculatorWorkers.get(forceCalculatorWorkers.size() - 1).start();
 
-        ForceCalculatorWorker forceWorker1 = new ForceCalculatorWorker(0, 1, particles, K_CONST);
-        ForceCalculatorWorker forceWorker2 = new ForceCalculatorWorker(1, 1, particles, K_CONST);
+        forceCalculatorWorkers.stream().forEach(w -> {
+            try {
+                w.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
 
-        UpdatePositionWorker positionWorker1 = new UpdatePositionWorker(0, 1, particles);
-        UpdatePositionWorker positionWorker2 = new UpdatePositionWorker(1, 1, particles);
-
-        forceWorker1.start();
-        forceWorker2.start();
-
-        forceWorker1.join();
-        forceWorker2.join();
-
-        positionWorker1.start();
-        positionWorker2.start();
-
-        positionWorker2.join();
-        positionWorker2.join();
-
+        forceCalculatorWorkers.clear();
 
         printAllParticles();
     }
 
+    private void updatePositionsAndPrint(int nthread, int particlePerThread) {
+
+        for (int i = 0; i < nthread - 1; i++) {
+            updatePositionWorkers.add(new UpdatePositionWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), particles));
+            updatePositionWorkers.get(updatePositionWorkers.size() - 1).start();
+        }
+
+        updatePositionWorkers.add(new UpdatePositionWorker((nthread - 1) * particlePerThread, particles.size(), particles));
+        updatePositionWorkers.get(updatePositionWorkers.size() - 1).start();
+
+        updatePositionWorkers.stream().forEach(w -> {
+            try {
+                w.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        updatePositionWorkers.clear();
+
+        printAllParticles();
+    }
 
     // region particle factories
 

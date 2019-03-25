@@ -10,16 +10,15 @@ public class ForceCalculatorWorker extends ParticleWorker {
 
     private double k;
 
-    public ForceCalculatorWorker(int from, int nparticles, List<Particle> particles, double k) {
-        super(from, nparticles, particles);
+    public ForceCalculatorWorker(int from, int to, List<Particle> particles, double k) {
+        super(from, to, particles);
         this.k = k;
     }
 
 
     @Override
     public void run() {
-        int to = from + nparticles;
-
+        System.out.println("FW from " + from + " to " + to);
         for (int i = from; i < to; i++) {
 
             V2d particleForce = particles.get(i).getForce();

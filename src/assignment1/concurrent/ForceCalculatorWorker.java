@@ -8,11 +8,12 @@ import java.util.List;
 
 public class ForceCalculatorWorker extends ParticleWorker {
 
-    private double k;
+    private double k_const;
 
-    public ForceCalculatorWorker(int from, int to, List<Particle> particles, double k) {
+
+    public ForceCalculatorWorker(int from, int to, List<Particle> particles, double k_const) {
         super(from, to, particles);
-        this.k = k;
+        this.k_const = k_const;
     }
 
 
@@ -25,13 +26,17 @@ public class ForceCalculatorWorker extends ParticleWorker {
 
             for (int j = 0; j < particles.size(); j++) {
                 if (i != j) {
-                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), k));
-
+                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), k_const ));
                 }
-
             }
 
-            particles.get(i).setForce(particleForce);
+            Particle currentParticle = particles.get(i);
+
+            //  Aggiunte la forza di attrito
+            particleForce.x -= currentParticle.getFriction() * currentParticle.getSpeed().x;
+            particleForce.y -= currentParticle.getFriction() * currentParticle.getSpeed().y;
+
+            currentParticle.setForce(particleForce);
 
         }
 

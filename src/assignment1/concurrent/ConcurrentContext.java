@@ -3,10 +3,7 @@ package assignment1.concurrent;
 
 import assignment1.Boundary;
 import assignment1.Particle;
-import assignment1.ParticleUtils;
 import assignment1.common.Cron;
-import assignment1.common.V2d;
-import sun.security.krb5.KdcComm;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,8 +11,6 @@ import java.util.Random;
 public class ConcurrentContext {
 
     private static final int K_CONST = 1;
-    private static final double OVERLAPPED_X_DELTA = 0.05;
-    private static final double OVERLAPPED_Y_DELTA = 0.05;
 
     private final Boundary boundary;
     private final ArrayList<Particle> particles;
@@ -23,13 +18,13 @@ public class ConcurrentContext {
     private ArrayList<UpdatePositionWorker> updatePositionWorkers = new ArrayList<>();
 
     public ConcurrentContext() {
-        this.boundary = new Boundary(0, 0, 10, 10);
+        this.boundary = new Boundary(0, 0, 80, 80);
         this.particles = new ArrayList<>();
     }
 
     public void start() throws InterruptedException {
 
-        int numOfParticle = 32000;
+        int numOfParticle = 10;
         int nThread = 4;
         createNParticles(numOfParticle);
 
@@ -48,13 +43,14 @@ public class ConcurrentContext {
 
         cron.stop();
 
-        System.out.println(cron.getTime());
+        System.out.println("Time: " + cron.getTime());
 
     }
 
 
     /*
-    PROBLEMA: se faccio start-join su i 2 thread e poi rifaccio partire si piant perchè non posso richiamare 2 volte start sullo stesso thread
+    FIXME :
+    se faccio start-join su i 2 thread e poi rifaccio partire si piant perchè non posso richiamare 2 volte start sullo stesso thread
     serve meccanismo per fare in modo che tutti i forcecalculatore eseguano - si fermini - tutti i poscalculator - si fermini  eccc...
      */
     private void calculateForcesAndPrint(int nthread, int particlePerThread) throws InterruptedException {
@@ -102,7 +98,12 @@ public class ConcurrentContext {
         printAllParticles();
     }
 
-    // region particle factories
+    private void printAllParticles() {
+        particles.stream().forEach(p -> System.out.println(p));
+        System.out.println();
+    }
+
+    // region Particle factories
 
     public void createParticle(double x, double y) {
         Particle particle = new Particle(x, y);
@@ -124,11 +125,6 @@ public class ConcurrentContext {
 
     // endregion
 
-
-    public void printAllParticles() {
-        particles.stream().forEach(p -> System.out.println(p));
-        System.out.println();
-    }
 
 
 }

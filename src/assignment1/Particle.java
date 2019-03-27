@@ -7,6 +7,7 @@ public class Particle {
 
     private static final double ALPHA_CONST = 1;
     private static final double M_CONST = 1;
+    private static final double K_FRICTION = 0.05;
 
     private P2d position;
     private V2d speed = new V2d(0, 0);
@@ -22,6 +23,10 @@ public class Particle {
 
     public double getAlpha() {
         return ALPHA_CONST;
+    }
+
+    public double getFriction() {
+        return K_FRICTION;
     }
 
 

@@ -11,8 +11,8 @@ public class ForceCalculatorWorker extends ParticleWorker {
     private double k_const;
 
 
-    public ForceCalculatorWorker(int from, int to, List<Particle> particles, double k_const) {
-        super(from, to, particles);
+    public ForceCalculatorWorker(int from, int to, List<Particle> particles, double k_const, Object forceLock, Object positionLock, Counter counter) {
+        super(from, to, particles, forceLock, positionLock, counter);
         this.k_const = k_const;
     }
 

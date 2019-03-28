@@ -8,8 +8,8 @@ public class UpdatePositionWorker extends ParticleWorker {
 
     private int timeElapsed = 2; //TODO: sistemare better
 
-    public UpdatePositionWorker(int from, int to, List<Particle> particles) {
-        super(from, to, particles);
+    public UpdatePositionWorker(int from, int to, List<Particle> particles, Object forceLock, Object positionLock, Counter counter) {
+        super(from, to, particles, forceLock, positionLock, counter);
     }
 
     @Override

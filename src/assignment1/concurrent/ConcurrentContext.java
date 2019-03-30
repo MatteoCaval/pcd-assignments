@@ -4,6 +4,7 @@ package assignment1.concurrent;
 import assignment1.Boundary;
 import assignment1.Particle;
 import assignment1.common.Cron;
+import assignment1.common.P2d;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,89 +15,16 @@ public class ConcurrentContext {
 
     private final Boundary boundary;
     private final ArrayList<Particle> particles;
-    private ArrayList<ForceCalculatorWorker> forceCalculatorWorkers = new ArrayList<>();
-    private ArrayList<UpdatePositionWorker> updatePositionWorkers = new ArrayList<>();
+    private final ArrayList<P2d> tempPositions = new ArrayList<>();
+    private int nThread = 4;
 
     public ConcurrentContext() {
         this.boundary = new Boundary(0, 0, 80, 80);
         this.particles = new ArrayList<>();
-    }
-
-    public void start() throws InterruptedException {
-
         int numOfParticle = 10;
-        int nThread = 4;
         createNParticles(numOfParticle);
-
-        Cron cron = new Cron();
-
-        nThread = Math.min(numOfParticle, nThread);
-
-        int particlePerThread = numOfParticle / nThread;
-
-        printAllParticles();
-
-        cron.start();
-
-        calculateForcesAndPrint(nThread, particlePerThread);
-        updatePositionsAndPrint(nThread, particlePerThread);
-
-        cron.stop();
-
-        System.out.println("Time: " + cron.getTime());
-
     }
 
-
-    /*
-    FIXME :
-    se faccio start-join su i 2 thread e poi rifaccio partire si piant perchè non posso richiamare 2 volte start sullo stesso thread
-    serve meccanismo per fare in modo che tutti i forcecalculatore eseguano - si fermini - tutti i poscalculator - si fermini  eccc...
-     */
-    private void calculateForcesAndPrint(int nthread, int particlePerThread) throws InterruptedException {
-        for (int i = 0; i < nthread - 1; i++) {
-            forceCalculatorWorkers.add(new ForceCalculatorWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), particles, K_CONST));
-            forceCalculatorWorkers.get(forceCalculatorWorkers.size() - 1).start();
-        }
-
-        forceCalculatorWorkers.add(new ForceCalculatorWorker((nthread - 1) * particlePerThread, particles.size(), particles, K_CONST));
-        forceCalculatorWorkers.get(forceCalculatorWorkers.size() - 1).start();
-
-        forceCalculatorWorkers.stream().forEach(w -> {
-            try {
-                w.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        forceCalculatorWorkers.clear();
-
-        printAllParticles();
-    }
-
-    private void updatePositionsAndPrint(int nthread, int particlePerThread) {
-
-        for (int i = 0; i < nthread - 1; i++) {
-            updatePositionWorkers.add(new UpdatePositionWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), particles));
-            updatePositionWorkers.get(updatePositionWorkers.size() - 1).start();
-        }
-
-        updatePositionWorkers.add(new UpdatePositionWorker((nthread - 1) * particlePerThread, particles.size(), particles));
-        updatePositionWorkers.get(updatePositionWorkers.size() - 1).start();
-
-        updatePositionWorkers.stream().forEach(w -> {
-            try {
-                w.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        updatePositionWorkers.clear();
-
-        printAllParticles();
-    }
 
     private void printAllParticles() {
         particles.stream().forEach(p -> System.out.println(p));
@@ -125,6 +53,16 @@ public class ConcurrentContext {
 
     // endregion
 
+    // region Getter
 
+    public ArrayList<Particle> getParticles() {
+        return particles;
+    }
+
+    public int getkConst() {
+        return K_CONST;
+    }
+
+    // endregion
 
 }

@@ -60,7 +60,7 @@ public class MainWorker extends Thread {
                 view.updatePositions(context.getTempPositions());
 
 
-                Thread.sleep(500);
+                Thread.sleep(15);
 
                 System.out.println("Resume all threads.");
                 proceedBarrier.proceed();

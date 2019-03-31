@@ -16,8 +16,8 @@ public class ParticleUtils {
             dist = OVERLAPPED_DELTA;
         }
         double d3 = dist * dist * dist;
-        double fx = i.getForce().x + k * i.getAlpha() * j.getAlpha() / d3 * (i.getPosition().x - j.getPosition().x);
-        double fy = i.getForce().y + k * i.getAlpha() * j.getAlpha() / d3 * (i.getPosition().y - j.getPosition().y);
+        double fx = /*i.getForce().x +*/ k * i.getAlpha() * j.getAlpha() / d3 * (i.getPosition().x - j.getPosition().x);
+        double fy = /*i.getForce().y + */k * i.getAlpha() * j.getAlpha() / d3 * (i.getPosition().y - j.getPosition().y);
 
         return new V2d(fx, fy);
     }

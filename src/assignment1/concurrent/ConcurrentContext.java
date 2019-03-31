@@ -15,21 +15,29 @@ public class ConcurrentContext {
 
     private final Boundary boundary;
     private final ArrayList<Particle> particles;
-    private final ArrayList<P2d> tempPositions = new ArrayList<>();
-    private int nThread = 4;
+    private ArrayList<P2d> tempPositions = new ArrayList<>();
 
-    public ConcurrentContext() {
-        this.boundary = new Boundary(0, 0, 80, 80);
+    public ConcurrentContext(int numOfParticles) {
+        this.boundary = new Boundary(200, 200, 300, 300);
         this.particles = new ArrayList<>();
-        int numOfParticle = 10;
-        createNParticles(numOfParticle);
+        createNParticles(numOfParticles);
     }
 
+    // region Public methods
 
-    private void printAllParticles() {
+    public void refreshParticlesList() {
+        for (int i = 0; i < particles.size(); i++) {
+            this.particles.get(i).getPosition().x = tempPositions.get(i).x;
+            this.particles.get(i).getPosition().y = tempPositions.get(i).y;
+        }
+    }
+
+    public void printAllParticles() {
         particles.stream().forEach(p -> System.out.println(p));
         System.out.println();
     }
+
+    // endregion
 
     // region Particle factories
 
@@ -41,6 +49,7 @@ public class ConcurrentContext {
     public void createNParticles(int numberOfParticlesToCreate) {
         for (int i = 0; i < numberOfParticlesToCreate; i++) {
             createRandomParticle();
+            this.tempPositions.add(new P2d(0, 0));
         }
     }
 
@@ -57,6 +66,10 @@ public class ConcurrentContext {
 
     public ArrayList<Particle> getParticles() {
         return particles;
+    }
+
+    public ArrayList<P2d> getTempPositions() {
+        return tempPositions;
     }
 
     public int getkConst() {

@@ -29,13 +29,12 @@ public class ParticleWorker extends Thread {
     public void run() {
         while (true) {
 
+            System.out.println(String.format("Calculating forces from %d to %d", from, to));
+            calculateForces();
 
-//            calculateForces();
-            System.out.println(String.format("Calculate forces from %d to %d", from, to));
+            System.out.println(String.format("Updating positions from %d to %d", from, to));
+            updatePosition();
 
-            System.out.println(String.format("Update positions from %d to %d", from, to));
-
-//            updatePosition();
             barrier.inc();
 
             try {
@@ -78,12 +77,15 @@ public class ParticleWorker extends Thread {
         ArrayList<Particle> particles = context.getParticles();
         System.out.println("PW from " + from + " to " + to);
 
-        particles.subList(from, to).forEach(particle -> {
-            particle.getPosition().x += timeElapsed * particle.getSpeed().x;
-            particle.getPosition().y += timeElapsed * particle.getSpeed().y;
-            particle.getSpeed().x += timeElapsed * particle.getForce().x / particle.getmConst();
-            particle.getSpeed().y += timeElapsed * particle.getForce().y / particle.getmConst();
-        });
+        for (int i = from; i < to; i++) {
+            Particle particle = particles.get(i);
+            context.getTempPositions().get(i).x = particle.getPosition().x + timeElapsed * particle.getSpeed().x;
+            context.getTempPositions().get(i).y = particle.getPosition().y + timeElapsed * particle.getSpeed().y;
+            particle.getSpeed().x = timeElapsed * particle.getForce().x / particle.getmConst();
+            particle.getSpeed().y = timeElapsed * particle.getForce().y / particle.getmConst();
+        }
+
     }
+
 
 }

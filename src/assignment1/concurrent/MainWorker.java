@@ -1,15 +1,26 @@
 package assignment1.concurrent;
 
+import assignment1.Particle;
+import assignment1.common.P2d;
+import assignment1.view.ParticleView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 public class MainWorker extends Thread {
 
     private ConcurrentContext context;
-    private int N_THREAD = 4;
+    private int N_THREAD = 8;
+    private ParticleView view;
 
     //qua terrei pure referenza alla view e al framerate
     //ci vuole anche un listener per la view
 
-    public MainWorker(ConcurrentContext context) {
+    public MainWorker(ConcurrentContext context, ParticleView view) {
         this.context = context;
+        this.view = view;
     }
 
 
@@ -43,8 +54,13 @@ public class MainWorker extends Thread {
                 System.out.println("All thread done.");
 
                 //sarebbe da aggiornare le liste correttamente e stampare i risultati
+                context.refreshParticlesList();
+                context.printAllParticles();
 
-                Thread.sleep(1000);
+                view.updatePositions(context.getTempPositions());
+
+
+                Thread.sleep(500);
 
                 System.out.println("Resume all threads.");
                 proceedBarrier.proceed();

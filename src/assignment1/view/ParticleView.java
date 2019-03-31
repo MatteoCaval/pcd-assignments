@@ -1,6 +1,7 @@
 package assignment1.view;
 
 import assignment1.common.P2d;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ParticleView extends JFrame implements ActionListener{
+public class ParticleView extends JFrame implements ActionListener {
 
     private static final int PARTICLE_DIAMETER = 20;
 
@@ -18,7 +19,7 @@ public class ParticleView extends JFrame implements ActionListener{
     private ArrayList<InputListener> listeners;
     private VisualiserPanel panel;
 
-    public ParticleView(int w, int h){
+    public ParticleView(int w, int h) {
         super("Mandelbrot Viewer");
         setSize(w, h);
         listeners = new ArrayList<InputListener>();
@@ -50,53 +51,53 @@ public class ParticleView extends JFrame implements ActionListener{
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    public void display(){
+    public void display() {
         SwingUtilities.invokeLater(() -> {
             this.setVisible(true);
         });
     }
 
 
-    public void changeState(final String s){
-        SwingUtilities.invokeLater(new Runnable(){
-            public void run(){
+    public void changeState(final String s) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
                 state.setText(s);
             }
         });
     }
 
-    public void addListener(InputListener l){
+    public void addListener(InputListener l) {
         listeners.add(l);
     }
 
 
-    private void notifyStopped(){
-        for(InputListener l : listeners){
+    private void notifyStopped() {
+        for (InputListener l : listeners) {
             l.stopped();
         }
     }
 
     @Override
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
 
     }
 
-    public void updatePositions(P2d[] array){
+    public void updatePositions(ArrayList<P2d> array) {
         panel.updatePositions(array);
     }
 
-    public class VisualiserPanel extends JPanel{
-        private P2d[] positions;
+    public class VisualiserPanel extends JPanel {
+        private ArrayList<P2d> positions;
         private long dx;
         private long dy;
 
-        public VisualiserPanel(int w, int h){
+        public VisualiserPanel(int w, int h) {
             setSize(w, h);
             dx = w / 2 - PARTICLE_DIAMETER;
             dy = h / 2 - PARTICLE_DIAMETER;
         }
 
-        public void paint(Graphics g){
+        public void paint(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
 
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -104,22 +105,22 @@ public class ParticleView extends JFrame implements ActionListener{
             g2.setRenderingHint(RenderingHints.KEY_RENDERING,
                     RenderingHints.VALUE_RENDER_QUALITY);
             g2.clearRect(0, 0, this.getWidth(), this.getHeight());
-            synchronized(this){
-                if(positions != null){
-                    Arrays.stream(positions).forEach(p -> {
-                        int x0 = (int) (dx + p.x * dx);
-                        int y0 = (int) (dy - p.y * dy);
+            synchronized (this) {
+                if (positions != null) {
+                    positions.stream().forEach(p -> {
+                        int x0 = (int) p.x;//(int) (dx + p.x * dx);
+                        int y0 = (int) p.y;//(int) (dy - p.y * dy);
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
                 }
-                g2.drawString("Particles: " + positions.length, 2, PARTICLE_DIAMETER);
+                g2.drawString("Particles: " + positions.size(), 2, PARTICLE_DIAMETER);
 
             }
 
         }
 
-        public void updatePositions(P2d[] pos){
-            synchronized(this){
+        public void updatePositions(ArrayList<P2d> pos) {
+            synchronized (this) {
                 positions = pos;
             }
             repaint();

@@ -5,19 +5,22 @@ import assignment1.concurrent.ConcurrentContext;
 import assignment1.concurrent.MainWorker;
 import assignment1.view.ParticleView;
 
+import java.util.ArrayList;
+
 public class SmartPositioning {
     public static void main(String[] args) throws InterruptedException {
         int pixel_w = 1200;
         int pixel_h = 800;
 
-        ConcurrentContext context1 = new ConcurrentContext();
+        ConcurrentContext context1 = new ConcurrentContext(10);
 
-        new MainWorker(context1).start();
+
         ParticleView view = new ParticleView(pixel_w, pixel_h);
         view.display();
+        view.updatePositions(new ArrayList<>());
 
-        /*P2d[] array = new P2d[]{new P2d(-1,0), new P2d(-1,-1), new P2d(1,1)};
-        view.updatePositions(array);*/
+        new MainWorker(context1, view).start();
+
 
     }
 }

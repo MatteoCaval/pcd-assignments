@@ -12,7 +12,7 @@ public class ParticleWorker extends Thread {
     private final int from, to;
 
     private ConcurrentContext context;
-    private int timeElapsed = 2; //TODO: sistemare better
+    private int timeElapsed = 16; //TODO: sistemare better
     private Barrier barrier;
     private ProceedBarrier proceedBarrier;
 

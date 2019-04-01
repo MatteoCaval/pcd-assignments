@@ -18,7 +18,7 @@ public class ConcurrentContext {
     private ArrayList<P2d> tempPositions = new ArrayList<>();
 
     public ConcurrentContext(int numOfParticles) {
-        this.boundary = new Boundary(300, 200, 800, 500);
+        this.boundary = new Boundary(300, 200, 800, 500); //farlo tramite calcoli partendo da dimensioni con cui ho settato la view
         this.particles = new ArrayList<>();
         createNParticles(numOfParticles);
     }

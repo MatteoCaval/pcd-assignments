@@ -46,7 +46,7 @@ public class MainWorker extends Thread {
         new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedBarrier).start();
 
         try {
-            while (true) {
+            while (true/*!stopFlag.isStopped()*/) {
 
 
                 barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione

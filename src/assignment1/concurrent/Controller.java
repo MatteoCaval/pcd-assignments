@@ -12,10 +12,12 @@ public class Controller implements InputListener {
     public Controller(ParticleView view, ConcurrentContext context) {
         this.view = view;
         this.context = context;
+        stopFlag = new StopFlag();
+        stopFlag.stop();
     }
 
     public void start() {
-        stopFlag = new StopFlag();
+        stopFlag.start();
         new MainWorker(context, view, stopFlag).start();
     }
 

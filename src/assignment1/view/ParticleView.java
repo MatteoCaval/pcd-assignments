@@ -82,11 +82,10 @@ public class ParticleView extends JFrame implements ActionListener {
         String cmd = ev.getActionCommand();
         if (cmd.equals("Start")) {
             listener.startPressed();
-            state.setText("Idle");
+            changeState("Idle");
         } else if (cmd.equals("Stop")) {
             listener.stopPressed();
-            state.setText("Stopped");
-
+            changeState("Stopped");
         }
     }
 

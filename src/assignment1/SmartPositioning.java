@@ -5,18 +5,16 @@ import assignment1.concurrent.Controller;
 import assignment1.view.ParticleView;
 
 public class SmartPositioning {
-    public static void main(String[] args) throws InterruptedException {
-        int pixel_w = 1200;
-        int pixel_h = 800;
+    private final static int WIDTH = 1200;
+    private final static int HEIGHT = 800;
 
-        ConcurrentContext context1 = new ConcurrentContext(500, pixel_w, pixel_h);
-        ParticleView view = new ParticleView(pixel_w, pixel_h);
-        view.display();
+    public static void main(String[] args) throws InterruptedException {
+        ConcurrentContext context1 = new ConcurrentContext(500, WIDTH, HEIGHT);
+        ParticleView view = new ParticleView(WIDTH, HEIGHT);
 
         Controller controller = new Controller(view, context1); //controller da passare alla view per comunicare pressione startPressed/stopPressed
-
         view.setInputListener(controller);
-        controller.start();
 
+        view.display();
     }
 }

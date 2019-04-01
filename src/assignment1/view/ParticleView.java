@@ -1,14 +1,12 @@
 package assignment1.view;
 
 import assignment1.common.P2d;
-import assignment1.concurrent.Controller;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ParticleView extends JFrame implements ActionListener {
 
@@ -19,15 +17,15 @@ public class ParticleView extends JFrame implements ActionListener {
     private JTextField state;
     private ArrayList<InputListener> listeners;
     private VisualiserPanel panel;
-    private Controller controller;
+    private InputListener listener;
 
     public ParticleView(int w, int h) {
         super("Mandelbrot Viewer");
         setSize(w, h);
         listeners = new ArrayList<InputListener>();
 
-        startButton = new JButton("start");
-        stopButton = new JButton("stop");
+        startButton = new JButton("startPressed");
+        stopButton = new JButton("stopPressed");
         JPanel controlPanel = new JPanel();
         controlPanel.add(startButton);
         controlPanel.add(stopButton);
@@ -75,17 +73,17 @@ public class ParticleView extends JFrame implements ActionListener {
 
     private void notifyStopped() {
         for (InputListener l : listeners) {
-            l.stopped();
+            l.stopPressed();
         }
     }
 
     @Override
-    public void actionPerformed(ActionEvent ev){
+    public void actionPerformed(ActionEvent ev) {
         String cmd = ev.getActionCommand();
-        if (cmd.equals("start")){
-            controller.startPressed();
-        } else if (cmd.equals("stop")){
-            controller.stopPressed();
+        if (cmd.equals("startPressed")) {
+            listener.startPressed();
+        } else if (cmd.equals("stopPressed")) {
+            listener.stopPressed();
         }
     }
 
@@ -93,8 +91,8 @@ public class ParticleView extends JFrame implements ActionListener {
         panel.updatePositions(array);
     }
 
-    public void setController(Controller controller){
-        this.controller = controller;
+    public void setInputListener(InputListener listener) {
+        this.listener = listener;
     }
 
     public class VisualiserPanel extends JPanel {

@@ -1,8 +1,9 @@
 package assignment1.concurrent;
 
+import assignment1.view.InputListener;
 import assignment1.view.ParticleView;
 
-public class Controller /*implements InputListener */{
+public class Controller implements InputListener {
 
     private ParticleView view;
     private StopFlag stopFlag;
@@ -18,15 +19,15 @@ public class Controller /*implements InputListener */{
         new MainWorker(context, view, stopFlag).start();
     }
 
-    public void startPressed(){
-        if(this.stopFlag.isStopped()){
-            this.stopFlag.start();
+    @Override
+    public void startPressed() {
+        if (this.stopFlag.isStopped()) {
+           this.start();
         }
     }
 
-    public void stopPressed(){
-        if (!stopFlag.isStopped()){
-            this.stopFlag.stop();
-        }
+    @Override
+    public void stopPressed() {
+        this.stopFlag.stop();
     }
 }

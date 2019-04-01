@@ -20,12 +20,12 @@ public class ParticleView extends JFrame implements ActionListener {
     private InputListener listener;
 
     public ParticleView(int w, int h) {
-        super("Mandelbrot Viewer");
+        super("Particle Viewer");
         setSize(w, h);
         listeners = new ArrayList<InputListener>();
 
-        startButton = new JButton("startPressed");
-        stopButton = new JButton("stopPressed");
+        startButton = new JButton("Start");
+        stopButton = new JButton("Stop");
         JPanel controlPanel = new JPanel();
         controlPanel.add(startButton);
         controlPanel.add(stopButton);
@@ -80,10 +80,13 @@ public class ParticleView extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ev) {
         String cmd = ev.getActionCommand();
-        if (cmd.equals("startPressed")) {
+        if (cmd.equals("Start")) {
             listener.startPressed();
-        } else if (cmd.equals("stopPressed")) {
+            state.setText("Idle");
+        } else if (cmd.equals("Stop")) {
             listener.stopPressed();
+            state.setText("Stopped");
+
         }
     }
 
@@ -121,8 +124,9 @@ public class ParticleView extends JFrame implements ActionListener {
                         int y0 = (int) p.y;//(int) (dy - p.y * dy);
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
+                    g2.drawString("Particles: " + positions.size(), 2, PARTICLE_DIAMETER);
+
                 }
-                g2.drawString("Particles: " + positions.size(), 2, PARTICLE_DIAMETER);
 
             }
 

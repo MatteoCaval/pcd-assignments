@@ -9,7 +9,7 @@ public class SmartPositioning {
         int pixel_w = 1200;
         int pixel_h = 800;
 
-        ConcurrentContext context1 = new ConcurrentContext(500);
+        ConcurrentContext context1 = new ConcurrentContext(500, pixel_w, pixel_h);
         ParticleView view = new ParticleView(pixel_w, pixel_h);
         view.display();
 

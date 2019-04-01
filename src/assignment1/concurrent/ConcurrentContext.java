@@ -3,7 +3,6 @@ package assignment1.concurrent;
 
 import assignment1.Boundary;
 import assignment1.Particle;
-import assignment1.common.Cron;
 import assignment1.common.P2d;
 
 import java.util.ArrayList;
@@ -17,8 +16,8 @@ public class ConcurrentContext {
     private final ArrayList<Particle> particles;
     private ArrayList<P2d> tempPositions = new ArrayList<>();
 
-    public ConcurrentContext(int numOfParticles) {
-        this.boundary = new Boundary(300, 200, 800, 500); //farlo tramite calcoli partendo da dimensioni con cui ho settato la view
+    public ConcurrentContext(int numOfParticles, int w, int h) {
+        this.boundary = new Boundary(w / 5 * 2, h / 5 * 2, w / 5 * 3, h / 5 * 3); //farlo tramite calcoli partendo da dimensioni con cui ho settato la view
         this.particles = new ArrayList<>();
         createNParticles(numOfParticles);
     }

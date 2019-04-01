@@ -1,13 +1,6 @@
 package assignment1.concurrent;
 
-import assignment1.Particle;
-import assignment1.common.P2d;
 import assignment1.view.ParticleView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class MainWorker extends Thread {
 

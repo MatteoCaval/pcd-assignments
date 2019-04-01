@@ -1,6 +1,7 @@
 package assignment1.view;
 
 import assignment1.common.P2d;
+import assignment1.concurrent.Controller;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +19,7 @@ public class ParticleView extends JFrame implements ActionListener {
     private JTextField state;
     private ArrayList<InputListener> listeners;
     private VisualiserPanel panel;
+    private Controller controller;
 
     public ParticleView(int w, int h) {
         super("Mandelbrot Viewer");
@@ -78,12 +80,21 @@ public class ParticleView extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-
+    public void actionPerformed(ActionEvent ev){
+        String cmd = ev.getActionCommand();
+        if (cmd.equals("start")){
+            controller.startPressed();
+        } else if (cmd.equals("stop")){
+            controller.stopPressed();
+        }
     }
 
     public void updatePositions(ArrayList<P2d> array) {
         panel.updatePositions(array);
+    }
+
+    public void setController(Controller controller){
+        this.controller = controller;
     }
 
     public class VisualiserPanel extends JPanel {

@@ -14,7 +14,19 @@ public class Controller /*implements InputListener */{
     }
 
     public void start() {
+        stopFlag = new StopFlag();
+        new MainWorker(context, view, stopFlag).start();
+    }
 
-        new MainWorker(context, view).start();
+    public void startPressed(){
+        if(this.stopFlag.isStopped()){
+            this.stopFlag.start();
+        }
+    }
+
+    public void stopPressed(){
+        if (!stopFlag.isStopped()){
+            this.stopFlag.stop();
+        }
     }
 }

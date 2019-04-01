@@ -13,12 +13,13 @@ public class SmartPositioning {
         int pixel_w = 1200;
         int pixel_h = 800;
 
-        ConcurrentContext context1 = new ConcurrentContext(5000);
+        ConcurrentContext context1 = new ConcurrentContext(500);
         ParticleView view = new ParticleView(pixel_w, pixel_h);
         view.display();
-        view.updatePositions(new ArrayList<>());
 
         Controller controller = new Controller(view, context1); //controller da passare alla view per comunicare pressione start/stop
+
+        view.setController(controller);
         controller.start();
 
     }

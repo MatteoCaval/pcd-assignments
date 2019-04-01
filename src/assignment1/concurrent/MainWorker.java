@@ -12,15 +12,17 @@ import java.util.stream.Collectors;
 public class MainWorker extends Thread {
 
     private ConcurrentContext context;
-    private int N_THREAD = 8;
+    private int N_THREAD = 8; //TODO: meglio 8 + 1 ? da sustemare in ognu caso con il numero di processori
     private ParticleView view;
+    private final StopFlag stopFlag;
 
     //qua terrei pure referenza alla view e al framerate
     //ci vuole anche un listener per la view
 
-    public MainWorker(ConcurrentContext context, ParticleView view) {
+    public MainWorker(ConcurrentContext context, ParticleView view, StopFlag stopFlag) {
         this.context = context;
         this.view = view;
+        this.stopFlag = stopFlag;
     }
 
 
@@ -46,7 +48,7 @@ public class MainWorker extends Thread {
         new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedBarrier).start();
 
         try {
-            while (true/*!stopFlag.isStopped()*/) {
+            while (!stopFlag.isStopped()) {
 
 
                 barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione

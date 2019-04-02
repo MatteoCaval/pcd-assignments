@@ -71,7 +71,7 @@ public class ConcurrentContext {
         return tempPositions;
     }
 
-    public int getkConst() {
+    public int getKConst() {
         return K_CONST;
     }
 

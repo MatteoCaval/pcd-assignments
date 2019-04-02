@@ -5,7 +5,6 @@ import assignment1.ParticleUtils;
 import assignment1.common.V2d;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ParticleWorker extends Thread {
 
@@ -42,11 +41,7 @@ public class ParticleWorker extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-
         }
-
-
     }
 
     private void calculateForces() {
@@ -59,7 +54,7 @@ public class ParticleWorker extends Thread {
 
             for (int j = 0; j < particles.size(); j++) {
                 if (i != j) {
-                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), context.getkConst()));
+                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), context.getKConst()));
                 }
             }
 

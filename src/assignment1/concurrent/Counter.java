@@ -3,9 +3,9 @@ package assignment1.concurrent;
 public class Counter {
 
     private int counterValue;
-    private final int maxValue;
+    private final Integer maxValue;
 
-    public Counter(int maxValue) {
+    public Counter(Integer maxValue) {
         this.counterValue = 0;
         this.maxValue = maxValue;
     }
@@ -19,6 +19,10 @@ public class Counter {
     }
 
     public synchronized boolean maxReached() {
-        return this.counterValue == this.maxValue;
+        if (maxValue != null){
+            return this.counterValue == this.maxValue;
+        } else {
+            return false;
+        }
     }
  }

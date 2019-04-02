@@ -5,7 +5,7 @@ public class StopFlag {
     private boolean isStopped;
 
     public StopFlag() {
-        this.isStopped = false;
+        this.isStopped = true;
     }
 
     public synchronized void stop() {

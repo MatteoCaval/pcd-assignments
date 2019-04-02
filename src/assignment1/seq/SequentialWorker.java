@@ -48,7 +48,7 @@ public class SequentialWorker extends Thread {
 
             for (int j = 0; j < particles.size(); j++) {
                 if (i != j) {
-                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), context.getkConst()));
+                    particleForce = particleForce.sum(ParticleUtils.getForceBetweenParticle(particles.get(i), particles.get(j), context.getKConst()));
                 }
             }
 

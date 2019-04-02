@@ -8,17 +8,18 @@ public class Controller implements InputListener {
     private ParticleView view;
     private StopFlag stopFlag;
     private ConcurrentContext context;
+    private Counter counter;
 
-    public Controller(ParticleView view, ConcurrentContext context) {
+    public Controller(ParticleView view, ConcurrentContext context, Counter counter) {
         this.view = view;
         this.context = context;
-        stopFlag = new StopFlag();
-        stopFlag.stop();
+        this.counter = counter;
+        this.stopFlag = new StopFlag();
     }
 
     public void start() {
         stopFlag.start();
-        new MainWorker(context, view, stopFlag).start();
+        new MainWorker(context, view, stopFlag, counter).start();
     }
 
     @Override

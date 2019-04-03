@@ -26,7 +26,7 @@ public class MainWorker extends Thread {
         super.run();
 
         Barrier barrier = new Barrier(N_THREAD);
-        ProceedBarrier proceedBarrier = new ProceedBarrier(N_THREAD);
+        ProceedMonitor proceedMonitor = new ProceedMonitor();
 
         int particleNumber = context.getParticles().size();
 
@@ -36,14 +36,14 @@ public class MainWorker extends Thread {
 
 
         for (int i = 0; i < N_THREAD - 1; i++) {
-            new ParticleWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedBarrier).start();
+            new ParticleWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();
         }
 
-        new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedBarrier).start();
+        new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
 
         try {
             while (!stopFlag.isStopped()) {
-                if (!counter.maxReached()){
+                if (!counter.maxReached()) {
                     barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione
 
                     System.out.println("All thread done.");
@@ -55,10 +55,12 @@ public class MainWorker extends Thread {
                     view.updatePositions(context.getTempPositions());
                     counter.inc();
 
-                    Thread.sleep(15);
+                    Thread.sleep(2000);
 
                     System.out.println("Resume all threads.");
-                    proceedBarrier.proceed();
+
+                    proceedMonitor.proceed();
+
                 } else {
                     stopFlag.stop();
                     view.changeState("Out of steps");

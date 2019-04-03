@@ -13,14 +13,14 @@ public class ParticleWorker extends Thread {
     private ConcurrentContext context;
     private int timeElapsed = 16; //TODO: sistemare better
     private Barrier barrier;
-    private ProceedBarrier proceedBarrier;
+    private ProceedMonitor proceedMonitor;
 
-    public ParticleWorker(int from, int to, ConcurrentContext context, Barrier barrier, ProceedBarrier proceedBarrier) {
+    public ParticleWorker(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor) {
         this.from = from;
         this.to = to;
         this.context = context;
         this.barrier = barrier;
-        this.proceedBarrier = proceedBarrier;
+        this.proceedMonitor = proceedMonitor;
     }
 
 
@@ -37,7 +37,7 @@ public class ParticleWorker extends Thread {
             barrier.inc();
 
             try {
-                proceedBarrier.waitNextRound();
+                proceedMonitor.waitNextRound();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -47,7 +47,6 @@ public class ParticleWorker extends Thread {
     private void calculateForces() {
         ArrayList<Particle> particles = context.getParticles();
 
-        System.out.println("FW from " + from + " to " + to);
         for (int i = from; i < to; i++) {
 
             V2d particleForce = particles.get(i).getForce();
@@ -70,7 +69,6 @@ public class ParticleWorker extends Thread {
 
     private void updatePosition() {
         ArrayList<Particle> particles = context.getParticles();
-        System.out.println("PW from " + from + " to " + to);
 
         for (int i = from; i < to; i++) {
             Particle particle = particles.get(i);

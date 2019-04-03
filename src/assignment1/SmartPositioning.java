@@ -20,6 +20,7 @@ public class SmartPositioning {
         Controller controller = new Controller(view, context, counter); //controller da passare alla view per comunicare pressione startPressed/stopPressed
 
         view.setInputListener(controller);
+        view.setPartcilesNumber(N_PARTICLES);
         view.display();
     }
 }

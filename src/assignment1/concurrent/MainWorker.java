@@ -1,5 +1,6 @@
 package assignment1.concurrent;
 
+import assignment1.common.States;
 import assignment1.view.ParticleView;
 
 public class MainWorker extends Thread {
@@ -8,16 +9,16 @@ public class MainWorker extends Thread {
     private int N_THREAD = 8; //TODO: meglio 8 + 1 ? da sustemare in ognu caso con il numero di processori
     private ParticleView view;
     private final StopFlag stopFlag;
-    private Counter counter;
+    private Counter numSteps;
 
     //qua terrei pure referenza alla view e al framerate
     //ci vuole anche un listener per la view
 
-    public MainWorker(ConcurrentContext context, ParticleView view, StopFlag stopFlag, Counter counter) {
+    MainWorker(ConcurrentContext context, ParticleView view, StopFlag stopFlag, Counter numSteps) {
         this.context = context;
         this.view = view;
         this.stopFlag = stopFlag;
-        this.counter = counter;
+        this.numSteps = numSteps;
     }
 
 
@@ -36,14 +37,14 @@ public class MainWorker extends Thread {
 
 
         for (int i = 0; i < N_THREAD - 1; i++) {
-            new ParticleWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();
+            new ParticleWorker(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor, stopFlag).start();
         }
 
-        new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
+        new ParticleWorker((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor, stopFlag).start();
 
         try {
             while (!stopFlag.isStopped()) {
-                if (!counter.maxReached()) {
+                if (!numSteps.maxReached()) {
                     barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione
 
                     System.out.println("All thread done.");
@@ -53,9 +54,11 @@ public class MainWorker extends Thread {
                     context.printAllParticles();
 
                     view.updatePositions(context.getTempPositions());
-                    counter.inc();
 
-                    Thread.sleep(2000);
+                    numSteps.inc();
+                    view.updateSteps(numSteps.value());
+
+                    Thread.sleep(15);
 
                     System.out.println("Resume all threads.");
 
@@ -63,7 +66,7 @@ public class MainWorker extends Thread {
 
                 } else {
                     stopFlag.stop();
-                    view.changeState("Out of steps");
+                    view.changeState(States.OUT_OF_STEPS);
                 }
             }
 

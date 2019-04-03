@@ -1,6 +1,7 @@
 package assignment1.view;
 
 import assignment1.common.P2d;
+import assignment1.common.States;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,14 +16,14 @@ public class ParticleView extends JFrame implements ActionListener {
     private JButton startButton;
     private JButton stopButton;
     private JTextField state;
-    private ArrayList<InputListener> listeners;
+    private JTextField steps;
+    private JTextField particleField;
     private VisualiserPanel panel;
     private InputListener listener;
 
     public ParticleView(int w, int h) {
         super("Particle Viewer");
         setSize(w, h);
-        listeners = new ArrayList<InputListener>();
 
         startButton = new JButton("Start");
         stopButton = new JButton("Stop");
@@ -33,11 +34,25 @@ public class ParticleView extends JFrame implements ActionListener {
         panel = new VisualiserPanel(w, h);
 
         JPanel infoPanel = new JPanel();
+
+        particleField = new JTextField(10);
+        particleField.setText("0");
+        particleField.setEditable(false);
+        infoPanel.add(new JLabel("Particles"));
+        infoPanel.add(particleField);
+
+        steps = new JTextField(10);
+        steps.setText("0");
+        steps.setEditable(false);
+        infoPanel.add(new JLabel("Steps"));
+        infoPanel.add(steps);
+
         state = new JTextField(20);
         state.setText("Idle");
         state.setEditable(false);
         infoPanel.add(new JLabel("State"));
         infoPanel.add(state);
+
         JPanel cp = new JPanel();
         LayoutManager layout = new BorderLayout();
         cp.setLayout(layout);
@@ -58,34 +73,38 @@ public class ParticleView extends JFrame implements ActionListener {
     }
 
 
-    public void changeState(final String s) {
+    public void changeState(final States s) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                state.setText(s);
+                state.setText(s.getString());
             }
         });
     }
 
-    public void addListener(InputListener l) {
-        listeners.add(l);
+    public void updateSteps(final int step) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                steps.setText(String.valueOf(step));
+            }
+        });
     }
 
-
-    private void notifyStopped() {
-        for (InputListener l : listeners) {
-            l.stopPressed();
-        }
+    public void setPartcilesNumber(final int nParticles) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                particleField.setText(String.valueOf(nParticles));
+            }
+        });
     }
+
 
     @Override
     public void actionPerformed(ActionEvent ev) {
         String cmd = ev.getActionCommand();
         if (cmd.equals("Start")) {
             listener.startPressed();
-            changeState("Idle");
         } else if (cmd.equals("Stop")) {
             listener.stopPressed();
-            changeState("Stopped");
         }
     }
 
@@ -123,14 +142,11 @@ public class ParticleView extends JFrame implements ActionListener {
                         int y0 = (int) (dy - p.y * dy/1000);
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
-                    g2.drawString("Particles: " + positions.size(), 10, 20);
                 }
-
             }
-
         }
 
-        public void updatePositions(ArrayList<P2d> pos) {
+        private void updatePositions(ArrayList<P2d> pos) {
             synchronized (this) {
                 positions = pos;
             }

@@ -14,19 +14,22 @@ public class ParticleWorker extends Thread {
     private int timeElapsed = 16; //TODO: sistemare better
     private Barrier barrier;
     private ProceedMonitor proceedMonitor;
+    private final StopFlag stopFlag;
 
-    public ParticleWorker(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor) {
+
+    public ParticleWorker(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor, StopFlag stopFlag) {
         this.from = from;
         this.to = to;
         this.context = context;
         this.barrier = barrier;
         this.proceedMonitor = proceedMonitor;
+        this.stopFlag = stopFlag;
     }
 
 
     @Override
     public void run() {
-        while (true) {
+        while (!stopFlag.isStopped()) {
 
             System.out.println(String.format("Calculating forces from %d to %d", from, to));
             calculateForces();

@@ -25,4 +25,8 @@ public class Counter {
             return false;
         }
     }
- }
+
+    public synchronized int value(){
+        return this.counterValue;
+    }
+}

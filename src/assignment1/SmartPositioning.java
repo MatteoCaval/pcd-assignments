@@ -13,7 +13,7 @@ public class SmartPositioning {
 
 
     public static void main(String[] args) throws InterruptedException {
-        ConcurrentContext context = new ConcurrentContext(N_PARTICLES, WIDTH, HEIGHT);
+        ConcurrentContext context = new ConcurrentContext(N_PARTICLES);
         ParticleView view = new ParticleView(WIDTH, HEIGHT);
 
         Counter counter = new Counter(N_STEPS);

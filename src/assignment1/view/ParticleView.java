@@ -119,12 +119,11 @@ public class ParticleView extends JFrame implements ActionListener {
             synchronized (this) {
                 if (positions != null) {
                     positions.stream().forEach(p -> {
-                        int x0 = (int) p.x;//(int) (dx + p.x * dx);
-                        int y0 = (int) p.y;//(int) (dy - p.y * dy);
+                        int x0 = (int) (dx + p.x * dx/1000);
+                        int y0 = (int) (dy - p.y * dy/1000);
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
-                    g2.drawString("Particles: " + positions.size(), 2, PARTICLE_DIAMETER);
-
+                    g2.drawString("Particles: " + positions.size(), 10, 20);
                 }
 
             }

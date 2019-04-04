@@ -19,14 +19,14 @@ public class Counter {
     }
 
     public synchronized boolean maxReached() {
-        if (maxValue != null){
+        if (maxValue != null) {
             return this.counterValue == this.maxValue;
         } else {
             return false;
         }
     }
 
-    public synchronized int value(){
+    public synchronized int value() {
         return this.counterValue;
     }
 }

@@ -10,9 +10,9 @@ public class ParticleUtils {
     /*
     calculate force of j on i
      */
-    public static V2d getForceBetweenParticle(Particle i, Particle j, double  k) {
+    public static V2d getForceBetweenParticle(Particle i, Particle j, double k) {
         double dist = i.getPosition().getDistance(j.getPosition());
-        if (dist <= 0){
+        if (dist <= 0) {
             dist = OVERLAPPED_DELTA;
         }
         double d3 = dist * dist * dist;

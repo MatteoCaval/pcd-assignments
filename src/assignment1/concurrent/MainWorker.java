@@ -1,5 +1,6 @@
 package assignment1.concurrent;
 
+import assignment1.SmartPositioning;
 import assignment1.common.States;
 import assignment1.view.ParticleView;
 
@@ -43,7 +44,9 @@ public class MainWorker extends Thread {
                 if (!numSteps.maxReached()) {
                     barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione
 
-                    System.out.println("All thread done.");
+                    if (SmartPositioning.IS_DEBUG) {
+                        System.out.println("All thread done.");
+                    }
 
                     context.refreshParticlesList();
                     context.printAllParticles();
@@ -55,7 +58,9 @@ public class MainWorker extends Thread {
 
                     Thread.sleep(15);
 
-                    System.out.println("Resume all threads.");
+                    if (SmartPositioning.IS_DEBUG) {
+                        System.out.println("Resume all threads.");
+                    }
 
                     proceedMonitor.proceed();
 

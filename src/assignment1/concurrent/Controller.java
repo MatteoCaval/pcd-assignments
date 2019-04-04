@@ -21,8 +21,8 @@ public class Controller implements InputListener {
     @Override
     public void startPressed() {
         if (this.stopFlag.isStopped()) {
-           this.start();
-           view.changeState(States.IDLE);
+            this.start();
+            view.changeState(States.IDLE);
         }
     }
 

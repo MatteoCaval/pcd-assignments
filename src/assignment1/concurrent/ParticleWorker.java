@@ -2,6 +2,7 @@ package assignment1.concurrent;
 
 import assignment1.Particle;
 import assignment1.ParticleUtils;
+import assignment1.SmartPositioning;
 import assignment1.common.V2d;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class ParticleWorker extends Thread {
     private final int from, to;
 
     private ConcurrentContext context;
-    private int timeElapsed = 16; //TODO: sistemare better
+    private int timeElapsed = 2; //TODO: sistemare better
     private Barrier barrier;
     private ProceedMonitor proceedMonitor;
     private final StopFlag stopFlag;
@@ -31,10 +32,14 @@ public class ParticleWorker extends Thread {
     public void run() {
         while (!stopFlag.isStopped()) {
 
-            System.out.println(String.format("Calculating forces from %d to %d", from, to));
+            if (SmartPositioning.IS_DEBUG) {
+                System.out.println(String.format("Calculating forces from %d to %d", from, to));
+            }
             calculateForces();
 
-            System.out.println(String.format("Updating positions from %d to %d", from, to));
+            if (SmartPositioning.IS_DEBUG) {
+                System.out.println(String.format("Updating positions from %d to %d", from, to));
+            }
             updatePosition();
 
             barrier.inc();

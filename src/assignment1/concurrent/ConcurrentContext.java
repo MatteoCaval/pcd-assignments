@@ -75,7 +75,7 @@ public class ConcurrentContext {
         return K_CONST;
     }
 
-    public Boundary getBoundary(){
+    public Boundary getBoundary() {
         return this.boundary;
     }
 

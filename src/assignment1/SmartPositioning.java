@@ -6,13 +6,14 @@ import assignment1.concurrent.Counter;
 import assignment1.view.ParticleView;
 
 public class SmartPositioning {
+    public final static boolean IS_DEBUG = false;
     private final static int WIDTH = 1200;
-    private final static int HEIGHT = 800;
-    private final static int N_PARTICLES = 5000;
+    private final static int HEIGHT = 700;
+    private final static int N_PARTICLES = 1000;
     private final static Integer N_STEPS = null;
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         ConcurrentContext context = new ConcurrentContext(N_PARTICLES);
         ParticleView view = new ParticleView(WIDTH, HEIGHT);
 

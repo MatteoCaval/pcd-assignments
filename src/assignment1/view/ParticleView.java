@@ -32,7 +32,7 @@ public class ParticleView extends JFrame implements ActionListener {
         controlPanel.add(stopButton);
 
         panel = new VisualiserPanel(w, h);
-        panel.setPreferredSize(new Dimension(w,h));
+        panel.setPreferredSize(new Dimension(w, h));
 
         JPanel infoPanel = new JPanel();
 
@@ -119,9 +119,10 @@ public class ParticleView extends JFrame implements ActionListener {
         this.listener = listener;
     }
 
-    public void setBoundary(Boundary boundary){
+    public void setBoundary(Boundary boundary) {
         this.boundaryHeight = boundary.getHeight();
-        this.boundaryWidth = boundary.getWidth();;
+        this.boundaryWidth = boundary.getWidth();
+        ;
     }
 
     public class VisualiserPanel extends JPanel {
@@ -150,8 +151,8 @@ public class ParticleView extends JFrame implements ActionListener {
             synchronized (this) {
                 if (positions != null) {
                     positions.stream().forEach(p -> {
-                        int x0 = (int) (dx + p.x * panelWidth /(boundaryWidth + boundaryWidth / 2));
-                        int y0 = (int) (dy - p.y * panelHeight /(boundaryHeight + boundaryHeight / 2));
+                        int x0 = (int) (dx + p.x * panelWidth / (boundaryWidth + boundaryWidth / 2));
+                        int y0 = (int) (dy - p.y * panelHeight / (boundaryHeight + boundaryHeight / 2));
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
                 }

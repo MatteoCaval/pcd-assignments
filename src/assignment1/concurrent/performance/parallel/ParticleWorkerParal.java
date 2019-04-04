@@ -1,45 +1,56 @@
-package assignment1.seq;
+package assignment1.concurrent.performance;
 
 import assignment1.Particle;
 import assignment1.ParticleUtils;
-import assignment1.common.Cron;
 import assignment1.common.V2d;
+import assignment1.concurrent.Barrier;
 import assignment1.concurrent.ConcurrentContext;
+import assignment1.concurrent.ProceedMonitor;
+import assignment1.concurrent.StopFlag;
 
 import java.util.ArrayList;
 
-public class SequentialWorker extends Thread {
+public class ParticleWorkerParal extends Thread {
+
+    private final int from, to;
 
     private ConcurrentContext context;
-    private int steps;
+    private int timeElapsed = 2; //TODO: sistemare better
+    private Barrier barrier;
+    private ProceedMonitor proceedMonitor;
 
-    private int timeElapsed = 2;
 
-    public SequentialWorker(ConcurrentContext context, int nSteps) {
+    public ParticleWorkerParal(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor) {
+        this.from = from;
+        this.to = to;
         this.context = context;
-        this.steps = nSteps;
+        this.barrier = barrier;
+        this.proceedMonitor = proceedMonitor;
     }
+
 
     @Override
     public void run() {
-        super.run();
-        Cron cron = new Cron();
-        cron.start();
-        for (int i = 0; i < steps; i++) {
-            this.calculateForces();
-            this.updatePosition();
-            context.refreshParticlesList();
-            context.printAllParticles();
+        while (true) {
+
+            calculateForces();
+
+            updatePosition();
+
+            barrier.inc();
+
+            try {
+                proceedMonitor.waitNextRound();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        cron.stop();
-
-        System.out.println(String.format("Sequential time for %d steps with %d particles: %d", steps, context.getParticles().size(), cron.getTime()));
     }
-
 
     private void calculateForces() {
         ArrayList<Particle> particles = context.getParticles();
-        for (int i = 0; i < particles.size(); i++) {
+
+        for (int i = from; i < to; i++) {
 
             V2d particleForce = particles.get(i).getForce();
 
@@ -62,7 +73,7 @@ public class SequentialWorker extends Thread {
     private void updatePosition() {
         ArrayList<Particle> particles = context.getParticles();
 
-        for (int i = 0; i < particles.size(); i++) {
+        for (int i = from; i < to; i++) {
             Particle particle = particles.get(i);
             context.getTempPositions().get(i).x = particle.getPosition().x + timeElapsed * particle.getSpeed().x;
             context.getTempPositions().get(i).y = particle.getPosition().y + timeElapsed * particle.getSpeed().y;
@@ -71,4 +82,6 @@ public class SequentialWorker extends Thread {
         }
 
     }
+
+
 }

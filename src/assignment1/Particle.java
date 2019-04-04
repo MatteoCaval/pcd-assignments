@@ -47,10 +47,6 @@ public class Particle {
         return speed;
     }
 
-    public void setSpeed(V2d speed) {
-        this.speed = speed;
-    }
-
     public double getmConst() {
         return M_CONST;
     }

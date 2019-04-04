@@ -17,7 +17,7 @@ public class ConcurrentContext {
     private ArrayList<P2d> tempPositions = new ArrayList<>();
 
     public ConcurrentContext(int numOfParticles) {
-        this.boundary = new Boundary(-1000, 1000, 1000, -1000); //farlo tramite calcoli partendo da dimensioni con cui ho settato la view
+        this.boundary = new Boundary(-1000, -1000, 1000, 1000);
         this.particles = new ArrayList<>();
         createNParticles(numOfParticles);
     }
@@ -73,6 +73,10 @@ public class ConcurrentContext {
 
     public int getKConst() {
         return K_CONST;
+    }
+
+    public Boundary getBoundary(){
+        return this.boundary;
     }
 
     // endregion

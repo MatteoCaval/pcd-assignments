@@ -34,6 +34,7 @@ public class Controller implements InputListener {
 
     private void start() {
         stopFlag.start();
+        view.setBoundary(this.context.getBoundary());
         new MainWorker(context, view, stopFlag, counter).start();
     }
 }

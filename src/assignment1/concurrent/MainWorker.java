@@ -6,13 +6,10 @@ import assignment1.view.ParticleView;
 public class MainWorker extends Thread {
 
     private ConcurrentContext context;
-    private int N_THREAD = 8; //TODO: meglio 8 + 1 ? da sustemare in ognu caso con il numero di processori
+    private int N_THREAD = Runtime.getRuntime().availableProcessors();
     private ParticleView view;
     private final StopFlag stopFlag;
     private Counter numSteps;
-
-    //qua terrei pure referenza alla view e al framerate
-    //ci vuole anche un listener per la view
 
     MainWorker(ConcurrentContext context, ParticleView view, StopFlag stopFlag, Counter numSteps) {
         this.context = context;
@@ -20,7 +17,6 @@ public class MainWorker extends Thread {
         this.stopFlag = stopFlag;
         this.numSteps = numSteps;
     }
-
 
     @Override
     public void run() {
@@ -49,7 +45,6 @@ public class MainWorker extends Thread {
 
                     System.out.println("All thread done.");
 
-                    //sarebbe da aggiornare le liste correttamente e stampare i risultati
                     context.refreshParticlesList();
                     context.printAllParticles();
 

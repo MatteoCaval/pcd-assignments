@@ -36,4 +36,11 @@ public class Boundary {
         return y1;
     }
 
+    public double getHeight(){
+        return Math.abs(this.x0) + this.x1;
+    }
+
+    public double getWidth(){
+        return Math.abs(this.y0) + this.y1;
+    }
 }

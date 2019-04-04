@@ -1,5 +1,6 @@
 package assignment1.view;
 
+import assignment1.Boundary;
 import assignment1.common.P2d;
 import assignment1.common.States;
 
@@ -13,25 +14,25 @@ public class ParticleView extends JFrame implements ActionListener {
 
     private static final int PARTICLE_DIAMETER = 20;
 
-    private JButton startButton;
-    private JButton stopButton;
     private JTextField state;
     private JTextField steps;
     private JTextField particleField;
     private VisualiserPanel panel;
     private InputListener listener;
+    private double boundaryWidth;
+    private double boundaryHeight;
 
     public ParticleView(int w, int h) {
         super("Particle Viewer");
-        setSize(w, h);
 
-        startButton = new JButton("Start");
-        stopButton = new JButton("Stop");
+        JButton startButton = new JButton("Start");
+        JButton stopButton = new JButton("Stop");
         JPanel controlPanel = new JPanel();
         controlPanel.add(startButton);
         controlPanel.add(stopButton);
 
         panel = new VisualiserPanel(w, h);
+        panel.setPreferredSize(new Dimension(w,h));
 
         JPanel infoPanel = new JPanel();
 
@@ -64,6 +65,8 @@ public class ParticleView extends JFrame implements ActionListener {
         startButton.addActionListener(this);
         stopButton.addActionListener(this);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        pack(); // setta la misura del frame in base a quella dei vari elem. Così il pannello centrale è delle misure volute.
     }
 
     public void display() {
@@ -116,15 +119,24 @@ public class ParticleView extends JFrame implements ActionListener {
         this.listener = listener;
     }
 
+    public void setBoundary(Boundary boundary){
+        this.boundaryHeight = boundary.getHeight();
+        this.boundaryWidth = boundary.getWidth();;
+    }
+
     public class VisualiserPanel extends JPanel {
         private ArrayList<P2d> positions;
+        private long panelWidth;
+        private long panelHeight;
         private long dx;
         private long dy;
 
-        public VisualiserPanel(int w, int h) {
-            setSize(w, h);
-            dx = w / 2 - PARTICLE_DIAMETER;
-            dy = h / 2 - PARTICLE_DIAMETER;
+
+        VisualiserPanel(int w, int h) {
+            panelWidth = w;
+            panelHeight = h;
+            dx = w / 2;
+            dy = h / 2;
         }
 
         public void paint(Graphics g) {
@@ -138,8 +150,8 @@ public class ParticleView extends JFrame implements ActionListener {
             synchronized (this) {
                 if (positions != null) {
                     positions.stream().forEach(p -> {
-                        int x0 = (int) (dx + p.x * dx/1000);
-                        int y0 = (int) (dy - p.y * dy/1000);
+                        int x0 = (int) (dx + p.x * panelWidth /(boundaryWidth + boundaryWidth / 2));
+                        int y0 = (int) (dy - p.y * panelHeight /(boundaryHeight + boundaryHeight / 2));
                         g2.drawOval(x0, y0, PARTICLE_DIAMETER, PARTICLE_DIAMETER);
                     });
                 }

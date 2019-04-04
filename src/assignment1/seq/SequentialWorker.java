@@ -12,15 +12,13 @@ public class SequentialWorker extends Thread {
 
     private ConcurrentContext context;
     private int steps;
-    //qua terrei pure referenza alla view e al framerate
-    //ci vuole anche un listener per la view
+
     private int timeElapsed = 2;
 
     public SequentialWorker(ConcurrentContext context, int nSteps) {
         this.context = context;
         this.steps = nSteps;
     }
-
 
     @Override
     public void run() {
@@ -36,7 +34,6 @@ public class SequentialWorker extends Thread {
         cron.stop();
 
         System.out.println(String.format("Sequential time for %d steps with %d particles: %d", steps, context.getParticles().size(), cron.getTime()));
-
     }
 
 

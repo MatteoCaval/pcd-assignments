@@ -1,4 +1,4 @@
-package assignment1.concurrent.performance;
+package assignment1.concurrent.performance.parallel;
 
 import assignment1.common.Cron;
 import assignment1.concurrent.*;
@@ -7,11 +7,13 @@ public class MainWorkerParal extends Thread {
 
     private ConcurrentContext context;
     private int N_THREAD = Runtime.getRuntime().availableProcessors();
-    private Counter numSteps;
+    private int numSteps;
+    private int curStep;
 
-    public MainWorkerParal(ConcurrentContext context, Counter numSteps) {
+    public MainWorkerParal(ConcurrentContext context, int numSteps) {
         this.context = context;
         this.numSteps = numSteps;
+        this.curStep = 0;
     }
 
     @Override
@@ -36,13 +38,13 @@ public class MainWorkerParal extends Thread {
         new ParticleWorkerParal((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
 
         try {
-            while (!numSteps.maxReached()) {
+            while (curStep < numSteps) {
                 barrier.waitAllDone(); //aspetta che tutti i thread abbiamo finito il calcolo forza/aggiornamento posizione
 
                 context.refreshParticlesList();
                 context.printAllParticles();
 
-                numSteps.inc();
+                curStep++;
 
                 Thread.sleep(15);
 
@@ -54,6 +56,6 @@ public class MainWorkerParal extends Thread {
         }
 
         cron.stop();
-        System.out.println(String.format("Parallel time for %d steps with %d particles: %d", numSteps.value(), context.getParticles().size(), cron.getTime()));
+        System.out.println(String.format("Parallel time for %d steps with %d particles: %d", numSteps, context.getParticles().size(), cron.getTime()));
     }
 }

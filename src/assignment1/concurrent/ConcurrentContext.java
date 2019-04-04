@@ -3,6 +3,7 @@ package assignment1.concurrent;
 
 import assignment1.Boundary;
 import assignment1.Particle;
+import assignment1.SmartPositioning;
 import assignment1.common.P2d;
 
 import java.util.ArrayList;
@@ -32,8 +33,9 @@ public class ConcurrentContext {
     }
 
     public void printAllParticles() {
-        particles.stream().forEach(p -> System.out.println(p));
-        System.out.println();
+        if (SmartPositioning.IS_DEBUG){
+            particles.stream().forEach(p -> System.out.println(p));
+        }
     }
 
     // endregion

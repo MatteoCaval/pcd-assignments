@@ -1,4 +1,4 @@
-package assignment1.concurrent.performance.seq;
+package assignment1.performance.seq;
 
 import assignment1.Particle;
 import assignment1.ParticleUtils;

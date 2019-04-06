@@ -23,12 +23,12 @@ public class MainWorker extends Thread {
     public void run() {
         super.run();
 
-        Barrier barrier = new Barrier(N_THREAD);
-        ProceedMonitor proceedMonitor = new ProceedMonitor();
-
         int particleNumber = context.getParticles().size();
 
         N_THREAD = Math.min(particleNumber, N_THREAD);
+
+        Barrier barrier = new Barrier(N_THREAD);
+        ProceedMonitor proceedMonitor = new ProceedMonitor();
 
         int particlePerThread = particleNumber / N_THREAD;
 

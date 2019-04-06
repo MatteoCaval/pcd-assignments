@@ -1,4 +1,4 @@
-package assignment1.concurrent.performance.parallel;
+package assignment1.performance.parallel;
 
 import assignment1.common.Cron;
 import assignment1.concurrent.*;
@@ -6,7 +6,7 @@ import assignment1.concurrent.*;
 public class MainWorkerParal extends Thread {
 
     private ConcurrentContext context;
-    private int N_THREAD = Runtime.getRuntime().availableProcessors();
+    private int N_THREAD = 1;
     private int numSteps;
     private int curStep;
 
@@ -21,12 +21,13 @@ public class MainWorkerParal extends Thread {
         super.run();
         Cron cron = new Cron();
         cron.start();
-        Barrier barrier = new Barrier(N_THREAD);
-        ProceedMonitor proceedMonitor = new ProceedMonitor();
 
         int particleNumber = context.getParticles().size();
 
         N_THREAD = Math.min(particleNumber, N_THREAD);
+
+        Barrier barrier = new Barrier(N_THREAD);
+        ProceedMonitor proceedMonitor = new ProceedMonitor();
 
         int particlePerThread = particleNumber / N_THREAD;
 

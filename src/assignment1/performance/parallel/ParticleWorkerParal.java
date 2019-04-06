@@ -1,4 +1,4 @@
-package assignment1.concurrent.performance.parallel;
+package assignment1.performance.parallel;
 
 import assignment1.Particle;
 import assignment1.ParticleUtils;
@@ -6,7 +6,6 @@ import assignment1.common.V2d;
 import assignment1.concurrent.Barrier;
 import assignment1.concurrent.ConcurrentContext;
 import assignment1.concurrent.ProceedMonitor;
-import assignment1.concurrent.StopFlag;
 
 import java.util.ArrayList;
 

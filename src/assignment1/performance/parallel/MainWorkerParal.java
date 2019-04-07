@@ -19,8 +19,8 @@ public class MainWorkerParal extends Thread {
     @Override
     public void run() {
         super.run();
+
         Cron cron = new Cron();
-        cron.start();
 
         int particleNumber = context.getParticles().size();
 
@@ -31,6 +31,7 @@ public class MainWorkerParal extends Thread {
 
         int particlePerThread = particleNumber / N_THREAD;
 
+        cron.start();
 
         for (int i = 0; i < N_THREAD - 1; i++) {
             new ParticleWorkerParal(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();

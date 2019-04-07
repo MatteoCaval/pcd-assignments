@@ -6,14 +6,15 @@ import assignment1.concurrent.*;
 public class MainWorkerParal extends Thread {
 
     private ConcurrentContext context;
-    private int N_THREAD = 1;
+    private int nthreads = 1;
     private int numSteps;
     private int curStep;
 
-    public MainWorkerParal(ConcurrentContext context, int numSteps) {
+    public MainWorkerParal(ConcurrentContext context, int numSteps, int nthreads) {
         this.context = context;
         this.numSteps = numSteps;
         this.curStep = 0;
+        this.nthreads = nthreads;
     }
 
     @Override
@@ -24,20 +25,20 @@ public class MainWorkerParal extends Thread {
 
         int particleNumber = context.getParticles().size();
 
-        N_THREAD = Math.min(particleNumber, N_THREAD);
+        nthreads = Math.min(particleNumber, nthreads);
 
-        Barrier barrier = new Barrier(N_THREAD);
+        Barrier barrier = new Barrier(nthreads);
         ProceedMonitor proceedMonitor = new ProceedMonitor();
 
-        int particlePerThread = particleNumber / N_THREAD;
+        int particlePerThread = particleNumber / nthreads;
 
         cron.start();
 
-        for (int i = 0; i < N_THREAD - 1; i++) {
+        for (int i = 0; i < nthreads - 1; i++) {
             new ParticleWorkerParal(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();
         }
 
-        new ParticleWorkerParal((N_THREAD - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
+        new ParticleWorkerParal((nthreads - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
 
         try {
             while (curStep < numSteps) {
@@ -48,8 +49,6 @@ public class MainWorkerParal extends Thread {
 
                 curStep++;
 
-                Thread.sleep(15);
-
                 proceedMonitor.proceed();
             }
 
@@ -58,6 +57,6 @@ public class MainWorkerParal extends Thread {
         }
 
         cron.stop();
-        System.out.println(String.format("Parallel time for %d steps with %d particles: %d", numSteps, context.getParticles().size(), cron.getTime()));
+        System.out.println(String.format("Parallel time for %d steps, %d threads with %d particles: %d", numSteps, nthreads, context.getParticles().size(), cron.getTime()));
     }
 }

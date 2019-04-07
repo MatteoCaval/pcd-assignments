@@ -49,8 +49,6 @@ public class MainWorkerParal extends Thread {
 
                 curStep++;
 
-                Thread.sleep(15);
-
                 proceedMonitor.proceed();
             }
 

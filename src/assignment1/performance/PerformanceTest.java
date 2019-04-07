@@ -10,7 +10,7 @@ public class PerformanceTest {
 
     public static void main(String[] args) throws InterruptedException {
         ConcurrentContext context = new ConcurrentContext(N_PARTICLES);
-        MainWorkerParal workerParal = new MainWorkerParal(context, N_STEPS);
+        MainWorkerParal workerParal = new MainWorkerParal(context, N_STEPS, 8);
         SequentialWorker sequentialWorker = new SequentialWorker(context, N_STEPS);
 
         sequentialWorker.start();

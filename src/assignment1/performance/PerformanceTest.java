@@ -1,16 +1,16 @@
-package assignment1.concurrent.performance;
+package assignment1.performance;
 
 import assignment1.concurrent.ConcurrentContext;
-import assignment1.concurrent.performance.parallel.MainWorkerParal;
-import assignment1.concurrent.performance.seq.SequentialWorker;
+import assignment1.performance.conc.MainWorkerConcur;
+import assignment1.performance.seq.SequentialWorker;
 
 public class PerformanceTest {
-    private final static int N_PARTICLES = 1240;  // a 1240 circa si equivalgono. Poi vince abbestia il parallelo
+    private final static int N_PARTICLES = 5000;
     private final static Integer N_STEPS = 1;
 
     public static void main(String[] args) throws InterruptedException {
         ConcurrentContext context = new ConcurrentContext(N_PARTICLES);
-        MainWorkerParal workerParal = new MainWorkerParal(context, N_STEPS, 8);
+        MainWorkerConcur workerParal = new MainWorkerConcur(context, N_STEPS, 8);
         SequentialWorker sequentialWorker = new SequentialWorker(context, N_STEPS);
 
         sequentialWorker.start();

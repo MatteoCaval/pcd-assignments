@@ -1,4 +1,4 @@
-package assignment1.performance.parallel;
+package assignment1.performance.conc;
 
 import assignment1.Particle;
 import assignment1.ParticleUtils;
@@ -9,17 +9,17 @@ import assignment1.concurrent.ProceedMonitor;
 
 import java.util.ArrayList;
 
-public class ParticleWorkerParal extends Thread {
+public class ParticleWorkerConcur extends Thread {
 
     private final int from, to;
 
     private ConcurrentContext context;
-    private int timeElapsed = 2; //TODO: sistemare better
+    private int timeElapsed = 2;
     private Barrier barrier;
     private ProceedMonitor proceedMonitor;
 
 
-    public ParticleWorkerParal(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor) {
+    public ParticleWorkerConcur(int from, int to, ConcurrentContext context, Barrier barrier, ProceedMonitor proceedMonitor) {
         this.from = from;
         this.to = to;
         this.context = context;

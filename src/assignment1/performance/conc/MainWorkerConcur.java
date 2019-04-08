@@ -1,16 +1,16 @@
-package assignment1.performance.parallel;
+package assignment1.performance.conc;
 
 import assignment1.common.Cron;
 import assignment1.concurrent.*;
 
-public class MainWorkerParal extends Thread {
+public class MainWorkerConcur extends Thread {
 
     private ConcurrentContext context;
     private int nthreads = 1;
     private int numSteps;
     private int curStep;
 
-    public MainWorkerParal(ConcurrentContext context, int numSteps, int nthreads) {
+    public MainWorkerConcur(ConcurrentContext context, int numSteps, int nthreads) {
         this.context = context;
         this.numSteps = numSteps;
         this.curStep = 0;
@@ -35,10 +35,10 @@ public class MainWorkerParal extends Thread {
         cron.start();
 
         for (int i = 0; i < nthreads - 1; i++) {
-            new ParticleWorkerParal(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();
+            new ParticleWorkerConcur(particlePerThread * i, particlePerThread + (i * particlePerThread), context, barrier, proceedMonitor).start();
         }
 
-        new ParticleWorkerParal((nthreads - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
+        new ParticleWorkerConcur((nthreads - 1) * particlePerThread, particleNumber, context, barrier, proceedMonitor).start();
 
         try {
             while (curStep < numSteps) {
@@ -57,6 +57,6 @@ public class MainWorkerParal extends Thread {
         }
 
         cron.stop();
-        System.out.println(String.format("Parallel time for %d steps, %d threads with %d particles: %d", numSteps, nthreads, context.getParticles().size(), cron.getTime()));
+        System.out.println(String.format("Concurr time for %d steps, %d threads with %d particles: %d", numSteps, nthreads, context.getParticles().size(), cron.getTime()));
     }
 }

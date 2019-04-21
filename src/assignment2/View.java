@@ -3,6 +3,11 @@ package assignment2;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class View extends JFrame {
 
@@ -87,23 +92,40 @@ public class View extends JFrame {
         this.chooser = new JFileChooser();
         this.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            this.selectedDirectoryName.setText(chooser.getSelectedFile().toString());
-            this.listener.directorySelected(chooser.getSelectedFile());
-            this.elementListModel.add(this.elementListModel.size(), chooser.getSelectedFile().toString());
+//            this.listener.directorySelected(chooser.getSelectedFile());
+            try {
+                this.addFilesToList(getDirectoryFiles(chooser.getSelectedFile().getPath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void selectFiles() {
         JFileChooser chooser = new JFileChooser();
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            this.selectedDirectoryName.setText(chooser.getSelectedFile().toString());
-            this.listener.directorySelected(chooser.getSelectedFile());
+//            this.listener.directorySelected(chooser.getSelectedFile());
             this.elementListModel.add(this.elementListModel.size(), chooser.getSelectedFile().toString());
         }
     }
 
     private void removeSelectedElement(int selectedIndex) {
         this.elementListModel.remove(selectedIndex);
+    }
+
+    private void addFilesToList(List<String> paths) {
+        paths.stream().forEach(p ->
+                this.elementListModel.add(this.elementListModel.size(), p)
+        );
+
+    }
+
+    private List<String> getDirectoryFiles(String path) throws IOException {
+        return Files.walk(Paths.get(path))
+                .filter(Files::isRegularFile)
+                .map(f -> f.toAbsolutePath().toString())
+                .collect(Collectors.toList());
+
     }
 
     // endregion

@@ -9,7 +9,7 @@ public class Controller implements View.SelectorListener {
     }
 
     @Override
-    public void start(List<String> paths) {
+    public void startPressed(List<String> paths) {
         System.out.println(Document.fromPath(paths.get(0)).getLines().get(0));
     }
 }

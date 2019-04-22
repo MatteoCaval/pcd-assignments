@@ -33,4 +33,13 @@ public class Document {
         }
         return new Document(lines);
     }
+
+    @Override
+    public String toString() {
+        String text = "";
+        for (String line : lines) {
+            text += line + "\n";
+        }
+        return text;
+    }
 }

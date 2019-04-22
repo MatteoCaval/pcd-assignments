@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class View extends JFrame {
 
     interface SelectorListener {
-        void start(List<String> paths);
+        void startPressed(List<String> paths);
     }
 
     private JButton addDirectoryButton;
@@ -84,8 +83,8 @@ public class View extends JFrame {
             }
 
         });
-        
-        this.startButton.addActionListener(e -> this.listener.start(fromListModel(elementListModel)));
+
+        this.startButton.addActionListener(e -> this.listener.startPressed(fromListModel(elementListModel)));
 
     }
 

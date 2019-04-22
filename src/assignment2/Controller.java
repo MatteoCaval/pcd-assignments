@@ -1,6 +1,6 @@
 package assignment2;
 
-import java.io.File;
+import java.util.List;
 
 public class Controller implements View.SelectorListener {
 
@@ -9,7 +9,7 @@ public class Controller implements View.SelectorListener {
     }
 
     @Override
-    public void directorySelected(File file) {
-        System.out.println(file.getPath());
+    public void start(List<String> paths) {
+        System.out.println(Document.fromPath(paths.get(0)).getLines().get(0));
     }
 }

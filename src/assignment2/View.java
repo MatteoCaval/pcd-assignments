@@ -2,17 +2,18 @@ package assignment2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class View extends JFrame {
 
     interface SelectorListener {
-        void directorySelected(File file);
+        void start(List<String> paths);
     }
 
     private JButton addDirectoryButton;
@@ -83,6 +84,8 @@ public class View extends JFrame {
             }
 
         });
+        
+        this.startButton.addActionListener(e -> this.listener.start(fromListModel(elementListModel)));
 
     }
 
@@ -126,6 +129,14 @@ public class View extends JFrame {
                 .map(f -> f.toAbsolutePath().toString())
                 .collect(Collectors.toList());
 
+    }
+
+    private List<String> fromListModel(DefaultListModel<String> model) {
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < model.size(); i++) {
+            list.add(model.get(i));
+        }
+        return list;
     }
 
     // endregion

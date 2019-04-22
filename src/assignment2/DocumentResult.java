@@ -1,6 +1,10 @@
 package assignment2;
 
+import javafx.util.Pair;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DocumentResult {
@@ -12,11 +16,7 @@ public class DocumentResult {
     }
 
     public void insert(String word) {
-        if (result.containsKey(word)) {
-            result.put(word, result.get(word) + 1);
-        } else {
-            result.put(word, 1);
-        }
+        insert(word, 1);
     }
 
     public Map<String, Integer> getResult() {
@@ -31,4 +31,42 @@ public class DocumentResult {
         }
         return "Result:\n" + text;
     }
+
+    /**
+     * @return ordered structure of word - num occurrences
+     */
+    public List<Pair<String, Integer>> toSortedPair() {
+        List<Pair<String, Integer>> list = new ArrayList<>();
+        result.forEach((k, v) -> list.add(new Pair<>(k, v)));
+        list.sort((o1, o2) -> o2.getValue() - o1.getValue());
+        return list;
+    }
+
+    // region Private methods
+
+    /**
+     * @param word word found inside the file
+     * @param n    word occurrences inside the file
+     */
+    private void insert(String word, int n) {
+        if (result.containsKey(word)) {
+            result.put(word, result.get(word) + n);
+        } else {
+            result.put(word, n);
+        }
+    }
+
+    // endregion
+
+    // region Static methods
+
+    public static DocumentResult merge(DocumentResult d1, DocumentResult d2) {
+        DocumentResult document = new DocumentResult();
+        d2.getResult().forEach(((k, v) -> document.insert(k, v)));
+        d1.getResult().forEach((k, v) -> document.insert(k, v));
+        return document;
+    }
+
+    // endregion
+
 }

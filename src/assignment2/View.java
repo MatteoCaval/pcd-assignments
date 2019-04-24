@@ -1,6 +1,9 @@
 package assignment2;
 
+import javafx.util.Pair;
+
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +16,10 @@ public class View extends JFrame {
 
     interface SelectorListener {
         void startPressed(List<String> paths);
+
+        void fileAdded(String... paths);
+
+        void fileRemoved(String path);
     }
 
     private JButton addDirectoryButton;
@@ -27,11 +34,18 @@ public class View extends JFrame {
 
     private SelectorListener listener;
 
+    private DefaultListModel<String> resultListModel;
+
     public View(SelectorListener listener) throws HeadlessException {
         this.listener = listener;
         initUI();
         setVisible(true);
     }
+
+    public void printResult(List<Pair<String, Integer>> result) {
+        result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+    }
+
 
     private void initUI() {
         setTitle("Assignment2");
@@ -50,22 +64,29 @@ public class View extends JFrame {
         selectionPanel.add(this.addFileButton);
         selectionPanel.add(this.removeElementButton);
 
-        JPanel controlPanel = new JPanel();
-        controlPanel.add(this.startButton);
-        controlPanel.add(this.stopButton);
-
-
         this.elementListModel = new DefaultListModel<>();
         this.elementList = new JList<>(this.elementListModel);
         JScrollPane listScrollPanel = new JScrollPane(this.elementList);
 
-        this.selectedDirectoryName = new JTextField("prova");
 
-        LayoutManager mainLayout = new BorderLayout();
-        this.setLayout(mainLayout);
-        this.add(BorderLayout.NORTH, selectionPanel);
-        this.add(BorderLayout.SOUTH, controlPanel);
-        this.add(BorderLayout.CENTER, listScrollPanel);
+        JPanel controlPanel = new JPanel();
+        controlPanel.add(this.startButton);
+        controlPanel.add(this.stopButton);
+
+        this.resultListModel = new DefaultListModel<>();
+        JList<String> resultList = new JList<>(this.resultListModel);
+        JScrollPane resultListScrollPanel = new JScrollPane(resultList);
+
+        JPanel resultPanel = new JPanel();
+        resultPanel.setLayout(new BorderLayout());
+        resultPanel.add(BorderLayout.NORTH, resultListScrollPanel);
+        resultPanel.add(BorderLayout.SOUTH, controlPanel);
+
+
+        this.setLayout(new BorderLayout());
+        this.add(BorderLayout.NORTH, listScrollPanel);
+        this.add(BorderLayout.SOUTH, resultPanel);
+        this.add(BorderLayout.CENTER, selectionPanel);
 
 
         this.addDirectoryButton.addActionListener(e -> {
@@ -94,7 +115,6 @@ public class View extends JFrame {
         this.chooser = new JFileChooser();
         this.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-//            this.listener.directorySelected(chooser.getSelectedFile());
             try {
                 this.addFilesToList(getDirectoryFiles(chooser.getSelectedFile().getPath()));
             } catch (IOException e) {
@@ -119,7 +139,6 @@ public class View extends JFrame {
         paths.stream().forEach(p ->
                 this.elementListModel.add(this.elementListModel.size(), p)
         );
-
     }
 
     private List<String> getDirectoryFiles(String path) throws IOException {

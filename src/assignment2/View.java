@@ -20,6 +20,8 @@ public class View extends JFrame {
         void fileAdded(String... paths);
 
         void fileRemoved(String path);
+
+        void stopPressed();
     }
 
     private JButton addDirectoryButton;
@@ -43,7 +45,10 @@ public class View extends JFrame {
     }
 
     public void printResult(List<Pair<String, Integer>> result) {
-        result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+        SwingUtilities.invokeLater(() -> {
+            this.resultListModel.clear();
+            result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+        });
     }
 
 
@@ -106,6 +111,7 @@ public class View extends JFrame {
         });
 
         this.startButton.addActionListener(e -> this.listener.startPressed(fromListModel(elementListModel)));
+        this.stopButton.addActionListener(e -> this.listener.stopPressed());
 
     }
 

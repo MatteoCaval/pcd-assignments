@@ -42,6 +42,16 @@ public class DocumentResult {
         return list;
     }
 
+    public void merge(DocumentResult d2) {
+        d2.getResult().forEach((k, v) -> this.insert(k, v));
+    }
+
+    public void clear() {
+        this.result.clear();
+    }
+
+
+
     // region Private methods
 
     /**

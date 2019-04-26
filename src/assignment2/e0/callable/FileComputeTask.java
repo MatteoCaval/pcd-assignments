@@ -1,4 +1,4 @@
-package assignment2.e0;
+package assignment2.e0.callable;
 
 import assignment2.Document;
 import assignment2.DocumentAnalyzer;

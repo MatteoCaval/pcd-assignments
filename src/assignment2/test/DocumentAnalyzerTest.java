@@ -4,12 +4,9 @@ import assignment2.Document;
 import assignment2.DocumentAnalyzer;
 import org.junit.Before;
 import org.junit.Test;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class DocumentAnalyzerTest {
 

@@ -113,6 +113,8 @@ public class View extends JFrame {
         this.startButton.addActionListener(e -> this.listener.startPressed(fromListModel(elementListModel)));
         this.stopButton.addActionListener(e -> this.listener.stopPressed());
 
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
     }
 
     // region Private methods

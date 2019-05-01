@@ -17,7 +17,7 @@ public class View extends JFrame {
     interface SelectorListener {
         void startPressed(List<String> paths);
 
-        void fileAdded(String... paths);
+        void fileAdded(String paths);
 
         void fileRemoved(String path);
 
@@ -136,6 +136,7 @@ public class View extends JFrame {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 //            this.listener.directorySelected(chooser.getSelectedFile());
             this.elementListModel.add(this.elementListModel.size(), chooser.getSelectedFile().toString());
+            this.listener.fileAdded(chooser.getSelectedFile().toString());
         }
     }
 

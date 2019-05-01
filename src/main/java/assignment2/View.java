@@ -17,7 +17,7 @@ public class View extends JFrame {
     public interface SelectorListener {
         void startPressed(List<String> paths);
 
-        void fileAdded(String paths);
+        void filesAdded(String... paths);
 
         void fileRemoved(String path);
 
@@ -33,10 +33,10 @@ public class View extends JFrame {
     private JButton stopButton;
     private DefaultListModel<String> elementListModel;
     private JList<String> elementList;
-
-    private SelectorListener listener;
-
     private DefaultListModel<String> resultListModel;
+
+    private boolean started = false;
+    private SelectorListener listener;
 
     public View(SelectorListener listener) throws HeadlessException {
         this.listener = listener;
@@ -110,8 +110,19 @@ public class View extends JFrame {
 
         });
 
-        this.startButton.addActionListener(e -> this.listener.startPressed(fromListModel(elementListModel)));
-        this.stopButton.addActionListener(e -> this.listener.stopPressed());
+        this.startButton.addActionListener(e -> {
+            this.started = true;
+            this.startButton.setEnabled(false);
+            this.stopButton.setEnabled(true);
+            this.listener.startPressed(fromListModel(elementListModel));
+        });
+
+        this.stopButton.addActionListener(e -> {
+            this.started = false;
+            this.stopButton.setEnabled(false);
+            this.startButton.setEnabled(true);
+            this.listener.stopPressed();
+        });
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -124,10 +135,17 @@ public class View extends JFrame {
         this.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-                this.addFilesToList(getDirectoryFiles(chooser.getSelectedFile().getPath()));
+                List<String> paths = getDirectoryFiles(chooser.getSelectedFile().getPath());
+                this.addFilesToList(paths);
+                if (started) {
+                    this.listener.filesAdded(paths.toArray(new String[paths.size()]));
+                }
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
@@ -136,7 +154,9 @@ public class View extends JFrame {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 //            this.listener.directorySelected(chooser.getSelectedFile());
             this.elementListModel.add(this.elementListModel.size(), chooser.getSelectedFile().toString());
-            this.listener.fileAdded(chooser.getSelectedFile().toString());
+            if (started) {
+                this.listener.filesAdded(chooser.getSelectedFile().toString());
+            }
         }
     }
 

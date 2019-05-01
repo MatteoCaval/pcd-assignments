@@ -33,7 +33,7 @@ public class Controller implements View.SelectorListener {
     }
 
     @Override
-    public void fileAdded(String filePath) {
+    public void filesAdded(String... filePath) {
     }
 
     @Override

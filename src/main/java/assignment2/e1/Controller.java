@@ -7,6 +7,7 @@ import assignment2.e0.classic.TestExecutors;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,9 @@ public class Controller implements View.SelectorListener {
         test = new TestExecutors(view);
         this.eventBus = vertx.eventBus();
         vertx.deployVerticle(new FileVerticle(singleResults));
+        eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
+            this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+        });
 
     }
 
@@ -37,15 +41,18 @@ public class Controller implements View.SelectorListener {
 //        this.view.printResult(result);
 
 //        test.compute(paths);
-        eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
-            this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-        });
+
+
+        this.filesAdded(paths.toArray(new String[paths.size()]));
 
     }
 
     @Override
-    public void fileAdded(String filePath) {
-        eventBus.publish(BusAddresses.FILE_ADDED, filePath);
+    public void filesAdded(String... filePaths) {
+        Arrays.stream(filePaths).forEach(p ->
+                eventBus.publish(BusAddresses.FILE_ADDED, p)
+        );
+
     }
 
     @Override

@@ -5,9 +5,6 @@ import assignment2.DocumentAnalyzer;
 import assignment2.DocumentResult;
 import assignment2.Utils;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 
 import java.util.Arrays;
@@ -32,16 +29,17 @@ public class FileVerticle extends AbstractVerticle {
 
             Utils.log("File added: " + path);
 
-            Future<Void> failFuture = Future.future();
-            Future<Buffer> future = Future.future();
 
-            vertx.fileSystem().readFile(path, future);
-            future.compose(result -> {
-                Utils.log("Obtained " + path + " result ");
-                singleResults.put(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(result.toString()))));
-                eventBus.publish(BusAddresses.FILE_COMPUTED, path);
+            vertx.fileSystem().readFile(path, buffer -> {
+                vertx.executeBlocking(future -> {
+                    Utils.log("Obtained " + path + " result ");
+                    singleResults.put(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.toString()))));
+                    future.complete();
 
-            }, failFuture);
+                }, res -> {
+                    eventBus.publish(BusAddresses.FILE_COMPUTED, path);
+                });
+            });
 
         });
     }

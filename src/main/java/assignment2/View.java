@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class View extends JFrame {
 
-    interface SelectorListener {
+    public interface SelectorListener {
         void startPressed(List<String> paths);
 
         void fileAdded(String paths);

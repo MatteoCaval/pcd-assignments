@@ -36,8 +36,9 @@ public class FileVerticle extends AbstractVerticle {
                     singleResults.put(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.toString()))));
                     future.complete();
 
-                }, res -> {
+                }, false, res -> {
                     eventBus.publish(BusAddresses.FILE_COMPUTED, path);
+                    Utils.log("Finished " + path + " result ");
                 });
             });
 

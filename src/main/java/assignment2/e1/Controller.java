@@ -2,6 +2,7 @@ package assignment2.e1;
 
 import assignment2.Document;
 import assignment2.DocumentResult;
+import assignment2.Utils;
 import assignment2.View;
 import assignment2.e0.classic.TestExecutors;
 import io.vertx.core.Vertx;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Controller implements View.SelectorListener {
 
@@ -19,7 +21,7 @@ public class Controller implements View.SelectorListener {
     private Vertx vertx = Vertx.vertx();
     private EventBus eventBus;
     private DocumentResult result = new DocumentResult();
-    private Map<String, DocumentResult> singleResults = new HashMap<>();
+    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
 
     public Controller() {
         this.view = new View(this);
@@ -28,6 +30,7 @@ public class Controller implements View.SelectorListener {
         vertx.deployVerticle(new FileVerticle(singleResults));
         eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
             this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+            Utils.log("Aggiorno view");
         });
 
     }

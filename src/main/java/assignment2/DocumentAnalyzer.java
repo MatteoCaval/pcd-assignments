@@ -14,6 +14,7 @@ public class DocumentAnalyzer {
                 }
             }
         }
+        Utils.log("Stop analyzing document");
         return result;
     }
 

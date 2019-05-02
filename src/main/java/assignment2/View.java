@@ -47,7 +47,9 @@ public class View extends JFrame {
     public void printResult(List<Pair<String, Integer>> result) {
         SwingUtilities.invokeLater(() -> {
             this.resultListModel.clear();
-            result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+            if (result != null && !result.isEmpty()){
+                result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+            }
         });
     }
 
@@ -161,6 +163,8 @@ public class View extends JFrame {
     }
 
     private void removeSelectedElement(int selectedIndex) {
+        String elemPathToBeRemoved = this.elementListModel.get(selectedIndex);
+        this.listener.fileRemoved(elemPathToBeRemoved);
         this.elementListModel.remove(selectedIndex);
     }
 

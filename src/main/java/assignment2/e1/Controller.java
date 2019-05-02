@@ -17,19 +17,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Controller implements View.SelectorListener {
 
     private View view;
-    private TestExecutors test;
+    //private TestExecutors test;
     private Vertx vertx = Vertx.vertx();
     private EventBus eventBus;
-    private DocumentResult result = new DocumentResult();
     private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
 
     public Controller() {
         this.view = new View(this);
-        test = new TestExecutors(view);
+        //test = new TestExecutors(view);
         this.eventBus = vertx.eventBus();
         vertx.deployVerticle(new FileVerticle(singleResults));
         eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
-            this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+            if (this.singleResults != null && !this.singleResults.isEmpty()){
+                this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+            } else {
+                this.view.printResult(null);
+            }
             Utils.log("Aggiorno view");
         });
 
@@ -60,11 +63,11 @@ public class Controller implements View.SelectorListener {
 
     @Override
     public void fileRemoved(String path) {
-
+        eventBus.publish(BusAddresses.FILE_REMOVED, path);
     }
 
     @Override
     public void stopPressed() {
-        this.test.stop();
+        //this.test.stop();
     }
 }

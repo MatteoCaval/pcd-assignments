@@ -5,6 +5,7 @@ public class DocumentAnalyzer {
     private static final int MIN_LENGHT = 4;
 
     public static DocumentResult analyzeDocument(Document document) {
+        Utils.log("Analyzing document");
         DocumentResult result = new DocumentResult();
         for (String line : document.getLines()) {
             for (String word : wordInLine(line)) {
@@ -13,6 +14,7 @@ public class DocumentAnalyzer {
                 }
             }
         }
+        Utils.log("Stop analyzing document");
         return result;
     }
 

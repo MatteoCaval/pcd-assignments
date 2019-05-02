@@ -28,7 +28,6 @@ public class FileVerticle extends AbstractVerticle {
             String path = message.body().toString();
 
             Utils.log("File added: " + path);
-
             vertx.fileSystem().readFile(path, buffer -> {
                 vertx.executeBlocking(future -> {
                     Utils.log("Obtained " + path + " result ");
@@ -37,7 +36,7 @@ public class FileVerticle extends AbstractVerticle {
                         this.singleResults.remove(path);
                     } else {
                         // viene aggiunto ai risultati
-                        singleResults.put(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.toString()))));
+                        singleResults.put(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.result().toString()))));
                     }
                     future.complete();
 
@@ -46,7 +45,6 @@ public class FileVerticle extends AbstractVerticle {
                     Utils.log("Finished " + path + " result ");
                 });
             });
-
         });
 
         eventBus.consumer(BusAddresses.FILE_REMOVED, message -> {

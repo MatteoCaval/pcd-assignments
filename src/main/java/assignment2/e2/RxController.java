@@ -1,9 +1,10 @@
 package assignment2.e2;
 
-import assignment2.DocumentResult;
-import assignment2.View;
+import assignment2.*;
 import assignment2.e1.BusAddresses;
 import javafx.util.Pair;
+import rx.Observer;
+import rx.schedulers.Schedulers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,18 +13,44 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RxController implements View.SelectorListener {
 
     private View view;
-    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap();
     private RxBus bus;
 
     public RxController() {
         bus = RxBus.getInstace();
         this.view = new View(this);
-        new ReactiveAnalyzer();
     }
 
     @Override
     public void startPressed(List<String> paths) {
         bus.putEvent(new Pair(BusAddresses.START, null));
+
+        bus.getEvents()
+                .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
+                .map(e -> e.getValue())
+                .map(e -> new Pair<>(e, DocumentAnalyzer.analyzeDocument(Document.fromPath(e))))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .subscribe(new Observer<Pair<String, DocumentResult>>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Pair<String, DocumentResult> p) {
+                        Utils.log("Computed element " + p.getKey());
+                        singleResults.put(p.getKey(), p.getValue());
+                        view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+                    }
+                });
+
+
         filesAdded(paths.toArray(new String[paths.size()]));
     }
 

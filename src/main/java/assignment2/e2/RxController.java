@@ -26,20 +26,19 @@ public class RxController implements View.SelectorListener {
         bus.putEvent(new Pair(BusAddresses.START, null));
 
         bus.getEvents()
+                .observeOn(Schedulers.io())
                 .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
                 .map(e -> e.getValue())
                 .map(e -> new Pair<>(e, DocumentAnalyzer.analyzeDocument(Document.fromPath(e))))
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
                 .subscribe(new Observer<Pair<String, DocumentResult>>() {
                     @Override
                     public void onCompleted() {
-
+                        Utils.log("COMPLETED");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
+                        e.printStackTrace();
                     }
 
                     @Override

@@ -1,24 +1,19 @@
 package assignment2.e0;
 
-import assignment2.View;
-import assignment2.e0.callable.TestExecutorCallables;
+import assignment2.ViewImpl;
+import assignment2.MainView;
 import assignment2.e0.classic.TestExecutors;
-import assignment2.e1.BusAddresses;
-import assignment2.e1.FileVerticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
-import javafx.util.Pair;
 
 import java.util.List;
 
-public class Controller implements View.SelectorListener {
+public class Controller implements ViewImpl.SelectorListener {
 
-    private View view;
+    private MainView view;
     private TestExecutors test;
 
 
     public Controller() {
-        this.view = new View(this);
+        this.view = new ViewImpl(this);
         test = new TestExecutors(view);
     }
 

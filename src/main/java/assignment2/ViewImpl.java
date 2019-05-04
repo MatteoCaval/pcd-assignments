@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class View extends JFrame implements ViewInterface {
+public class ViewImpl extends JFrame implements MainView {
 
     public interface SelectorListener {
 
@@ -38,7 +38,7 @@ public class View extends JFrame implements ViewInterface {
     private boolean started = false;
     private SelectorListener listener;
 
-    public View(SelectorListener listener) throws HeadlessException {
+    public ViewImpl(SelectorListener listener) throws HeadlessException {
         this.listener = listener;
         initUI();
         setVisible(true);

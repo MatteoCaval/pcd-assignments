@@ -12,16 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RxController implements View.SelectorListener {
+public class RxController implements ViewImpl.SelectorListener {
 
-    private ViewInterface view;
+    private MainView view;
     private Map<String, DocumentResult> singleResults = new ConcurrentHashMap();
     private RxBus bus;
     private CompositeDisposable compositeDisposable;
 
     public RxController() {
         bus = RxBus.getInstace();
-        this.view = new View(this);
+        this.view = new ViewImpl(this);
         this.compositeDisposable = new CompositeDisposable();
     }
 

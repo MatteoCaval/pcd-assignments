@@ -1,7 +1,7 @@
 package assignment2.e0.classic;
 
 import assignment2.DocumentResult;
-import assignment2.View;
+import assignment2.MainView;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,9 +14,9 @@ public class TestExecutors implements FileComputeTask.Updater {
 
     private ExecutorService executor;
     private Map<String, DocumentResult> singleResults = new HashMap<>();
-    private View view;
+    private MainView view;
 
-    public TestExecutors(View view) {
+    public TestExecutors(MainView view) {
         this.executor = Executors.newFixedThreadPool(8);
         this.view = view;
     }
@@ -31,17 +31,18 @@ public class TestExecutors implements FileComputeTask.Updater {
         );
     }
 
-    public synchronized void remove(String path){
-        if(singleResults.keySet().contains(path)){
+    public synchronized void remove(String path) {
+        if (singleResults.keySet().contains(path)) {
             singleResults.remove(path);
         } else {
             singleResults.put(path, new DocumentResult());
         }
         this.mergeAndUpdateResult();
     }
+
     @Override
     synchronized public void submitResult(String path, DocumentResult result) {
-        if (this.singleResults.keySet().contains(path)){
+        if (this.singleResults.keySet().contains(path)) {
             // significa che la remove l'ha inserito vuoto, e quindi lo devo scartare, oltre che togliere quello vuoto dalla mappa
             this.singleResults.remove(path);
         } else {
@@ -57,8 +58,8 @@ public class TestExecutors implements FileComputeTask.Updater {
         this.executor = Executors.newFixedThreadPool(8);
     }
 
-    private void mergeAndUpdateResult(){
-        if (!singleResults.isEmpty()){
+    private void mergeAndUpdateResult() {
+        if (!singleResults.isEmpty()) {
             this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
         } else {
             this.view.printResult(null);

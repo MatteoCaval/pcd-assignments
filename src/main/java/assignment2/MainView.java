@@ -4,7 +4,7 @@ import javafx.util.Pair;
 
 import java.util.List;
 
-public interface ViewInterface {
+public interface MainView {
 
     int getInputSize();
 

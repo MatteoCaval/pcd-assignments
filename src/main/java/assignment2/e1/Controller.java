@@ -1,40 +1,41 @@
 package assignment2.e1;
 
-import assignment2.DocumentResult;
+import assignment2.BaseController;
+import assignment2.ComputationResults;
+import assignment2.MainView;
 import assignment2.Utils;
-import assignment2.View;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class Controller implements View.SelectorListener {
+public class Controller extends BaseController{
 
-    private View view;
     private Vertx vertx = Vertx.vertx();
     private EventBus eventBus;
-    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
+    private ComputationResults singleResults;
 
-    public Controller() {
-        this.view = new View(this);
+    public Controller(MainView view) {
+        super(view);
+        this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();
+
         vertx.deployVerticle(new FileVerticle(singleResults));
         eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
-            if (this.singleResults != null && !this.singleResults.isEmpty()){
-                this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-            } else {
-                this.view.printResult(null);
+            this.view.printResult(singleResults.getGlobalOrderedResult());
+            if (this.singleResults.checkComputationEnded(this.view.getInputSize())) {
+                this.view.notifyComputationCompleted();
+                this.view.setComputationTime(this.crono.stop().getTime());
             }
-            Utils.log("Aggiorno view");
         });
 
     }
 
     @Override
     public void startPressed(List<String> paths) {
-        this.view.printResult(null);
+        super.startPressed(paths);
+        this.singleResults.clear();
         this.filesAdded(paths.toArray(new String[paths.size()]));
     }
 
@@ -43,7 +44,6 @@ public class Controller implements View.SelectorListener {
         Arrays.stream(filePaths).forEach(p ->
                 eventBus.publish(BusAddresses.FILE_ADDED, p)
         );
-
     }
 
     @Override
@@ -53,6 +53,7 @@ public class Controller implements View.SelectorListener {
 
     @Override
     public void stopPressed() {
-        this.singleResults.clear();
+        super.stopPressed();
+//        eventBus.publish(BusAddresses.STOP, null);
     }
 }

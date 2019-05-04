@@ -3,7 +3,6 @@ package assignment2;
 import javafx.util.Pair;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,25 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class View extends JFrame {
+public class ViewImpl extends JFrame implements MainView {
 
-    public interface SelectorListener {
-        void startPressed(List<String> paths);
-
-        void filesAdded(String... paths);
-
-        void fileRemoved(String path);
-
-        void stopPressed();
-    }
-
-    private JButton addDirectoryButton;
-    private JButton addFileButton;
-    private JFileChooser chooser;
-    private JTextField selectedDirectoryName;
-    private JButton removeElementButton;
     private JButton startButton;
     private JButton stopButton;
+    private JLabel timeSpent;
     private DefaultListModel<String> elementListModel;
     private JList<String> elementList;
     private DefaultListModel<String> resultListModel;
@@ -38,38 +23,70 @@ public class View extends JFrame {
     private boolean started = false;
     private SelectorListener listener;
 
-    public View(SelectorListener listener) throws HeadlessException {
-        this.listener = listener;
+    public ViewImpl() throws HeadlessException {
         initUI();
         setVisible(true);
     }
 
+    // region ViewInterface
+
+    @Override
+    public int getInputSize() {
+        return this.elementListModel.size();
+    }
+
+    @Override
     public void printResult(List<Pair<String, Integer>> result) {
         SwingUtilities.invokeLater(() -> {
+            Utils.log("Printing results");
             this.resultListModel.clear();
-            if (result != null && !result.isEmpty()){
+            if (result != null && !result.isEmpty()) {
                 result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
             }
         });
     }
 
+    @Override
+    public void notifyComputationCompleted() {
+        this.stopButtonPressed();
+    }
+
+    @Override
+    public void setComputationTime(long time) {
+        this.timeSpent.setText("Computation time (ms): " + String.valueOf(time));
+    }
+
+    @Override
+    public void clearComputationTime() {
+        this.timeSpent.setText("");
+    }
+
+    @Override
+    public void setListener(SelectorListener listener) {
+        this.listener = listener;
+    }
+
+    // endregion
+
+    // region Private methods
 
     private void initUI() {
         setTitle("Assignment2");
         setResizable(true);
-        this.setSize(600, 400);
+        this.setSize(600, 450);
 
 
-        this.addDirectoryButton = new JButton("Add directory");
-        this.addFileButton = new JButton("Add file");
-        this.removeElementButton = new JButton("Remove element");
+        JButton addDirectoryButton = new JButton("Add directory");
+        JButton addFileButton = new JButton("Add file");
+        JButton removeElementButton = new JButton("Remove element");
         this.startButton = new JButton("Start");
         this.stopButton = new JButton("Stop");
+        this.timeSpent = new JLabel("");
 
         JPanel selectionPanel = new JPanel();
-        selectionPanel.add(this.addDirectoryButton);
-        selectionPanel.add(this.addFileButton);
-        selectionPanel.add(this.removeElementButton);
+        selectionPanel.add(addDirectoryButton);
+        selectionPanel.add(addFileButton);
+        selectionPanel.add(removeElementButton);
 
         this.elementListModel = new DefaultListModel<>();
         this.elementList = new JList<>(this.elementListModel);
@@ -80,6 +97,9 @@ public class View extends JFrame {
         controlPanel.add(this.startButton);
         controlPanel.add(this.stopButton);
 
+        JPanel timeResultPanel = new JPanel();
+        timeResultPanel.add(this.timeSpent);
+
         this.resultListModel = new DefaultListModel<>();
         JList<String> resultList = new JList<>(this.resultListModel);
         JScrollPane resultListScrollPanel = new JScrollPane(resultList);
@@ -87,7 +107,8 @@ public class View extends JFrame {
         JPanel resultPanel = new JPanel();
         resultPanel.setLayout(new BorderLayout());
         resultPanel.add(BorderLayout.NORTH, resultListScrollPanel);
-        resultPanel.add(BorderLayout.SOUTH, controlPanel);
+        resultPanel.add(BorderLayout.CENTER, controlPanel);
+        resultPanel.add(BorderLayout.SOUTH, timeResultPanel);
 
 
         this.setLayout(new BorderLayout());
@@ -96,15 +117,15 @@ public class View extends JFrame {
         this.add(BorderLayout.CENTER, selectionPanel);
 
 
-        this.addDirectoryButton.addActionListener(e -> {
+        addDirectoryButton.addActionListener(e -> {
             this.selectDirectory();
         });
 
-        this.addFileButton.addActionListener(e -> {
+        addFileButton.addActionListener(e -> {
             this.selectFiles();
         });
 
-        this.removeElementButton.addActionListener(e -> {
+        removeElementButton.addActionListener(e -> {
             int selectedIndex = this.elementList.getSelectedIndex();
             if (selectedIndex >= 0) {
                 this.removeSelectedElement(selectedIndex);
@@ -116,25 +137,28 @@ public class View extends JFrame {
             this.started = true;
             this.startButton.setEnabled(false);
             this.stopButton.setEnabled(true);
+            this.resultListModel.clear();
             this.listener.startPressed(fromListModel(elementListModel));
         });
 
         this.stopButton.addActionListener(e -> {
-            this.started = false;
-            this.stopButton.setEnabled(false);
-            this.startButton.setEnabled(true);
-            this.listener.stopPressed();
+            this.stopButtonPressed();
         });
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
     }
 
-    // region Private methods
+    private void stopButtonPressed() {
+        this.started = false;
+        this.stopButton.setEnabled(false);
+        this.startButton.setEnabled(true);
+        this.listener.stopPressed();
+    }
 
     private void selectDirectory() {
-        this.chooser = new JFileChooser();
-        this.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 List<String> paths = getDirectoryFiles(chooser.getSelectedFile().getPath());

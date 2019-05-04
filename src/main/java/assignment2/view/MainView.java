@@ -1,4 +1,4 @@
-package assignment2;
+package assignment2.view;
 
 import javafx.util.Pair;
 

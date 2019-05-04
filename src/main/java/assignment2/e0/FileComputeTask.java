@@ -1,11 +1,7 @@
 package assignment2.e0;
 
-import assignment2.Document;
-import assignment2.DocumentAnalyzer;
-import assignment2.DocumentResult;
-import assignment2.Utils;
-
-import java.util.concurrent.Callable;
+import assignment2.fileanalysis.DocumentAnalyzer;
+import assignment2.fileanalysis.DocumentResult;
 
 public class FileComputeTask implements Runnable {
 

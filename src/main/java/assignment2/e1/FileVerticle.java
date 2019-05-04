@@ -10,9 +10,11 @@ import java.util.Map;
 public class FileVerticle extends AbstractVerticle {
 
     private ComputationResults singleResults;
+    private boolean ordered;
 
-    public FileVerticle(ComputationResults singleResults) {
+    public FileVerticle(ComputationResults singleResults, boolean parallel) {
         this.singleResults = singleResults;
+        this.ordered = !parallel;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class FileVerticle extends AbstractVerticle {
                     this.singleResults.addResult(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.result().toString()))));
                     future.complete();
 
-                }, false, res -> {
+                }, ordered, res -> {
                     eventBus.publish(BusAddresses.FILE_COMPUTED, path);
                     Utils.log("Finished " + path + " result ");
                 });

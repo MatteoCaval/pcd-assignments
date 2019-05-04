@@ -9,13 +9,11 @@ import javafx.util.Pair;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RxController implements ViewImpl.SelectorListener {
 
     private MainView view;
-    private Map<String, DocumentResult> singleResults = new ConcurrentHashMap();
+    private ComputationResults singleResults;
     private RxBus bus;
     private CompositeDisposable compositeDisposable;
 
@@ -23,6 +21,7 @@ public class RxController implements ViewImpl.SelectorListener {
         bus = RxBus.getInstace();
         this.view = new ViewImpl(this);
         this.compositeDisposable = new CompositeDisposable();
+        this.singleResults = new ComputationResults();
     }
 
     @Override
@@ -62,15 +61,12 @@ public class RxController implements ViewImpl.SelectorListener {
                 .subscribe(p -> {
                             Utils.log("Computed element " + p.getKey());
 
-                            if (singleResults.keySet().contains(p.getKey())) {
-                                singleResults.remove(p.getKey());
+                            this.singleResults.addResult(p.getKey(), p.getValue());
 
-                            } else {
-                                singleResults.put(p.getKey(), p.getValue());
-                            }
 
-                            view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-                            if (view.getInputSize() == singleResults.size()) {
+                            view.printResult(this.singleResults.getGlobalOrderedResult());
+
+                            if (this.singleResults.checkComputationEnded(this.view.getInputSize())) {
                                 this.view.notifyComputationCompleted();
                                 Utils.log("FINEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                             }
@@ -83,15 +79,7 @@ public class RxController implements ViewImpl.SelectorListener {
                 .map(e -> e.getValue())
                 .subscribe(path -> {
                     Utils.log("Removing " + path);
-                    if (singleResults.keySet().contains(path)) {
-                        singleResults.remove(path);
-                        view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-
-                    } else {
-                        singleResults.put(path, new DocumentResult());
-                    }
-
-
+                    this.singleResults.removeResult(path);
                 }));
 
         filesAdded(paths.toArray(new String[paths.size()]));

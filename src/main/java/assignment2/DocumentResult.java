@@ -50,8 +50,6 @@ public class DocumentResult {
         this.result.clear();
     }
 
-
-
     // region Private methods
 
     /**

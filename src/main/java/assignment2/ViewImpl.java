@@ -66,12 +66,17 @@ public class ViewImpl extends JFrame implements MainView {
         this.listener = listener;
     }
 
+    @Override
+    public void setFrameTitle(String title) {
+        this.setTitle(title);
+    }
+
     // endregion
 
     // region Private methods
 
     private void initUI() {
-        setTitle("Assignment2");
+        setTitle("Assignment 2");
         setResizable(true);
         this.setSize(600, 450);
 

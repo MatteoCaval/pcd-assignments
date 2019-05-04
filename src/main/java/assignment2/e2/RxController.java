@@ -16,13 +16,12 @@ public class RxController extends BaseController {
     private RxBus bus;
     private CompositeDisposable compositeDisposable;
 
-    public RxController(MainView view) {
+    public RxController(MainView view, boolean parallel) {
         super(view);
         bus = RxBus.getInstace();
         this.compositeDisposable = new CompositeDisposable();
         this.singleResults = new ComputationResults();
     }
-
 
     @Override
     public void startPressed(List<String> paths) {

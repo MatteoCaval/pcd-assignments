@@ -12,7 +12,7 @@ public class ExecutorController extends BaseController implements FileComputeTas
     private ExecutorService executor;
     private ComputationResults singleResults = new ComputationResults();
 
-    public ExecutorController(MainView view) {
+    public ExecutorController(MainView view, boolean parallel) {
         super(view);
     }
 

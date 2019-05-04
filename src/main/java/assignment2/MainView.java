@@ -17,4 +17,6 @@ public interface MainView {
     void clearComputationTime();
 
     void setListener(SelectorListener listener);
+
+    void setFrameTitle(String title);
 }

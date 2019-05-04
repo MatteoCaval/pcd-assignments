@@ -16,7 +16,7 @@ public class VertxController extends BaseController{
     private EventBus eventBus;
     private ComputationResults singleResults;
 
-    public VertxController(MainView view) {
+    public VertxController(MainView view, boolean parallel) {
         super(view);
         this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();

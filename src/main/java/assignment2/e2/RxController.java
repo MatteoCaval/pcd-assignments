@@ -72,7 +72,7 @@ public class RxController extends BaseController {
                     .map(e -> e.getValue())
                     .flatMap(name -> Observable.just(name)
                             .subscribeOn(Schedulers.computation())
-                            .map(path -> new Pair<>(path, DocumentAnalyzer.analyzeDocument(Document.fromPath(path)))))
+                            .map(path -> new Pair<>(path, DocumentAnalyzer.resultFromPath(path))))
                     .subscribe(p -> {
                                 Utils.log("Computed element " + p.getKey());
 
@@ -90,7 +90,7 @@ public class RxController extends BaseController {
                     .observeOn(Schedulers.computation())
                     .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
                     .map(e -> e.getValue())
-                    .map(e -> new Pair<>(e, DocumentAnalyzer.analyzeDocument(Document.fromPath(e))))
+                    .map(e -> new Pair<>(e, DocumentAnalyzer.resultFromPath(e)))
                     .subscribe(p -> {
                                 Utils.log("Computed element " + p.getKey());
                                 this.singleResults.addResult(p.getKey(), p.getValue());

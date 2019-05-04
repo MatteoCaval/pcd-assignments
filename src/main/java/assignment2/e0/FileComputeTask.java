@@ -25,6 +25,6 @@ public class FileComputeTask implements Runnable {
 
     @Override
     public void run() {
-        this.updater.submitResult(this.path, DocumentAnalyzer.analyzeDocument(Document.fromPath(this.path)));
+        this.updater.submitResult(this.path, DocumentAnalyzer.resultFromPath(this.path));
     }
 }

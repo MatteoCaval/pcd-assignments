@@ -1,4 +1,4 @@
-package assignment2.e0.classic;
+package assignment2.e0;
 
 import assignment2.DocumentResult;
 import assignment2.MainView;

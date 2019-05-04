@@ -10,13 +10,13 @@ import io.vertx.core.eventbus.EventBus;
 import java.util.Arrays;
 import java.util.List;
 
-public class Controller extends BaseController{
+public class VertxController extends BaseController{
 
     private Vertx vertx = Vertx.vertx();
     private EventBus eventBus;
     private ComputationResults singleResults;
 
-    public Controller(MainView view) {
+    public VertxController(MainView view) {
         super(view);
         this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();

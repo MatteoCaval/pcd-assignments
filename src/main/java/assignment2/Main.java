@@ -1,7 +1,6 @@
 package assignment2;
 
 import assignment2.e0.ExecutorController;
-import assignment2.e1.VertxController;
 
 public class Main {
 

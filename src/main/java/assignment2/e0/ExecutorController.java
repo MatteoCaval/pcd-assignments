@@ -6,13 +6,13 @@ import assignment2.MainView;
 
 import java.util.List;
 
-public class Controller implements SelectorListener {
+public class ExecutorController implements SelectorListener {
 
     private MainView view;
     private TestExecutors test;
 
 
-    public Controller() {
+    public ExecutorController() {
         this.view = new ViewImpl();
         this.view.setListener(this);
         test = new TestExecutors(view);

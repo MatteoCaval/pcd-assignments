@@ -1,25 +1,25 @@
 package assignment2.e0;
 
+import assignment2.BaseController;
 import assignment2.SelectorListener;
 import assignment2.ViewImpl;
 import assignment2.MainView;
 
 import java.util.List;
 
-public class ExecutorController implements SelectorListener {
+public class ExecutorController extends BaseController {
 
-    private MainView view;
     private TestExecutors test;
 
 
-    public ExecutorController() {
-        this.view = new ViewImpl();
-        this.view.setListener(this);
+    public ExecutorController(MainView view) {
+        super(view);
         test = new TestExecutors(view);
     }
 
     @Override
     public void startPressed(List<String> paths) {
+        super.startPressed(paths);
        /* List<DocumentResult> results = paths.stream().map(p -> DocumentAnalyzer.analyzeDocument(Document.fromPath(p))).collect(Collectors.toList());
         List<Pair<String, Integer>> result = results.stream().reduce(DocumentResult::merge).get().toSortedPair();*/
 
@@ -41,6 +41,7 @@ public class ExecutorController implements SelectorListener {
 
     @Override
     public void stopPressed() {
+        super.stopPressed();
         this.test.stop();
     }
 }

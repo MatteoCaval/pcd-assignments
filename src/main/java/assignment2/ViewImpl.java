@@ -73,7 +73,7 @@ public class ViewImpl extends JFrame implements MainView {
     private void initUI() {
         setTitle("Assignment2");
         setResizable(true);
-        this.setSize(600, 400);
+        this.setSize(600, 450);
 
 
         JButton addDirectoryButton = new JButton("Add directory");

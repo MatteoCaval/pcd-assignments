@@ -1,47 +1,40 @@
 package assignment2.e1;
 
-import assignment2.*;
+import assignment2.BaseController;
+import assignment2.ComputationResults;
+import assignment2.MainView;
+import assignment2.Utils;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class Controller implements SelectorListener {
+public class Controller extends BaseController{
 
-    private MainView view;
-    //private TestExecutors test;
     private Vertx vertx = Vertx.vertx();
     private EventBus eventBus;
-    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
+    private ComputationResults singleResults;
 
-    public Controller() {
-        this.view = new ViewImpl();
-        this.view.setListener(this);
-        //test = new TestExecutors(view);
+    public Controller(MainView view) {
+        super(view);
+        this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();
-        vertx.deployVerticle(new FileVerticle(singleResults));
-        eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
-            if (this.singleResults != null && !this.singleResults.isEmpty()){
-                this.view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-            } else {
-                this.view.printResult(null);
-            }
-            Utils.log("Aggiorno view");
-        });
-
     }
 
     @Override
     public void startPressed(List<String> paths) {
-       /* List<DocumentResult> results = paths.stream().map(p -> DocumentAnalyzer.analyzeDocument(Document.fromPath(p))).collect(Collectors.toList());
-        List<Pair<String, Integer>> result = results.stream().reduce(DocumentResult::merge).get().toSortedPair();*/
+        super.startPressed(paths);
 
-//        List<Pair<String, Integer>> result = new TestExecutorCallables().compute(paths).toSortedPair();
-//        this.view.printResult(result);
-
-//        test.compute(paths);
+        vertx.deployVerticle(new FileVerticle(singleResults));
+        eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
+            this.view.printResult(singleResults.getGlobalOrderedResult());
+            if (this.singleResults.checkComputationEnded(this.view.getInputSize())) {
+                this.view.notifyComputationCompleted();
+                this.view.setComputationTime(this.crono.stop().getTime());
+            }
+            Utils.log("Aggiorno view");
+        });
 
 
         this.filesAdded(paths.toArray(new String[paths.size()]));
@@ -53,7 +46,6 @@ public class Controller implements SelectorListener {
         Arrays.stream(filePaths).forEach(p ->
                 eventBus.publish(BusAddresses.FILE_ADDED, p)
         );
-
     }
 
     @Override
@@ -63,6 +55,7 @@ public class Controller implements SelectorListener {
 
     @Override
     public void stopPressed() {
-        //this.test.stop();
+        super.stopPressed();
+        eventBus.publish(BusAddresses.STOP, null);
     }
 }

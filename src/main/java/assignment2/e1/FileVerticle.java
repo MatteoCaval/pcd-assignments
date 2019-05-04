@@ -32,7 +32,7 @@ public class FileVerticle extends AbstractVerticle {
             vertx.fileSystem().readFile(path, buffer -> {
                 vertx.executeBlocking(future -> {
                     Utils.log("Obtained " + path + " result ");
-                    if (this.singleResults.keySet().contains(path)){
+                    if (this.singleResults.keySet().contains(path)) {
                         // significa che la remove l'ha inserito vuoto, e quindi lo devo scartare, oltre che togliere quello vuoto dalla mappa
                         this.singleResults.remove(path);
                     } else {
@@ -51,11 +51,11 @@ public class FileVerticle extends AbstractVerticle {
 
         eventBus.consumer(BusAddresses.FILE_REMOVED, message -> {
             String path = message.body().toString();
-
             Utils.log("File removed: " + path);
 
-            if(singleResults.keySet().contains(path)){
+            if (singleResults.keySet().contains(path)) {
                 singleResults.remove(path);
+
             } else {
                 singleResults.put(path, new DocumentResult());
             }

@@ -3,7 +3,6 @@ package assignment2;
 import javafx.util.Pair;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,9 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class View extends JFrame {
+public class View extends JFrame implements ViewInterface {
 
     public interface SelectorListener {
+
         void startPressed(List<String> paths);
 
         void filesAdded(String... paths);
@@ -44,16 +44,32 @@ public class View extends JFrame {
         setVisible(true);
     }
 
+    // region ViewInterface
+
+    @Override
+    public int getInputSize() {
+        return this.elementListModel.size();
+    }
+
+    @Override
     public void printResult(List<Pair<String, Integer>> result) {
         SwingUtilities.invokeLater(() -> {
             Utils.log("Printing results");
             this.resultListModel.clear();
-            if (result != null && !result.isEmpty()){
+            if (result != null && !result.isEmpty()) {
                 result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
             }
         });
     }
 
+    @Override
+    public void notifyComputationCompleted() {
+        this.stopButtonPressed();
+    }
+
+    // endregion
+
+    // region Private methods
 
     private void initUI() {
         setTitle("Assignment2");
@@ -117,21 +133,24 @@ public class View extends JFrame {
             this.started = true;
             this.startButton.setEnabled(false);
             this.stopButton.setEnabled(true);
+            this.resultListModel.clear();
             this.listener.startPressed(fromListModel(elementListModel));
         });
 
         this.stopButton.addActionListener(e -> {
-            this.started = false;
-            this.stopButton.setEnabled(false);
-            this.startButton.setEnabled(true);
-            this.listener.stopPressed();
+            this.stopButtonPressed();
         });
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
     }
 
-    // region Private methods
+    private void stopButtonPressed() {
+        this.started = false;
+        this.stopButton.setEnabled(false);
+        this.startButton.setEnabled(true);
+        this.listener.stopPressed();
+    }
 
     private void selectDirectory() {
         this.chooser = new JFileChooser();

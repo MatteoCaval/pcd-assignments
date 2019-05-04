@@ -1,9 +1,8 @@
 package assignment2.e2;
 
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import javafx.util.Pair;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 
 public class RxBus {
 

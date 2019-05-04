@@ -2,35 +2,37 @@ package assignment2.e2;
 
 import assignment2.*;
 import assignment2.e1.BusAddresses;
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import javafx.util.Pair;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.schedulers.Schedulers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RxController implements View.SelectorListener {
 
-    private View view;
-    private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap();
+    private ViewInterface view;
+    private Map<String, DocumentResult> singleResults = new ConcurrentHashMap();
     private RxBus bus;
+    private CompositeDisposable compositeDisposable;
 
     public RxController() {
         bus = RxBus.getInstace();
         this.view = new View(this);
+        this.compositeDisposable = new CompositeDisposable();
     }
 
     @Override
     public void startPressed(List<String> paths) {
-        bus.putEvent(new Pair(BusAddresses.START, null));
+        this.singleResults.clear();
 
 //        bus.getEvents()
+//                .observeOn(Schedulers.computation())
 //                .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
 //                .map(e -> e.getValue())
-//                .observeOn(Schedulers.io())
 //                .map(e -> new Pair<>(e, DocumentAnalyzer.analyzeDocument(Document.fromPath(e))))
 //                .subscribe(new Observer<Pair<String, DocumentResult>>() {
 //                    @Override
@@ -51,31 +53,46 @@ public class RxController implements View.SelectorListener {
 //                    }
 //                });
 
-        bus.getEvents()
+        this.compositeDisposable.add(bus.getEvents()
                 .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
                 .map(e -> e.getValue())
                 .flatMap(name -> Observable.just(name)
-                        .observeOn(Schedulers.computation())
+                        .subscribeOn(Schedulers.computation())
                         .map(path -> new Pair<>(path, DocumentAnalyzer.analyzeDocument(Document.fromPath(path)))))
-                .subscribe(new Subscriber<Pair<String, DocumentResult>>() {
-                    @Override
-                    public void onCompleted() {
+                .subscribe(p -> {
+                            Utils.log("Computed element " + p.getKey());
 
-                    }
+                            if (singleResults.keySet().contains(p.getKey())) {
+                                singleResults.remove(p.getKey());
 
-                    @Override
-                    public void onError(Throwable e) {
+                            } else {
+                                singleResults.put(p.getKey(), p.getValue());
+                            }
 
-                    }
+                            view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
+                            if (view.getInputSize() == singleResults.size()) {
+                                this.view.notifyComputationCompleted();
+                                Utils.log("FINEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                            }
+                        }
+                ));
 
-                    @Override
-                    public void onNext(Pair<String, DocumentResult> p) {
-                        Utils.log("Computed element " + p.getKey());
-                        singleResults.put(p.getKey(), p.getValue());
+        this.compositeDisposable.add(bus.getEvents()
+                .observeOn(Schedulers.io())
+                .filter(e -> e.getKey().equals(BusAddresses.FILE_REMOVED))
+                .map(e -> e.getValue())
+                .subscribe(path -> {
+                    Utils.log("Removing " + path);
+                    if (singleResults.keySet().contains(path)) {
+                        singleResults.remove(path);
                         view.printResult(singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair());
-                    }
-                });
 
+                    } else {
+                        singleResults.put(path, new DocumentResult());
+                    }
+
+
+                }));
 
         filesAdded(paths.toArray(new String[paths.size()]));
     }
@@ -95,6 +112,6 @@ public class RxController implements View.SelectorListener {
 
     @Override
     public void stopPressed() {
-        bus.putEvent(new Pair(BusAddresses.STOP, null));
+        this.compositeDisposable.clear();
     }
 }

@@ -1,47 +1,80 @@
 package assignment2.e0;
 
-import assignment2.BaseController;
-import assignment2.SelectorListener;
-import assignment2.ViewImpl;
-import assignment2.MainView;
+import assignment2.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ExecutorController extends BaseController {
+public class ExecutorController extends BaseController implements FileComputeTask.Updater {
 
-    private TestExecutors test;
-
+    private ExecutorService executor;
+    private ComputationResults singleResults = new ComputationResults();
 
     public ExecutorController(MainView view) {
         super(view);
-        test = new TestExecutors(view);
     }
+
+    // region MainView
 
     @Override
     public void startPressed(List<String> paths) {
+        this.initExecutor();
+        this.singleResults.clear();
         super.startPressed(paths);
-       /* List<DocumentResult> results = paths.stream().map(p -> DocumentAnalyzer.analyzeDocument(Document.fromPath(p))).collect(Collectors.toList());
-        List<Pair<String, Integer>> result = results.stream().reduce(DocumentResult::merge).get().toSortedPair();*/
-
-//        List<Pair<String, Integer>> result = new TestExecutorCallables().compute(paths).toSortedPair();
-//        this.view.printResult(result);
-        this.view.printResult(null);
         this.filesAdded(paths.toArray(new String[paths.size()]));
     }
 
     @Override
-    public void filesAdded(String... filePath) {
-        test.compute(filePath);
+    public void filesAdded(String... paths) {
+        Arrays.stream(paths).forEach(
+                p -> {
+                    executor.submit(new FileComputeTask(p, this));
+                }
+        );
     }
 
     @Override
     public void fileRemoved(String path) {
-        test.remove(path);
+        Utils.log("Remove " + path);
+        singleResults.removeResult(path);
+        this.update();
     }
 
     @Override
     public void stopPressed() {
         super.stopPressed();
-        this.test.stop();
+        this.executor.shutdownNow();
     }
+
+    // endregion
+
+    // region FileComputeTask.Updater
+
+    @Override
+    public void submitResult(String path, DocumentResult result) {
+        singleResults.addResult(path, result);
+        this.update();
+    }
+
+    // endregion
+
+    // region Private methods
+
+    private void initExecutor() {
+        this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
+
+    private void update() {
+        this.view.printResult(this.singleResults.getGlobalOrderedResult());
+        if (singleResults.checkComputationEnded(view.getInputSize())) {
+            this.stopPressed();
+            this.view.notifyComputationCompleted();
+        }
+    }
+
+    // endregion
+
+
 }

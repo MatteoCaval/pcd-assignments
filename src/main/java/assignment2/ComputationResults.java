@@ -3,7 +3,6 @@ package assignment2;
 import javafx.util.Pair;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ComputationResults {
@@ -30,7 +29,7 @@ public class ComputationResults {
         return inputSize == singleResults.size();
     }
 
-    private void addOrRemove(String path, DocumentResult result) {
+    private synchronized void addOrRemove(String path, DocumentResult result) {
         if (singleResults.keySet().contains(path)) {
             singleResults.remove(path);
 

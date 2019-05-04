@@ -6,7 +6,8 @@ public class Main {
 
     public static void main(String[] args) {
 //        new assignment2.e1.Controller();
-        new RxController();
+        MainView view = new ViewImpl();
+        new RxController(view);
     }
 
 }

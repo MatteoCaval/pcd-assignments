@@ -1,18 +1,20 @@
 package assignment2.e0;
 
+import assignment2.SelectorListener;
 import assignment2.ViewImpl;
 import assignment2.MainView;
 
 import java.util.List;
 
-public class Controller implements ViewImpl.SelectorListener {
+public class Controller implements SelectorListener {
 
     private MainView view;
     private TestExecutors test;
 
 
     public Controller() {
-        this.view = new ViewImpl(this);
+        this.view = new ViewImpl();
+        this.view.setListener(this);
         test = new TestExecutors(view);
     }
 

@@ -13,22 +13,6 @@ import java.util.stream.Collectors;
 
 public class ViewImpl extends JFrame implements MainView {
 
-    public interface SelectorListener {
-
-        void startPressed(List<String> paths);
-
-        void filesAdded(String... paths);
-
-        void fileRemoved(String path);
-
-        void stopPressed();
-    }
-
-    private JButton addDirectoryButton;
-    private JButton addFileButton;
-    private JFileChooser chooser;
-    private JTextField selectedDirectoryName;
-    private JButton removeElementButton;
     private JButton startButton;
     private JButton stopButton;
     private JLabel timeSpent;
@@ -39,8 +23,7 @@ public class ViewImpl extends JFrame implements MainView {
     private boolean started = false;
     private SelectorListener listener;
 
-    public ViewImpl(SelectorListener listener) throws HeadlessException {
-        this.listener = listener;
+    public ViewImpl() throws HeadlessException {
         initUI();
         setVisible(true);
     }
@@ -68,6 +51,21 @@ public class ViewImpl extends JFrame implements MainView {
         this.stopButtonPressed();
     }
 
+    @Override
+    public void setComputationTime(long time) {
+        this.timeSpent.setText("Computation time (ms): " + String.valueOf(time));
+    }
+
+    @Override
+    public void clearComputationTime() {
+        this.timeSpent.setText("");
+    }
+
+    @Override
+    public void setListener(SelectorListener listener) {
+        this.listener = listener;
+    }
+
     // endregion
 
     // region Private methods
@@ -78,17 +76,17 @@ public class ViewImpl extends JFrame implements MainView {
         this.setSize(600, 400);
 
 
-        this.addDirectoryButton = new JButton("Add directory");
-        this.addFileButton = new JButton("Add file");
-        this.removeElementButton = new JButton("Remove element");
+        JButton addDirectoryButton = new JButton("Add directory");
+        JButton addFileButton = new JButton("Add file");
+        JButton removeElementButton = new JButton("Remove element");
         this.startButton = new JButton("Start");
         this.stopButton = new JButton("Stop");
         this.timeSpent = new JLabel("");
 
         JPanel selectionPanel = new JPanel();
-        selectionPanel.add(this.addDirectoryButton);
-        selectionPanel.add(this.addFileButton);
-        selectionPanel.add(this.removeElementButton);
+        selectionPanel.add(addDirectoryButton);
+        selectionPanel.add(addFileButton);
+        selectionPanel.add(removeElementButton);
 
         this.elementListModel = new DefaultListModel<>();
         this.elementList = new JList<>(this.elementListModel);
@@ -119,15 +117,15 @@ public class ViewImpl extends JFrame implements MainView {
         this.add(BorderLayout.CENTER, selectionPanel);
 
 
-        this.addDirectoryButton.addActionListener(e -> {
+        addDirectoryButton.addActionListener(e -> {
             this.selectDirectory();
         });
 
-        this.addFileButton.addActionListener(e -> {
+        addFileButton.addActionListener(e -> {
             this.selectFiles();
         });
 
-        this.removeElementButton.addActionListener(e -> {
+        removeElementButton.addActionListener(e -> {
             int selectedIndex = this.elementList.getSelectedIndex();
             if (selectedIndex >= 0) {
                 this.removeSelectedElement(selectedIndex);
@@ -151,14 +149,6 @@ public class ViewImpl extends JFrame implements MainView {
 
     }
 
-    public void setComputationTime(long time){
-        this.timeSpent.setText("Computation time (ms): " + String.valueOf(time));
-    }
-
-    public void clearComputationTime(long time){
-        this.timeSpent.setText("");
-    }
-
     private void stopButtonPressed() {
         this.started = false;
         this.stopButton.setEnabled(false);
@@ -167,8 +157,8 @@ public class ViewImpl extends JFrame implements MainView {
     }
 
     private void selectDirectory() {
-        this.chooser = new JFileChooser();
-        this.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 List<String> paths = getDirectoryFiles(chooser.getSelectedFile().getPath());

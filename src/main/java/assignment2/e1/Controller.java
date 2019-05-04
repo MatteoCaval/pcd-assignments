@@ -1,9 +1,6 @@
 package assignment2.e1;
 
-import assignment2.DocumentResult;
-import assignment2.Utils;
-import assignment2.ViewImpl;
-import assignment2.MainView;
+import assignment2.*;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
@@ -11,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Controller implements ViewImpl.SelectorListener {
+public class Controller implements SelectorListener {
 
     private MainView view;
     //private TestExecutors test;
@@ -20,7 +17,8 @@ public class Controller implements ViewImpl.SelectorListener {
     private ConcurrentHashMap<String, DocumentResult> singleResults = new ConcurrentHashMap<>();
 
     public Controller() {
-        this.view = new ViewImpl(this);
+        this.view = new ViewImpl();
+        this.view.setListener(this);
         //test = new TestExecutors(view);
         this.eventBus = vertx.eventBus();
         vertx.deployVerticle(new FileVerticle(singleResults));

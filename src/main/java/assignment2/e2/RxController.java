@@ -10,22 +10,23 @@ import javafx.util.Pair;
 import java.util.Arrays;
 import java.util.List;
 
-public class RxController implements ViewImpl.SelectorListener {
+public class RxController extends BaseController {
 
-    private MainView view;
     private ComputationResults singleResults;
     private RxBus bus;
     private CompositeDisposable compositeDisposable;
 
-    public RxController() {
+    public RxController(MainView view) {
+        super(view);
         bus = RxBus.getInstace();
-        this.view = new ViewImpl(this);
         this.compositeDisposable = new CompositeDisposable();
         this.singleResults = new ComputationResults();
     }
 
+
     @Override
     public void startPressed(List<String> paths) {
+        super.startPressed(paths);
         this.singleResults.clear();
 
 //        bus.getEvents()
@@ -68,7 +69,7 @@ public class RxController implements ViewImpl.SelectorListener {
 
                             if (this.singleResults.checkComputationEnded(this.view.getInputSize())) {
                                 this.view.notifyComputationCompleted();
-                                Utils.log("FINEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                                this.view.setComputationTime(this.crono.stop().getTime());
                             }
                         }
                 ));
@@ -82,24 +83,25 @@ public class RxController implements ViewImpl.SelectorListener {
                     this.singleResults.removeResult(path);
                 }));
 
-        filesAdded(paths.toArray(new String[paths.size()]));
+        filesAdded(paths.toArray(new String[0]));
     }
 
     @Override
     public void filesAdded(String... filePaths) {
         Arrays.stream(filePaths).forEach(p -> {
-            bus.putEvent(new Pair(BusAddresses.FILE_ADDED, p));
+            bus.putEvent(new Pair<>(BusAddresses.FILE_ADDED, p));
         });
 
     }
 
     @Override
     public void fileRemoved(String path) {
-        bus.putEvent(new Pair(BusAddresses.FILE_REMOVED, path));
+        bus.putEvent(new Pair<>(BusAddresses.FILE_REMOVED, path));
     }
 
     @Override
     public void stopPressed() {
+        super.stopPressed();
         this.compositeDisposable.clear();
     }
 }

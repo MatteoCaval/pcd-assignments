@@ -12,4 +12,9 @@ public interface MainView {
 
     void notifyComputationCompleted();
 
+    void setComputationTime(long time);
+
+    void clearComputationTime();
+
+    void setListener(SelectorListener listener);
 }

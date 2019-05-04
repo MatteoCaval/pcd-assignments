@@ -31,6 +31,7 @@ public class ViewImpl extends JFrame implements MainView {
     private JButton removeElementButton;
     private JButton startButton;
     private JButton stopButton;
+    private JLabel timeSpent;
     private DefaultListModel<String> elementListModel;
     private JList<String> elementList;
     private DefaultListModel<String> resultListModel;
@@ -82,6 +83,7 @@ public class ViewImpl extends JFrame implements MainView {
         this.removeElementButton = new JButton("Remove element");
         this.startButton = new JButton("Start");
         this.stopButton = new JButton("Stop");
+        this.timeSpent = new JLabel("");
 
         JPanel selectionPanel = new JPanel();
         selectionPanel.add(this.addDirectoryButton);
@@ -97,6 +99,9 @@ public class ViewImpl extends JFrame implements MainView {
         controlPanel.add(this.startButton);
         controlPanel.add(this.stopButton);
 
+        JPanel timeResultPanel = new JPanel();
+        timeResultPanel.add(this.timeSpent);
+
         this.resultListModel = new DefaultListModel<>();
         JList<String> resultList = new JList<>(this.resultListModel);
         JScrollPane resultListScrollPanel = new JScrollPane(resultList);
@@ -104,7 +109,8 @@ public class ViewImpl extends JFrame implements MainView {
         JPanel resultPanel = new JPanel();
         resultPanel.setLayout(new BorderLayout());
         resultPanel.add(BorderLayout.NORTH, resultListScrollPanel);
-        resultPanel.add(BorderLayout.SOUTH, controlPanel);
+        resultPanel.add(BorderLayout.CENTER, controlPanel);
+        resultPanel.add(BorderLayout.SOUTH, timeResultPanel);
 
 
         this.setLayout(new BorderLayout());
@@ -143,6 +149,14 @@ public class ViewImpl extends JFrame implements MainView {
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+    }
+
+    public void setComputationTime(long time){
+        this.timeSpent.setText("Computation time (ms): " + String.valueOf(time));
+    }
+
+    public void clearComputationTime(long time){
+        this.timeSpent.setText("");
     }
 
     private void stopButtonPressed() {

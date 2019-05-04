@@ -20,11 +20,6 @@ public class Controller extends BaseController{
         super(view);
         this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();
-    }
-
-    @Override
-    public void startPressed(List<String> paths) {
-        super.startPressed(paths);
 
         vertx.deployVerticle(new FileVerticle(singleResults));
         eventBus.consumer(BusAddresses.FILE_COMPUTED, message -> {
@@ -33,12 +28,15 @@ public class Controller extends BaseController{
                 this.view.notifyComputationCompleted();
                 this.view.setComputationTime(this.crono.stop().getTime());
             }
-            Utils.log("Aggiorno view");
         });
 
+    }
 
+    @Override
+    public void startPressed(List<String> paths) {
+        super.startPressed(paths);
+        this.singleResults.clear();
         this.filesAdded(paths.toArray(new String[paths.size()]));
-
     }
 
     @Override
@@ -56,6 +54,6 @@ public class Controller extends BaseController{
     @Override
     public void stopPressed() {
         super.stopPressed();
-        eventBus.publish(BusAddresses.STOP, null);
+//        eventBus.publish(BusAddresses.STOP, null);
     }
 }

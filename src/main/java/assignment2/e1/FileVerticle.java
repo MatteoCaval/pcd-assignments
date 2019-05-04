@@ -29,7 +29,7 @@ public class FileVerticle extends AbstractVerticle {
             vertx.fileSystem().readFile(path, buffer -> {
                 vertx.executeBlocking(future -> {
                     Utils.log("Obtained " + path + " result ");
-                    this.singleResults.addResult(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.toString()))));
+                    this.singleResults.addResult(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.result().toString()))));
                     future.complete();
 
                 }, false, res -> {
@@ -47,10 +47,10 @@ public class FileVerticle extends AbstractVerticle {
             eventBus.publish(BusAddresses.FILE_COMPUTED, path);
         });
 
-        eventBus.consumer(BusAddresses.STOP, message -> {
+       /* eventBus.consumer(BusAddresses.STOP, message -> {
             Utils.log("Undeploy verticle");
             this.vertx.undeploy(this.deploymentID());
-        });
+        });*/
 
     }
 

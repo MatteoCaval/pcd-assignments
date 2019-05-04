@@ -1,4 +1,4 @@
-package assignment2;
+package assignment2.fileanalysis;
 
 import java.io.BufferedReader;
 import java.io.File;

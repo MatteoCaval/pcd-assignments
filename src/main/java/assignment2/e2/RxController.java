@@ -1,7 +1,10 @@
 package assignment2.e2;
 
 import assignment2.*;
-import assignment2.e1.BusAddresses;
+import assignment2.IOMessage;
+import assignment2.fileanalysis.ComputationResults;
+import assignment2.fileanalysis.DocumentAnalyzer;
+import assignment2.view.MainView;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -35,7 +38,7 @@ public class RxController extends BaseController {
 
         this.compositeDisposable.add(bus.getEvents()
                 .observeOn(Schedulers.io())
-                .filter(e -> e.getKey().equals(BusAddresses.FILE_REMOVED))
+                .filter(e -> e.getKey().equals(IOMessage.FILE_REMOVED))
                 .map(e -> e.getValue())
                 .subscribe(path -> {
                     Utils.log("Removing " + path);
@@ -48,14 +51,14 @@ public class RxController extends BaseController {
     @Override
     public void filesAdded(String... filePaths) {
         Arrays.stream(filePaths).forEach(p -> {
-            bus.putEvent(new Pair<>(BusAddresses.FILE_ADDED, p));
+            bus.putEvent(new Pair<>(IOMessage.FILE_ADDED, p));
         });
 
     }
 
     @Override
     public void fileRemoved(String path) {
-        bus.putEvent(new Pair<>(BusAddresses.FILE_REMOVED, path));
+        bus.putEvent(new Pair<>(IOMessage.FILE_REMOVED, path));
     }
 
     @Override
@@ -68,7 +71,7 @@ public class RxController extends BaseController {
         Disposable disposable;
         if (parallel) {
             disposable = bus.getEvents()
-                    .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
+                    .filter(e -> e.getKey().equals(IOMessage.FILE_ADDED))
                     .map(e -> e.getValue())
                     .flatMap(name -> Observable.just(name)
                             .subscribeOn(Schedulers.computation())
@@ -88,7 +91,7 @@ public class RxController extends BaseController {
         } else {
             disposable = bus.getEvents()
                     .observeOn(Schedulers.computation())
-                    .filter(e -> e.getKey().equals(BusAddresses.FILE_ADDED))
+                    .filter(e -> e.getKey().equals(IOMessage.FILE_ADDED))
                     .map(e -> e.getValue())
                     .map(e -> new Pair<>(e, DocumentAnalyzer.resultFromPath(e)))
                     .subscribe(p -> {

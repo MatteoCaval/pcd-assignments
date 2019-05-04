@@ -1,4 +1,6 @@
-package assignment2;
+package assignment2.view;
+
+import assignment2.ControllerEnum;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +8,7 @@ import java.util.ArrayList;
 
 public class SelectionView extends JFrame {
 
-    interface ModeSelectionListener {
+    public interface ModeSelectionListener {
         void modeSelected(ControllerEnum mode, boolean parallel);
     }
 

@@ -1,5 +1,6 @@
-package assignment2;
+package assignment2.view;
 
+import assignment2.Utils;
 import javafx.util.Pair;
 
 import javax.swing.*;

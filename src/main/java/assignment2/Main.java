@@ -3,6 +3,9 @@ package assignment2;
 import assignment2.e0.ExecutorController;
 import assignment2.e1.VertxController;
 import assignment2.e2.RxController;
+import assignment2.view.MainView;
+import assignment2.view.SelectionView;
+import assignment2.view.ViewImpl;
 
 public class Main {
 

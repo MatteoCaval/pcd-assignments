@@ -1,11 +1,14 @@
 package assignment2.e1;
 
 import assignment2.*;
+import assignment2.fileanalysis.ComputationResults;
+import assignment2.fileanalysis.Document;
+import assignment2.fileanalysis.DocumentAnalyzer;
+import assignment2.view.MainView;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 
 import java.util.Arrays;
-import java.util.Map;
 
 public class FileVerticle extends AbstractVerticle {
 
@@ -23,7 +26,7 @@ public class FileVerticle extends AbstractVerticle {
 
         EventBus eventBus = this.vertx.eventBus();
 
-        eventBus.consumer(BusAddresses.FILE_ADDED, message -> {
+        eventBus.consumer(IOMessage.FILE_ADDED, message -> {
             String path = message.body().toString();
 
             Utils.log("File added: " + path);
@@ -34,17 +37,17 @@ public class FileVerticle extends AbstractVerticle {
                     future.complete();
 
                 }, ordered, res -> {
-                    eventBus.publish(BusAddresses.FILE_COMPUTED, path);
+                    eventBus.publish(IOMessage.FILE_COMPUTED, path);
                     Utils.log("Finished " + path + " result ");
                 });
             });
         });
 
-        eventBus.consumer(BusAddresses.FILE_REMOVED, message -> {
+        eventBus.consumer(IOMessage.FILE_REMOVED, message -> {
             String path = message.body().toString();
             Utils.log("File removed: " + path);
             this.singleResults.removeResult(path);
-            eventBus.publish(BusAddresses.FILE_COMPUTED, path);
+            eventBus.publish(IOMessage.FILE_COMPUTED, path);
         });
 
        /* eventBus.consumer(BusAddresses.STOP, message -> {

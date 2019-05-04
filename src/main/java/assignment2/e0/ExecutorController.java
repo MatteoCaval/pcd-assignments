@@ -1,6 +1,9 @@
 package assignment2.e0;
 
 import assignment2.*;
+import assignment2.fileanalysis.ComputationResults;
+import assignment2.fileanalysis.DocumentResult;
+import assignment2.view.MainView;
 
 import java.util.Arrays;
 import java.util.List;

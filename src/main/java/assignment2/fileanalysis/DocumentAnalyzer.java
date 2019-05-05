@@ -8,7 +8,7 @@ import java.io.FileReader;
 
 public class DocumentAnalyzer {
 
-    private static final int MIN_LENGHT = 4;
+    public static final int MIN_LENGHT = 4;
 
     public static DocumentResult analyzeDocument(Document document) {
         Utils.log("Analyzing document");
@@ -46,7 +46,7 @@ public class DocumentAnalyzer {
         return result;
     }
 
-    private static String[] wordInLine(String line) {
+    public static String[] wordInLine(String line) {
         return line.trim().split("\\s+");
     }
 

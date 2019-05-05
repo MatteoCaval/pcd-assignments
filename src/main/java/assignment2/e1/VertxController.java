@@ -22,7 +22,7 @@ public class VertxController extends BaseController {
         this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();
 
-        vertx.deployVerticle(new FileVerticle(singleResults, parallel));
+        vertx.deployVerticle(new FileVerticle(singleResults, parallel, view));
         eventBus.consumer(IOMessage.FILE_COMPUTED, message -> {
             this.view.printResult(singleResults.getGlobalOrderedResult());
             if (this.singleResults.checkComputationEnded(this.view.getInputSize())) {

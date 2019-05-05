@@ -39,7 +39,7 @@ public class ViewImpl extends JFrame implements MainView {
     @Override
     public void printResult(List<Pair<String, Integer>> result) {
         SwingUtilities.invokeLater(() -> {
-            Utils.log("Printing results");
+//            Utils.log("Printing results");
             this.resultListModel.clear();
             if (result != null && !result.isEmpty()) {
                 result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));

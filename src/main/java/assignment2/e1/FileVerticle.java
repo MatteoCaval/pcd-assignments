@@ -2,18 +2,9 @@ package assignment2.e1;
 
 import assignment2.*;
 import assignment2.fileanalysis.ComputationResults;
-import assignment2.fileanalysis.Document;
 import assignment2.fileanalysis.DocumentAnalyzer;
-import assignment2.fileanalysis.DocumentResult;
-import assignment2.view.MainView;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.file.OpenOptions;
-import io.vertx.core.streams.Pump;
-import javafx.util.Pair;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class FileVerticle extends AbstractVerticle {
 

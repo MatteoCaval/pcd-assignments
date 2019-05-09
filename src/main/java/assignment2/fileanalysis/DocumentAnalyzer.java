@@ -6,7 +6,7 @@ import java.io.FileReader;
 
 public class DocumentAnalyzer {
 
-    private static final int MIN_LENGHT = 4;
+    private static final int MIN_LENGTH = 4;
 
     public static DocumentResult resultFromPath(String path) {
         DocumentResult result = new DocumentResult();
@@ -17,7 +17,7 @@ public class DocumentAnalyzer {
             while (line != null) {
 
                 for (String word : wordInLine(line)) {
-                    if (word.length() >= MIN_LENGHT) {
+                    if (word.length() >= MIN_LENGTH) {
                         result.insert(word);
                     }
                 }

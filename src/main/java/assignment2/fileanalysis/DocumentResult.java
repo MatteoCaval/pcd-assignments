@@ -15,7 +15,7 @@ public class DocumentResult {
         result = new HashMap<>();
     }
 
-    public void insert(String word) {
+    public synchronized void insert(String word) {
         insert(word, 1);
     }
 

@@ -16,12 +16,13 @@ public class VertxController extends BaseController {
     private Vertx vertx = Vertx.vertx(/*new VertxOptions().setWorkerPoolSize(8)*/);
     private EventBus eventBus;
     private ComputationResults singleResults;
+    private boolean parallel;
 
     public VertxController(MainView view, boolean parallel) {
         super(view);
         this.singleResults = new ComputationResults();
         this.eventBus = vertx.eventBus();
-
+        this.parallel = parallel;
         vertx.deployVerticle(new FileVerticle(singleResults, parallel));
         eventBus.consumer(IOMessage.FILE_COMPUTED, message -> {
             this.view.printResult(singleResults.getGlobalOrderedResult());
@@ -30,7 +31,6 @@ public class VertxController extends BaseController {
                 this.view.setComputationTime(this.crono.stop().getTime());
             }
         });
-
     }
 
     @Override
@@ -55,6 +55,7 @@ public class VertxController extends BaseController {
     @Override
     public void stopPressed() {
         super.stopPressed();
-//        eventBus.publish(BusAddresses.STOP, null);
+        this.vertx.deploymentIDs().forEach(vertx::undeploy);
+        vertx.deployVerticle(new FileVerticle(singleResults, parallel));
     }
 }

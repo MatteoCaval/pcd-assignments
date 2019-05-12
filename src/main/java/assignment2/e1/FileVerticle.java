@@ -4,12 +4,16 @@ import assignment2.*;
 import assignment2.fileanalysis.ComputationResults;
 import assignment2.fileanalysis.DocumentAnalyzer;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.EventBus;
+
+import java.util.UUID;
 
 public class FileVerticle extends AbstractVerticle {
 
     private ComputationResults singleResults;
     private boolean ordered;
+    WorkerExecutor executor;
 
     public FileVerticle(ComputationResults singleResults, boolean parallel) {
         this.singleResults = singleResults;
@@ -21,19 +25,17 @@ public class FileVerticle extends AbstractVerticle {
         super.start();
 
         EventBus eventBus = this.vertx.eventBus();
+        executor = vertx.createSharedWorkerExecutor(UUID.randomUUID().toString());
 
         eventBus.consumer(IOMessage.FILE_ADDED, message -> {
             String path = message.body().toString();
-
             Utils.log("File added: " + path);
-
-            vertx.executeBlocking(future -> {
+            executor.executeBlocking(future -> {
                 this.singleResults.addResult(path, DocumentAnalyzer.resultFromPath(path));
-                future.complete(singleResults.getGlobalOrderedResult());
+                future.complete();
             }, ordered, res -> {
                 eventBus.publish(IOMessage.FILE_COMPUTED, path);
             });
-
         });
 
         eventBus.consumer(IOMessage.FILE_REMOVED, message -> {
@@ -42,5 +44,12 @@ public class FileVerticle extends AbstractVerticle {
             this.singleResults.removeResult(path);
             eventBus.publish(IOMessage.FILE_COMPUTED, path);
         });
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        executor.close();
+
     }
 }

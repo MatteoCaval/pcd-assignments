@@ -38,11 +38,11 @@ public class ViewImpl extends JFrame implements MainView {
 
     @Override
     public void printResult(List<Pair<String, Integer>> result) {
+        List<String> formattedResult = result.stream().map(e -> e.getValue().toString() + " - " + e.getKey()).collect(Collectors.toList());
         SwingUtilities.invokeLater(() -> {
-//            Utils.log("Printing results");
             this.resultListModel.clear();
-            if (result != null && !result.isEmpty()) {
-                result.stream().limit(10).forEach(e -> this.resultListModel.addElement(e.getValue().toString() + " - " + e.getKey()));
+            if (!result.isEmpty()) {
+                formattedResult.forEach(r -> this.resultListModel.addElement(r));
             }
         });
     }
@@ -184,7 +184,6 @@ public class ViewImpl extends JFrame implements MainView {
     private void selectFiles() {
         JFileChooser chooser = new JFileChooser();
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-//            this.listener.directorySelected(chooser.getSelectedFile());
             this.elementListModel.add(this.elementListModel.size(), chooser.getSelectedFile().toString());
             if (started) {
                 this.listener.filesAdded(chooser.getSelectedFile().toString());
@@ -194,12 +193,14 @@ public class ViewImpl extends JFrame implements MainView {
 
     private void removeSelectedElement(int selectedIndex) {
         String elemPathToBeRemoved = this.elementListModel.get(selectedIndex);
-        this.listener.fileRemoved(elemPathToBeRemoved);
+        if (this.started){
+            this.listener.fileRemoved(elemPathToBeRemoved);
+        }
         this.elementListModel.remove(selectedIndex);
     }
 
     private void addFilesToList(List<String> paths) {
-        paths.stream().forEach(p ->
+        paths.forEach(p ->
                 this.elementListModel.add(this.elementListModel.size(), p)
         );
     }
@@ -209,7 +210,6 @@ public class ViewImpl extends JFrame implements MainView {
                 .filter(Files::isRegularFile)
                 .map(f -> f.toAbsolutePath().toString())
                 .collect(Collectors.toList());
-
     }
 
     private List<String> fromListModel(DefaultListModel<String> model) {

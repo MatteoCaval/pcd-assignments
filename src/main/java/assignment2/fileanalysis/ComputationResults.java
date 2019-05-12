@@ -1,9 +1,11 @@
 package assignment2.fileanalysis;
 
+import assignment2.Config;
 import javafx.util.Pair;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ComputationResults {
 
@@ -18,7 +20,14 @@ public class ComputationResults {
     }
 
     public List<Pair<String, Integer>> getGlobalOrderedResult() {
-        return singleResults.values().stream().reduce((doc, doc2) -> DocumentResult.merge(doc, doc2)).get().toSortedPair();
+        return singleResults.values()
+                .stream()
+                .reduce((doc, doc2) -> DocumentResult.merge(doc, doc2))
+                .orElseGet(DocumentResult::new)
+                .toSortedPair()
+                .stream()
+                .limit(Config.VIEW_PRINTED_RESULTS)
+                .collect(Collectors.toList());
     }
 
     public void clear() {

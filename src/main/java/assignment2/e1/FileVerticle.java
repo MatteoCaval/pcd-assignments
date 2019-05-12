@@ -26,56 +26,6 @@ public class FileVerticle extends AbstractVerticle {
             String path = message.body().toString();
 
             Utils.log("File added: " + path);
-//            vertx.fileSystem().readFile(path, buffer -> {
-//                vertx.executeBlocking(future -> {
-//                    Utils.log("Obtained " + path + " result ");
-//                    this.singleResults.addResult(path, DocumentAnalyzer.analyzeDocument(new Document(Arrays.asList(buffer.result().toString()))));
-//                    future.complete();
-//
-//                }, ordered, res -> {
-//                    eventBus.publish(IOMessage.FILE_COMPUTED, path);
-//                    Utils.log("Finished " + path + " result ");
-//                });
-//            });
-
-//            vertx.fileSystem().open(path, new OpenOptions(), buffer -> {
-//
-//                DocumentResult result = new DocumentResult();
-//
-//                buffer.result().handler(fileBuffer -> {
-//
-//
-//                    //senza il blocking ordine corretto ma risultato finale leggermente scorretto rispetto agli altri
-//                    //rimane sempre più lento nei vari casi
-//                    vertx.executeBlocking(future -> {
-////
-//                        for (String word : DocumentAnalyzer.wordInLine(fileBuffer.toString())) {
-//                            if (word.length() >= DocumentAnalyzer.MIN_LENGHT) {
-//                                result.insert(word);
-//                            }
-//                        }
-//
-////                        System.out.println("Size of " + path + ": " + result.getResult().size());
-////                        this.view.printResult(singleResults.getGlobalOrderedResult());
-//                        future.complete();
-//
-//                    }, ordered, res -> {
-//
-//                    });
-//
-//
-//                });
-//
-//
-//                buffer.result().endHandler(handler -> {
-//                    this.singleResults.addResult(path, result);
-//                    this.view.printResult(singleResults.getGlobalOrderedResult());
-//                    eventBus.publish(IOMessage.FILE_COMPUTED, path);
-//                    Utils.log("Finished " + path + " result with size " + result.getResult().size());
-//                });
-//
-//
-//            });
 
             vertx.executeBlocking(future -> {
                 this.singleResults.addResult(path, DocumentAnalyzer.resultFromPath(path));
@@ -92,13 +42,5 @@ public class FileVerticle extends AbstractVerticle {
             this.singleResults.removeResult(path);
             eventBus.publish(IOMessage.FILE_COMPUTED, path);
         });
-
-       /* eventBus.consumer(BusAddresses.STOP, message -> {
-            Utils.log("Undeploy verticle");
-            this.vertx.undeploy(this.deploymentID());
-        });*/
-
     }
-
-
 }

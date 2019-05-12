@@ -1,12 +1,12 @@
 package assignment2.fileanalysis;
 
+import assignment2.Config;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
 public class DocumentAnalyzer {
-
-    private static final int MIN_LENGTH = 4;
 
     public static DocumentResult resultFromPath(String path) {
         DocumentResult result = new DocumentResult();
@@ -17,7 +17,7 @@ public class DocumentAnalyzer {
             while (line != null) {
 
                 for (String word : wordInLine(line)) {
-                    if (word.length() >= MIN_LENGTH) {
+                    if (word.length() >= Config.MIN_LENGHT) {
                         result.insert(word);
                     }
                 }

@@ -3,6 +3,7 @@ package assignment2.view;
 import assignment2.ControllerEnum;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -60,6 +61,7 @@ public class SelectionView extends JFrame {
         controllerButtons.add(e2Button);
 
         controllerSelectorPanel.setLayout(new GridLayout(3, 1, 20, 40));
+        controllerSelectorPanel.setBorder(new EmptyBorder(10,40,20,40));
 
         for (int i = 0; i < controllerButtons.size(); i++) {
             JButton btn = controllerButtons.get(i);

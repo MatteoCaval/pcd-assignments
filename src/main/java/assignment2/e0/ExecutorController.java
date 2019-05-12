@@ -14,11 +14,11 @@ public class ExecutorController extends BaseController implements FileComputeTas
 
     private ExecutorService executor;
     private ComputationResults singleResults = new ComputationResults();
-    private int nThreads;
+    private boolean parellel;
 
     public ExecutorController(MainView view, boolean parallel) {
         super(view);
-        this.nThreads = parallel ? Runtime.getRuntime().availableProcessors() : 1;
+        this.parellel = parallel;
     }
 
     // region MainView
@@ -68,7 +68,7 @@ public class ExecutorController extends BaseController implements FileComputeTas
     // region Private methods
 
     private void initExecutor() {
-        this.executor = Executors.newFixedThreadPool(nThreads);
+        this.executor = parellel ? Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()) : Executors.newSingleThreadExecutor();
     }
 
     private void update() {

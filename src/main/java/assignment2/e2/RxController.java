@@ -72,7 +72,7 @@ public class RxController extends BaseController {
         if (parallel) {
             disposable = bus.getEvents()
                     .filter(e -> e.getKey().equals(IOMessage.FILE_ADDED))
-                    .map(e -> e.getValue())
+                    .map(Pair::getValue)
                     .flatMap(name -> Observable.just(name)
                             .subscribeOn(Schedulers.computation())
                             .map(path -> new Pair<>(path, DocumentAnalyzer.resultFromPath(path))))

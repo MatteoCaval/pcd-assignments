@@ -40,5 +40,12 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjavafx:2.2.2"
 
 
+
+    // Akka actors 2.5.3
+    implementation "com.typesafe.akka:akka-actor_2.12:2.5.22"
+    implementation 'com.typesafe.akka:akka-remote_2.12:2.5.22'
+    implementation 'com.typesafe.akka:akka-testkit_2.12:2.5.22'
+
+
 }
 

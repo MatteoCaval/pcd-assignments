@@ -1,4 +1,4 @@
-package assignment3.e0.akka
+package assignment3.e0.actors
 
 import scala.util.Random
 

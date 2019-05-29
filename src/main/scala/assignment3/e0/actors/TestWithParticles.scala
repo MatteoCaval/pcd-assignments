@@ -1,7 +1,7 @@
-package assignment3.e0.akka
+package assignment3.e0.actors
 
 import akka.actor.{ActorSystem, Props}
-import assignment3.e0.akka.ActorActions.Start
+import assignment3.e0.actors.ActorActions.Start
 
 
 object TestWithParticles extends App {

@@ -1,8 +1,8 @@
-package assignment3.e0.akka
+package assignment3.e0.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
 import assignment3.e0.Particle
-import assignment3.e0.akka.ActorActions.{ComputeParticle, ParticleResult}
+import assignment3.e0.actors.ActorActions.{ComputeParticle, ParticleResult}
 
 object ParticleActor {
   def props(p: Particle) = Props(new ParticleActor(new Particle(p.getPos, p.getVel, 1, 1, 1)))

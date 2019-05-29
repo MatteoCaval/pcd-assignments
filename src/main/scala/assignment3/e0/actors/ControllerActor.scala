@@ -1,7 +1,7 @@
-package assignment3.e0.akka
+package assignment3.e0.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import assignment3.e0.akka.ActorActions._
+import assignment3.e0.actors.ActorActions._
 
 class ControllerActor extends Actor with ActorLogging {
 

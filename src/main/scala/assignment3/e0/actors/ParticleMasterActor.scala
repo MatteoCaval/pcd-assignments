@@ -1,8 +1,8 @@
-package assignment3.e0.akka
+package assignment3.e0.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import assignment3.e0.Particle
-import assignment3.e0.akka.ActorActions._
+import assignment3.e0.actors.ActorActions._
 
 import scala.collection.mutable
 

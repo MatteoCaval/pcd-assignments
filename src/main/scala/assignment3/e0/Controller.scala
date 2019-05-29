@@ -1,8 +1,8 @@
 package assignment3.e0
 
 class Controller(var world: World, var viewer: WorldViewer) {
-  private var master:ParticleMaster = _
-  private var stopFlag:Flag = _
+  private var master: ParticleMaster = _
+  private var stopFlag: Flag = _
   private var newParticles: ParticleBuffer = new ParticleBuffer
 
   def notifyStarted(nParticles: Int): Unit = {

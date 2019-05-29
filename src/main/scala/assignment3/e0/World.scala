@@ -5,27 +5,22 @@ import java.util.concurrent.LinkedBlockingQueue
 
 import scala.collection.mutable.ArrayBuffer
 
-class World(var dt: Double, var displayAllSnapPolicy: Boolean) {
-  private var particles:ArrayBuffer[Particle] = ArrayBuffer()
-  private var currentPosSnapshot:ArrayBuffer[P2d] = ArrayBuffer()
-  private var snapBuffer:LinkedBlockingQueue[WorldSnapshot] = new LinkedBlockingQueue()
+class World(var dt: Double, var displayAllSnapPolicy: Boolean = true) {
+  private var particles: ArrayBuffer[Particle] = ArrayBuffer()
+  private var currentPosSnapshot: ArrayBuffer[P2d] = ArrayBuffer()
+  private var snapBuffer: LinkedBlockingQueue[WorldSnapshot] = new LinkedBlockingQueue()
   private var snapToDisplay: WorldSnapshot = _
-  private var kParam:Int = 1
+  private var kParam: Int = 1
   private var currentStep = 0L
-
-  def this(dt: Double) {
-    this(dt, true)
-  }
 
   def init(nParticles: Int): Unit = {
     particles.clear()
     val rand = new Random(System.currentTimeMillis)
 
-    for(i<-0 to nParticles){
+    for (i <- 0 to nParticles) {
       val x = rand.nextDouble * 2 - 1
       val y = rand.nextDouble * 2 - 1
-      particles+= new Particle(new P2d(x, y), new V2d(0, 0), 1, 1, 1)
-
+      particles += new Particle(new P2d(x, y), new V2d(0, 0), 1, 1, 1)
     }
 
     currentStep = 0
@@ -35,22 +30,27 @@ class World(var dt: Double, var displayAllSnapPolicy: Boolean) {
 
   def backupPositions(): Unit = {
     currentPosSnapshot.clear()
-   for (p <- particles) {
-      currentPosSnapshot+= p.getPos
-    }
+    particles.foreach(p => currentPosSnapshot += p.getPos)
   }
 
-  def pushSnapshotToDisplay(): Unit = try if (displayAllSnapPolicy) snapBuffer.put(new WorldSnapshot(this.currentPosSnapshot, this.getCurrentTime))
-  else snapToDisplay = new WorldSnapshot(this.currentPosSnapshot, this.getCurrentTime)
-  catch {
-    case ex: Exception =>
-      ex.printStackTrace()
+  def pushSnapshotToDisplay(): Unit = {
+    try {
+      if (displayAllSnapPolicy) {
+        snapBuffer.put(new WorldSnapshot(this.currentPosSnapshot, this.getCurrentTime))
+      }
+      else snapToDisplay = new WorldSnapshot(this.currentPosSnapshot, this.getCurrentTime)
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace()
+    }
   }
 
   def addParticle(p: Particle): Unit = particles += p
 
-  def getSnapshotToDisplay: WorldSnapshot = if (displayAllSnapPolicy) snapBuffer.poll
-  else snapToDisplay
+  def getSnapshotToDisplay: WorldSnapshot = {
+    if (displayAllSnapPolicy) snapBuffer.poll
+    else snapToDisplay
+  }
 
   def getNumParticles: Int = particles.size
 
@@ -62,7 +62,7 @@ class World(var dt: Double, var displayAllSnapPolicy: Boolean) {
     val pos = currentPosSnapshot(indexBody)
     val alpha = b.getAlpha
 
-    for (i<-0 to particles.size){
+    for (i <- 0 to particles.size) {
       if (i != indexBody) {
         val b2 = particles(i)
         val pos2 = currentPosSnapshot(i)
@@ -88,9 +88,7 @@ class World(var dt: Double, var displayAllSnapPolicy: Boolean) {
 
   def dump(): Unit = {
     System.out synchronized System.out.println(" == WORLD == ")
-    for (p <- particles) {
-      System.out.println("Particle pos: " + p.getPos + " vel: " + p.getVel)
-    }
+    particles.foreach(p => System.out.println("Particle pos: " + p.getPos + " vel: " + p.getVel))
     System.out.println(" ========== ")
   }
 }

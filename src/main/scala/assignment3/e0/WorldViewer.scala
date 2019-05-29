@@ -10,7 +10,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
   private var frame: VisualiserFrame = new VisualiserFrame(w, h)
   frame.setResizable(false)
 
-  private var controller:Controller = _
+  private var controller: Controller = _
 
   def show(): Unit = frame.setVisible(true)
 
@@ -38,50 +38,49 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     zoomIn = new JButton("zoom in")
     zoomOut = new JButton("zoom out")
     val controlPanel = new JPanel
+
     controlPanel.add(startButton)
     controlPanel.add(stopButton)
     controlPanel.add(zoomIn)
     controlPanel.add(zoomOut)
     controlPanel.add(new JLabel("Num Particles"))
     controlPanel.add(nParticles)
+
     setPanel = new VisualiserPanel(w, h)
+
     val infoPanel = new JPanel
     time = new JTextField(20)
     time.setText("Idle")
     time.setEditable(false)
     infoPanel.add(new JLabel("Time"))
     infoPanel.add(time)
+
     val cp = new JPanel
     cp.setLayout(new BorderLayout)
     cp.add(BorderLayout.NORTH, controlPanel)
     cp.add(BorderLayout.CENTER, setPanel)
     cp.add(BorderLayout.SOUTH, infoPanel)
+
     setContentPane(cp)
     setNotRunningConfig()
+
     startButton.addActionListener(this)
     stopButton.addActionListener(this)
-    zoomIn.addActionListener((ev: ActionEvent) => {
-      def foo(ev: ActionEvent): Unit = {
-        scale = scale * 1.1
-      }
 
-      foo(ev)
-    })
-    zoomOut.addActionListener((ev: ActionEvent) => {
-      def foo(ev: ActionEvent): Unit = {
-        scale = scale * 0.9
-      }
+    zoomIn.addActionListener((e: ActionEvent) => scale = scale * 1.1)
 
-      foo(ev)
-    })
+    zoomOut.addActionListener((e: ActionEvent) => scale = scale * 0.9)
+
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-    override def actionPerformed(e: ActionEvent): Unit = if (e.getSource eq startButton) {
-      setRunningConfig()
-      controller.notifyStarted(nParticles.getText.toInt)
-    }
-    else if (e.getSource eq stopButton) {
-      setNotRunningConfig()
-      controller.notifyStopped()
+
+    override def actionPerformed(e: ActionEvent): Unit = {
+      if (e.getSource eq startButton) {
+        setRunningConfig()
+        controller.notifyStarted(nParticles.getText.toInt)
+      } else if (e.getSource eq stopButton) {
+        setNotRunningConfig()
+        controller.notifyStopped()
+      }
     }
 
     private def setNotRunningConfig(): Unit = {
@@ -98,12 +97,11 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
       zoomOut.setEnabled(true)
     }
 
-    private[e0] class VisualiserPanel(val w: Int, val h: Int) extends JPanel with MouseListener {
+    private class VisualiserPanel(val w: Int, val h: Int) extends JPanel with MouseListener {
       setSize(w, h)
       private var dx = w / 2 - 20
       private var dy = h / 2 - 20
       this.addMouseListener(this)
-      private var timeText: StringBuffer = new StringBuffer
 
       override def paint(g: Graphics): Unit = {
         val g2 = g.asInstanceOf[Graphics2D]
@@ -119,8 +117,8 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
             g2.drawOval(x0, y0, 5, 5)
           }
         }
-        timeText.setLength(0)
-        time.setText(timeText.toString)
+
+        time.setText(f"${world.getCurrentTime}%1.2f")
       }
 
       private def getViewX(x: Double) = (dx + x * scale).toInt

@@ -9,19 +9,19 @@ package assignment3.e0
  *
  */
 class ResettableLatch(var nParticipants: Int = 0) {
-    private var counter = 0
+  private var counter = 0
 
-    @throws[InterruptedException]
-    def await(): Unit = synchronized{
-      while (counter > 0) wait()
-    }
+  @throws[InterruptedException]
+  def await(): Unit = synchronized {
+    while (counter > 0) wait()
+  }
 
-    def down(): Unit = synchronized{
-      counter -= 1
-      if (counter == 0) notifyAll()
-    }
+  def down(): Unit = synchronized {
+    counter -= 1
+    if (counter == 0) notifyAll()
+  }
 
-    def reset(): Unit = synchronized{
-      counter = nParticipants
-    }
+  def reset(): Unit = synchronized {
+    counter = nParticipants
+  }
 }

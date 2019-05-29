@@ -8,34 +8,42 @@ object ParticleWorker {
 }
 
 class ParticleWorker(world: World, stopFlag: Flag, /* for coordination with the master */ var nextStep: Semaphore, var stepDone: ResettableLatch, /* particles in charge */ var from: Int, val num: Int) extends AbstractBasicAgent("worker-" + ParticleWorker.workerId.incrementAndGet, world, stopFlag) {
-  private var to_limit:Int = from + num - 1
+  private var to_limit: Int = from + num - 1
+
   /* for managing new particles */
-  private var newParticle = false
+  private var newParticle: Boolean = false
 
   override def run(): Unit = {
     log("Working from " + from + " to " + to_limit)
     val dt = world.getTimestep
-    while ({!stopFlag.isSet})
-      try {
-      log("waiting next step.")
-      /* wait for master signal */
-      nextStep.acquire()
-      /* extension | managing dynamically added bodies */
-      checkForNewParticles()
-      /* update bodies in charge */
-      for(i<-from to to_limit){
-        val body = world.getBody(i)
-        val force = world.computeForces(i)
-        body.update(force, dt)
-      }
 
-      log("job done.")
-      /* notify completion */
-      stepDone.down()
-    } catch {
-      case ex: Exception =>
-      // ex.printStackTrace();
+    while (!stopFlag.isSet) {
+      try {
+        log("waiting next step.")
+
+        /* wait for master signal */
+        nextStep.acquire()
+
+        /* extension | managing dynamically added bodies */
+        checkForNewParticles()
+
+        /* update bodies in charge */
+        for (i <- from to to_limit) {
+          val body = world.getBody(i)
+          val force = world.computeForces(i)
+          body.update(force, dt)
+        }
+
+        log("job done.")
+        /* notify completion */
+        stepDone.down()
+
+      } catch {
+        case ex: Exception =>
+        // ex.printStackTrace();
+      }
     }
+
     log("completed.")
   }
 
@@ -44,7 +52,7 @@ class ParticleWorker(world: World, stopFlag: Flag, /* for coordination with the 
    */
   private def checkForNewParticles(): Unit =
     if (newParticle) {
-      to_limit = to_limit + 1
+      to_limit += 1
       newParticle = false
     }
 

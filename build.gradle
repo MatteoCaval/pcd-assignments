@@ -27,7 +27,6 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 
-
     // vert.x
     implementation "io.vertx:vertx-core:3.7.0"
     implementation "io.vertx:vertx-sync:3.7.0"
@@ -38,8 +37,6 @@ dependencies {
     // rxjava
     implementation "io.reactivex.rxjava2:rxjava:2.2.8"
     implementation "io.reactivex.rxjava2:rxjavafx:2.2.2"
-
-
 
     // Akka actors 2.5.3
     implementation "com.typesafe.akka:akka-actor_2.12:2.5.22"

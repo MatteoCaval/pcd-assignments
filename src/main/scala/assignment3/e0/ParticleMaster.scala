@@ -2,12 +2,12 @@ package assignment3.e0
 
 import java.util.concurrent.Semaphore
 
-class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Option[Int],  viewer: WorldViewer = null, buffer: ParticleBuffer = null) extends AbstractBasicAgent("master", world, stopFlag) {
-  private var nextSteps:Array[Semaphore] = _
+class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Option[Int], viewer: WorldViewer = null, buffer: ParticleBuffer = null) extends AbstractBasicAgent("master", world, stopFlag) {
+  private var nextSteps: Array[Semaphore] = _
   private var stepDone: ResettableLatch = _
-  private var workers:Array[ParticleWorker] = _
-  private var nWorkers:Int = 0
-  private var newParticles:ParticleBuffer = buffer
+  private var workers: Array[ParticleWorker] = _
+  private var nWorkers: Int = 0
+  private var newParticles: ParticleBuffer = buffer
 
   override def run(): Unit = {
     log("init world...")
@@ -21,15 +21,17 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Opti
 
   private def initWorkers(): Unit = {
     nWorkers = Runtime.getRuntime.availableProcessors + 1
+
     log("creating workers " + nWorkers)
     workers = new Array[ParticleWorker](nWorkers)
     nextSteps = new Array[Semaphore](nWorkers)
     stepDone = new ResettableLatch(nWorkers)
+
     val nPartPerWorker = world.getNumParticles / nWorkers
     var nRem = world.getNumParticles % nWorkers
     var from = 0
 
-    for (i <- 0 until nWorkers){
+    for (i <- 0 until nWorkers) {
       nextSteps(i) = new Semaphore(0)
       var num = nPartPerWorker
       if (nRem > 0) {
@@ -44,18 +46,15 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Opti
 
   private def doSimulationWithGUI(): Unit = {
     world.backupPositions()
-    while ( {
-      !stopFlag.isSet
-    }) {
+    while (!stopFlag.isSet) {
       stepDone.reset()
       /* notify workers to make a new step */
-      for (s <- nextSteps) {
-        s.release()
-      }
+      nextSteps.foreach(s => s.release())
 
       try {
         /* wait for all workers to complete their job */
         stepDone.await()
+
         /* check for new particles to add */
         val newPart = newParticles.getNewParticleAvail
         if (newPart != null) {
@@ -66,7 +65,8 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Opti
         world.backupPositions()
         world.pushSnapshotToDisplay()
         world.updateTime()
-        /* update view */ viewer.updateView()
+        /* update view */
+        viewer.updateView()
         // Thread.sleep(20);
       } catch {
         case ex: Exception =>
@@ -74,23 +74,19 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Opti
       }
     }
     log("completed.")
-    for (pw <- workers) {
-      pw.interrupt()
-    }
+    workers.foreach(pw => pw.interrupt())
   }
 
   private def doSimulationWithChrono(nSteps: Int): Unit = {
     world.backupPositions()
+
     val chrono = new Chrono
     chrono.start()
     log("Started.")
-    while ( {
-      world.getCurrentStep < nSteps
-    }) {
+    while (world.getCurrentStep < nSteps) {
       stepDone.reset()
-      for (s <- nextSteps) {
-        s.release()
-      }
+      nextSteps.foreach(s => s.release())
+
       try {
         stepDone.await()
         world.backupPositions()

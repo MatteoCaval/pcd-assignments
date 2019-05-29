@@ -42,8 +42,8 @@ class ParticleMasterActor extends Actor with ActorLogging {
       results += result
       //        log.info(s"received result $result, total: $resultsNumber")
       if (resultsNumber == particleWorkers.length) {
-        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
-        controller ! ComputationDone
+//        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
+        controller ! ComputationDone(results.toList)
         context.become(handleParticle(particleWorkers))
       }
   }

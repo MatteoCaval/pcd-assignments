@@ -12,12 +12,12 @@ object ActorActions {
 
   case object ComputeNext
 
-  case object ComputationDone
+  case class ComputationDone(results: List[Particle])
 
   case class ComputeParticle(particles: Seq[Particle])
 
   case class ParticleResult(particle: Particle)
 
-  case object Start
+  case class Start(nParticles: Int)
 
 }

@@ -14,6 +14,8 @@ class Chrono() {
     running = false
   }
 
-  def getTime: Long = if (running) System.currentTimeMillis - startTime
-  else startTime
+  def getTime: Long = {
+    if (running) System.currentTimeMillis - startTime
+    else startTime
+  }
 }

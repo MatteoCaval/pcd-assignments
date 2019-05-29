@@ -12,14 +12,16 @@ class ResettableLatch(var nParticipants: Int = 0) {
     private var counter = 0
 
     @throws[InterruptedException]
-    def await(): Unit = while ( {
-      counter > 0
-    }) wait()
+    def await(): Unit = synchronized{
+      while (counter > 0) wait()
+    }
 
-    def down(): Unit = {
+    def down(): Unit = synchronized{
       counter -= 1
       if (counter == 0) notifyAll()
     }
 
-    def reset(): Unit = counter = nParticipants
+    def reset(): Unit = synchronized{
+      counter = nParticipants
+    }
 }

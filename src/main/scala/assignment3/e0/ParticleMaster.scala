@@ -2,7 +2,7 @@ package assignment3.e0
 
 import java.util.concurrent.Semaphore
 
-class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Int = 0, viewer: WorldViewer = null, buffer: ParticleBuffer = null) extends AbstractBasicAgent("master", world, stopFlag) {
+class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Option[Int],  viewer: WorldViewer = null, buffer: ParticleBuffer = null) extends AbstractBasicAgent("master", world, stopFlag) {
   private var nextSteps:Array[Semaphore] = _
   private var stepDone: ResettableLatch = _
   private var workers:Array[ParticleWorker] = _
@@ -16,7 +16,7 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Int 
     initWorkers()
     log("starting simulation.  ")
     if (viewer != null) doSimulationWithGUI()
-    else doSimulationWithChrono(nSteps)
+    else doSimulationWithChrono(nSteps.get)
   }
 
   private def initWorkers(): Unit = {
@@ -29,7 +29,7 @@ class ParticleMaster(world: World, stopFlag: Flag, nParticles: Int, nSteps: Int 
     var nRem = world.getNumParticles % nWorkers
     var from = 0
 
-    for (i <- 0 to nWorkers){
+    for (i <- 0 until nWorkers){
       nextSteps(i) = new Semaphore(0)
       var num = nPartPerWorker
       if (nRem > 0) {

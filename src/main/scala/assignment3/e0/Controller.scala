@@ -7,7 +7,7 @@ class Controller(var world: World, var viewer: WorldViewer) {
 
   def notifyStarted(nParticles: Int): Unit = {
     stopFlag = new Flag
-    master = new ParticleMaster(world, stopFlag, nParticles, 0,  viewer, newParticles)
+    master = new ParticleMaster(world, stopFlag, nParticles, None, viewer, newParticles)
     master.start()
   }
 

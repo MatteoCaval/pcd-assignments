@@ -6,9 +6,9 @@ import java.util.concurrent.LinkedBlockingQueue
 import scala.collection.mutable.ArrayBuffer
 
 class World(var dt: Double, var displayAllSnapPolicy: Boolean) {
-  private var particles:ArrayBuffer[Particle] = new ArrayBuffer[Particle]
-  private var currentPosSnapshot:ArrayBuffer[P2d] = _
-  private var snapBuffer:LinkedBlockingQueue[WorldSnapshot] = _
+  private var particles:ArrayBuffer[Particle] = ArrayBuffer()
+  private var currentPosSnapshot:ArrayBuffer[P2d] = ArrayBuffer()
+  private var snapBuffer:LinkedBlockingQueue[WorldSnapshot] = new LinkedBlockingQueue()
   private var snapToDisplay: WorldSnapshot = _
   private var kParam:Int = 1
   private var currentStep = 0L

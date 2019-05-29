@@ -15,7 +15,7 @@ object ParticleSystemNoGUI {
     val dt = 0.01
     val world = new World(dt)
     val stopFlag = new Flag
-    val master = new ParticleMaster(world, stopFlag, nParticles, nSteps)
+    val master = new ParticleMaster(world, stopFlag, nParticles, Some(nSteps))
     master.start()
   }
 }

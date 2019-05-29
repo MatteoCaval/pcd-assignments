@@ -1,11 +1,17 @@
 package assignment3.e0
 
 class Flag() {
-  var state:Boolean = false
+  private var state:Boolean = false
 
-  def set(): Unit = state = true
+  def set(): Unit = synchronized{
+    state = true
+  }
 
-  def isSet: Boolean = state
+  def isSet: Boolean = synchronized{
+    state
+  }
 
-  def reset(): Unit = state = false
+  def reset(): Unit = synchronized{
+    state = false
+  }
 }

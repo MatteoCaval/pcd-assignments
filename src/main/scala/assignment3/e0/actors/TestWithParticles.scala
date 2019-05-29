@@ -130,7 +130,7 @@ object TestWithParticles extends App {
   val system = ActorSystem("TestAss")
   val controller = system.actorOf(Props[ControllerActor])
 
-  controller ! Start
+  controller ! Start(5000)
 
 
 }

@@ -33,6 +33,13 @@ class World(var dt: Double, var displayAllSnapPolicy: Boolean = true) {
     particles.foreach(p => currentPosSnapshot += p.getPos)
   }
 
+
+  def backupPositions(ps: ArrayBuffer[Particle]): Unit = {
+    currentPosSnapshot.clear()
+    ps.foreach(p => currentPosSnapshot += p.getPos)
+  }
+
+
   def pushSnapshotToDisplay(): Unit = {
     try {
       if (displayAllSnapPolicy) {

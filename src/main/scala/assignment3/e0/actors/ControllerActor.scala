@@ -1,6 +1,7 @@
 package assignment3.e0.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import assignment3.e0.V2d
 import assignment3.e0.actors.ActorActions._
 import assignment3.e0.{Particle, World, WorldViewer}
 
@@ -16,7 +17,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
   override def receive: Receive = idle
 
-  def idle : Receive = {
+  def idle: Receive = {
     case Start(nParticles) =>
       log.info("simulation started")
       particleMaster = context.actorOf(Props[ParticleMasterActor])
@@ -41,6 +42,11 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
       log.info("stopping simulation")
       context.stop(particleMaster)
       context.become(idle)
+    case AddParticleByPosition(position) =>
+      val particle = new Particle(position, new V2d(0, 0), 1, 1, 1)
+      particleMaster ! AddParticle(particle)
+
+    case RemoveParticle =>
   }
 
   private def updateWorld(results: List[Particle]): Unit = {

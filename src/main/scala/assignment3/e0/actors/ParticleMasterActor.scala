@@ -13,19 +13,18 @@ class ParticleMasterActor extends Actor with ActorLogging {
   val results: mutable.MutableList[Particle] = mutable.MutableList()
   var controller: ActorRef = _
 
-  override def receive: Receive = handleParticle(Seq())
+  override def receive: Receive = handleParticle
 
-  def handleParticle(particleWorkers: Seq[ActorRef]): Receive = {
+  def handleParticle: Receive = {
     case AddParticle(particle) =>
       log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
-      context.become(handleParticle(particleWorkers :+ newParticle))
+      this.particleWorkers = particleWorkers :+ newParticle
 
     case Compute(particles) =>
       log.info(s"compute command received, number of slave actors: ${particleWorkers.length}")
 
       controller = sender
-      this.particleWorkers = particleWorkers
 
       this.sendComputationToParticles(particles)
       context.become(receiveResults)
@@ -33,6 +32,11 @@ class ParticleMasterActor extends Actor with ActorLogging {
     case ComputeNext =>
       this.sendComputationToParticles(results)
       context.become(receiveResults)
+
+    case RemoveParticle =>
+      particleWorkers = particleWorkers.tail
+
+    case message => log.info(s"received $message")
 
   }
 
@@ -42,10 +46,12 @@ class ParticleMasterActor extends Actor with ActorLogging {
       results += result
       //        log.info(s"received result $result, total: $resultsNumber")
       if (resultsNumber == particleWorkers.length) {
-//        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
+        //        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
         controller ! ComputationDone(results.toList)
-        context.become(handleParticle(particleWorkers))
+        context.become(handleParticle)
       }
+
+    case message => log.info(s"received $message")
   }
 
   private def reset = {

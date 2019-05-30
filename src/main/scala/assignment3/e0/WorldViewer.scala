@@ -79,7 +79,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
         controller.notifyStarted(nParticles.getText.toInt)
       } else if (e.getSource eq stopButton) {
         setNotRunningConfig()
-        controller.notifyStopped()
+        controller.notifyStopped
       }
     }
 

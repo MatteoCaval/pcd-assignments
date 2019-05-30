@@ -14,14 +14,16 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
   var particleMaster: ActorRef = _
 
-  override def receive: Receive = {
+  override def receive: Receive = idle
+
+  def idle : Receive = {
     case Start(nParticles) =>
       log.info("simulation started")
       particleMaster = context.actorOf(Props[ParticleMasterActor])
 
       //particles created and added to master
       val particles = ParticleComputationUtils.createNParticles(nParticles)
-//      log.info(s"particles created: ${particles.map(p => p.getPos.toString)}")
+      //      log.info(s"particles created: ${particles.map(p => p.getPos.toString)}")
       particles.foreach(p => particleMaster ! AddParticle(p))
 
       Thread.sleep(1000)
@@ -32,9 +34,13 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
   def computation: Receive = {
     case ComputationDone(results) =>
-//      log.info("computation done by master")
+      //      log.info("computation done by master")
       updateWorld(results)
       particleMaster ! ComputeNext
+    case Stop =>
+      log.info("stopping simulation")
+      context.stop(particleMaster)
+      context.become(idle)
   }
 
   private def updateWorld(results: List[Particle]): Unit = {

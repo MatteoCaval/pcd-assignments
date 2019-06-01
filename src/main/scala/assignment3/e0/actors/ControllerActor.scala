@@ -8,10 +8,10 @@ import assignment3.e0.{Particle, World, WorldViewer}
 import scala.collection.mutable.ArrayBuffer
 
 object ControllerActor {
-  def props(world: World, worldViewer: WorldViewer) = Props(new ControllerActor(world, worldViewer))
+  def props(world: World, worldViewer: WorldViewer, mode: Mode) = Props(new ControllerActor(world, worldViewer, mode))
 }
 
-class ControllerActor(private val world: World, private val worldViewer: WorldViewer) extends Actor with ActorLogging {
+class ControllerActor(private val world: World, private val worldViewer: WorldViewer, private var mode: Mode) extends Actor with ActorLogging {
 
   var particleMaster: ActorRef = _
 
@@ -31,22 +31,54 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
       particleMaster ! Compute(particles)
       context.become(computation)
+
+    case ContinuousMode =>
+      log.info("mode changed to continuous")
+      mode = ContinuousMode
+
+    case StepByStepMode =>
+      log.info("mode changed to step by step")
+      mode = StepByStepMode
+
+    case message =>
+      log.info(s"received unhandled message: $message")
   }
 
   def computation: Receive = {
     case ComputationDone(results) =>
       //      log.info("computation done by master")
       updateWorld(results)
-      particleMaster ! ComputeNext
+      if (mode == ContinuousMode) {
+        particleMaster ! ComputeNext
+      }
     case Stop =>
       log.info("stopping simulation")
       context.stop(particleMaster)
       context.become(idle)
+
     case AddParticleByPosition(position) =>
       val particle = new Particle(position, new V2d(0, 0), 1, 1, 1)
       particleMaster ! AddParticle(particle)
 
     case RemoveParticle =>
+      particleMaster ! RemoveParticle
+
+    case ContinuousMode =>
+      log.info("mode changed to continuous")
+      mode = ContinuousMode
+      particleMaster ! ComputeNext
+
+    case StepByStepMode =>
+      log.info("mode changed to step by step")
+      mode = StepByStepMode
+
+    case ComputeNext =>
+      log.info("next computation")
+      particleMaster ! ComputeNext
+
+    case message =>
+      log.info(s"received unhandled message: $message")
+
   }
 
   private def updateWorld(results: List[Particle]): Unit = {
@@ -56,5 +88,6 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
     /* update view */
     worldViewer.updateView()
   }
+
 
 }

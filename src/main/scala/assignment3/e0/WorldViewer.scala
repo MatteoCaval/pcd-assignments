@@ -7,8 +7,8 @@ import java.util.Formatter
 import javax.swing._
 
 class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
-  private val MODE_BUTTON_BECOME_CONTINUOUS = "Continuous Mode"
-  private val MODE_BUTTON_BECOME_STEP_BY_STEP = "Step by Step Mode"
+  private val MODE_BUTTON_BECOME_CONTINUOUS = "to Continuous Mode"
+  private val MODE_BUTTON_BECOME_STEP_BY_STEP = "to Step by Step Mode"
   private var frame: VisualiserFrame = new VisualiserFrame(w, h)
   frame.setResizable(false)
 
@@ -29,6 +29,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     private var stopButton: JButton = _
     private var modeButton: JButton = _
     private var removeButton: JButton = _
+    private var nextButton: JButton = _
     private var zoomIn: JButton = _
     private var zoomOut: JButton = _
     private var time: JTextField = _
@@ -40,17 +41,21 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     startButton = new JButton("start")
     stopButton = new JButton("stop")
     removeButton = new JButton("remove")
-    modeButton = new JButton(MODE_BUTTON_BECOME_STEP_BY_STEP)
+    modeButton = new JButton("mode")
+    nextButton = new JButton("next")
 
     private val dimension = modeButton.getPreferredSize
-    dimension.width = 150
+    dimension.width = 180
     modeButton.setPreferredSize(dimension)
 
     zoomIn = new JButton("zoom in")
     zoomOut = new JButton("zoom out")
     val controlPanel = new JPanel
 
+    setContinuousMode()
+
     controlPanel.add(modeButton)
+    controlPanel.add(nextButton)
     controlPanel.add(startButton)
     controlPanel.add(stopButton)
     controlPanel.add(removeButton)
@@ -98,13 +103,13 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
       } else if (e.getSource eq modeButton){
         if (e.getSource.asInstanceOf[JButton].getText == MODE_BUTTON_BECOME_CONTINUOUS){
           //controller.notifyContinuousMode
-          modeButton.setText(MODE_BUTTON_BECOME_STEP_BY_STEP)
+          setContinuousMode()
         } else {
           //controller.notifyStepByStepMode
-          modeButton.setText(MODE_BUTTON_BECOME_CONTINUOUS)
+          setStepByStepMode()
         }
       } else if (e.getSource eq removeButton){
-        controller.notifyRemove
+        controller.notifyParticleRemoved
       }
     }
 
@@ -120,6 +125,16 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
       stopButton.setEnabled(true)
       zoomIn.setEnabled(true)
       zoomOut.setEnabled(true)
+    }
+
+    private def setContinuousMode() = {
+      this.modeButton.setText(MODE_BUTTON_BECOME_STEP_BY_STEP)
+      this.nextButton.setEnabled(false)
+    }
+
+    private def setStepByStepMode() = {
+      this.modeButton.setText(MODE_BUTTON_BECOME_CONTINUOUS)
+      this.nextButton.setEnabled(true)
     }
 
     private class VisualiserPanel(val w: Int, val h: Int) extends JPanel with MouseListener {

@@ -6,7 +6,6 @@ import assignment3.e0.actors.ControllerActor
 
 
 class Controller(var world: World, var viewer: WorldViewer) {
-  private var newParticles: ParticleBuffer = new ParticleBuffer
   private val system = ActorSystem("ParticleSystem")
   private val controllerActor = system.actorOf(ControllerActor.props(world, viewer))
 

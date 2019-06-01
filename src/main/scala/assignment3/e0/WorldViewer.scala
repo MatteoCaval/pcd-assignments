@@ -84,6 +84,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
 
     startButton.addActionListener(this)
     stopButton.addActionListener(this)
+    removeButton.addActionListener(this)
     nextButton.addActionListener(this)
 
     zoomIn.addActionListener((e: ActionEvent) => scale = scale * 1.1)

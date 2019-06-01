@@ -25,9 +25,8 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
       //particles created and added to master
       val particles = ParticleComputationUtils.createNParticles(nParticles)
       //      log.info(s"particles created: ${particles.map(p => p.getPos.toString)}")
-      particles.foreach(p => particleMaster ! AddParticle(p))
 
-      Thread.sleep(1000)
+      particleMaster ! AddParticles(particles)
 
       particleMaster ! Compute(particles)
       context.become(computation)
@@ -46,7 +45,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
   def computation: Receive = {
     case ComputationDone(results) =>
-//      log.info("computation done by master")
+      //      log.info("computation done by master")
       updateWorld(results)
       if (mode == ContinuousMode) {
         particleMaster ! ComputeNext

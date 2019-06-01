@@ -19,6 +19,15 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
   override def receive: Receive = handleParticle
 
   def handleParticle: Receive = {
+
+    case AddParticles(particles) =>
+      log.info(s"adding ${particles.length} particles")
+      val particlesRef = particles.map(p =>
+        context.actorOf(ParticleActor.props(p))
+      )
+      this.particleWorkers = particleWorkers ++ particlesRef
+
+
     case AddParticle(particle) =>
       log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
@@ -34,7 +43,6 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
 
 
     case ComputeNext =>
-      log.info("compute next received")
       if (particleWorkers.nonEmpty) {
         this.sendComputationToParticles(results)
         context.become(receiveResults)

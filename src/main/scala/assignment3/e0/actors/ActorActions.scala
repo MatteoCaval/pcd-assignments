@@ -6,7 +6,7 @@ object ActorActions {
 
   case class AddParticle(particle: Particle)
 
-  case class AddParticles(numberOfParticle: Int) // not used yet
+  case class AddParticles(particles: Seq[Particle]) 
 
   case class ComputationDone(results: List[Particle])
 

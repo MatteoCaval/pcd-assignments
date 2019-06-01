@@ -1,12 +1,12 @@
 package assignment3.e0.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Stash}
 import assignment3.e0.Particle
 import assignment3.e0.actors.ActorActions._
 
 import scala.collection.mutable
 
-class ParticleMasterActor extends Actor with ActorLogging {
+class ParticleMasterActor extends Actor with ActorLogging with Stash {
 
   var resultsNumber = 0
   var particleWorkers: Seq[ActorRef] = Seq()
@@ -48,10 +48,15 @@ class ParticleMasterActor extends Actor with ActorLogging {
       if (resultsNumber == particleWorkers.length) {
         //        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
         controller ! ComputationDone(results.toList)
+        unstashAll()
         context.become(handleParticle)
       }
 
-    case message => log.info(s"received $message")
+    case message =>
+      log.info(s"received $message i cannot handle")
+      stash()
+
+
   }
 
   private def reset = {

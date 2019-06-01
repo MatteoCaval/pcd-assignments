@@ -7,7 +7,7 @@ import assignment3.e0.actors.{ActorActions, ControllerActor}
 
 class Controller(var world: World, var viewer: WorldViewer) {
   private val system = ActorSystem("ParticleSystem")
-  private val controllerActor = system.actorOf(ControllerActor.props(world, viewer, ActorActions.ContinuousMode))
+  private val controllerActor = system.actorOf(ControllerActor.props(world, viewer, ActorActions.ContinuousMode), "ControllerActor")
 
   import ActorActions._
 

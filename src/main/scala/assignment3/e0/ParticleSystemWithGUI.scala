@@ -14,9 +14,8 @@ object ParticleSystemWithGUI extends App {
     val windowSizeX = 1200
     val windowSizeY = 1000
     val scaleFactor = 10
-    val displayAllSnapshot = false
 
-    val world = new World(dt, displayAllSnapshot)
+    val world = new World(dt)
     val viewer = new WorldViewer(world, windowSizeX, windowSizeY, scaleFactor)
     val controller = new Controller(world, viewer)
     viewer.setController(controller)

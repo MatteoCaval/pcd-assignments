@@ -1,14 +1,14 @@
 package assignment3.e0
 
-import java.awt.event.{ActionEvent, ActionListener, MouseEvent, MouseListener}
 import java.awt._
-import java.util.Formatter
+import java.awt.event.{ActionEvent, ActionListener, MouseEvent, MouseListener}
 
 import javax.swing._
 
 class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
   private val MODE_BUTTON_BECOME_CONTINUOUS = "to Continuous Mode"
   private val MODE_BUTTON_BECOME_STEP_BY_STEP = "to Step by Step Mode"
+
   private var frame: VisualiserFrame = new VisualiserFrame(w, h)
   frame.setResizable(false)
 
@@ -102,17 +102,17 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
       } else if (e.getSource eq stopButton) {
         setNotRunningConfig()
         controller.notifyStopped
-      } else if (e.getSource eq modeButton){
-        if (e.getSource.asInstanceOf[JButton].getText == MODE_BUTTON_BECOME_CONTINUOUS){
+      } else if (e.getSource eq modeButton) {
+        if (e.getSource.asInstanceOf[JButton].getText == MODE_BUTTON_BECOME_CONTINUOUS) {
           controller.notifyContinuousMode
           setContinuousMode()
         } else {
           controller.notifyStepByStepMode
           setStepByStepMode()
         }
-      } else if (e.getSource eq removeButton){
+      } else if (e.getSource eq removeButton) {
         controller.notifyParticleRemoved
-      } else if (e.getSource eq nextButton){
+      } else if (e.getSource eq nextButton) {
         controller.notifyNextStep
       }
     }

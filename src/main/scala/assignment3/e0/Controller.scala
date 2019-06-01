@@ -29,4 +29,6 @@ class Controller(var world: World, var viewer: WorldViewer) {
 
   def notifyStepByStepMode = ???
 
+  def notifyRemove = ???
+
 }

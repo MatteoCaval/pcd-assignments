@@ -28,6 +28,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     private var startButton: JButton = _
     private var stopButton: JButton = _
     private var modeButton: JButton = _
+    private var removeButton: JButton = _
     private var zoomIn: JButton = _
     private var zoomOut: JButton = _
     private var time: JTextField = _
@@ -38,6 +39,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     nParticles.setText("2000")
     startButton = new JButton("start")
     stopButton = new JButton("stop")
+    removeButton = new JButton("remove")
     modeButton = new JButton(MODE_BUTTON_BECOME_STEP_BY_STEP)
 
     private val dimension = modeButton.getPreferredSize
@@ -51,6 +53,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
     controlPanel.add(modeButton)
     controlPanel.add(startButton)
     controlPanel.add(stopButton)
+    controlPanel.add(removeButton)
     controlPanel.add(zoomIn)
     controlPanel.add(zoomOut)
     controlPanel.add(new JLabel("Num Particles"))
@@ -100,6 +103,8 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
           //controller.notifyStepByStepMode
           modeButton.setText(MODE_BUTTON_BECOME_CONTINUOUS)
         }
+      } else if (e.getSource eq removeButton){
+        controller.notifyRemove
       }
     }
 

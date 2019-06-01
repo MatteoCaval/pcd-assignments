@@ -25,4 +25,8 @@ class Controller(var world: World, var viewer: WorldViewer) {
 
   def notifyParticleRemoved = controllerActor ! RemoveParticle
 
+  def notifyContinuousMode = ???
+
+  def notifyStepByStepMode = ???
+
 }

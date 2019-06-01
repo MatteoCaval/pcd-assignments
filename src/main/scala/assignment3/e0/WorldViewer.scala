@@ -104,7 +104,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
           modeButton.setText(MODE_BUTTON_BECOME_CONTINUOUS)
         }
       } else if (e.getSource eq removeButton){
-        controller.notifyRemove
+        controller.notifyParticleRemoved
       }
     }
 

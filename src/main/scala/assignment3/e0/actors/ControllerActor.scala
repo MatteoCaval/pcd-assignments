@@ -8,10 +8,10 @@ import assignment3.e0.{Particle, World, WorldViewer}
 import scala.collection.mutable.ArrayBuffer
 
 object ControllerActor {
-  def props(world: World, worldViewer: WorldViewer) = Props(new ControllerActor(world, worldViewer))
+  def props(world: World, worldViewer: WorldViewer, mode: Mode) = Props(new ControllerActor(world, worldViewer, mode))
 }
 
-class ControllerActor(private val world: World, private val worldViewer: WorldViewer) extends Actor with ActorLogging {
+class ControllerActor(private val world: World, private val worldViewer: WorldViewer, private var mode: Mode) extends Actor with ActorLogging {
 
   var particleMaster: ActorRef = _
 
@@ -37,7 +37,9 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
     case ComputationDone(results) =>
       //      log.info("computation done by master")
       updateWorld(results)
-      particleMaster ! ComputeNext
+      if (mode == ContinuousMode) {
+        particleMaster ! ComputeNext
+      }
     case Stop =>
       log.info("stopping simulation")
       context.stop(particleMaster)
@@ -47,6 +49,13 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
       particleMaster ! AddParticle(particle)
 
     case RemoveParticle =>
+      particleMaster ! RemoveParticle
+
+    case ContinuousMode => mode = ContinuousMode
+
+    case StepByStepMode => mode = StepByStepMode
+
+
   }
 
   private def updateWorld(results: List[Particle]): Unit = {
@@ -56,5 +65,6 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
     /* update view */
     worldViewer.updateView()
   }
+
 
 }

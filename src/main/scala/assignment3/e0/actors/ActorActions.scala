@@ -36,4 +36,15 @@ object ActorActions {
 
   // endregion
 
+  // region App modes
+
+  sealed class Mode
+
+  case object StepByStepMode extends Mode
+
+  case object ContinuousMode extends Mode
+
+
+  // endregion
+
 }

@@ -20,7 +20,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
   def idle: Receive = {
     case Start(nParticles) =>
       log.info("simulation started")
-      particleMaster = context.actorOf(ParticleMasterActor.props(self))
+      particleMaster = context.actorOf(ParticleMasterActor.props(self), "ParticleMaster")
 
       //particles created and added to master
       val particles = ParticleComputationUtils.createNParticles(nParticles)
@@ -46,7 +46,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
   def computation: Receive = {
     case ComputationDone(results) =>
-      //      log.info("computation done by master")
+//      log.info("computation done by master")
       updateWorld(results)
       if (mode == ContinuousMode) {
         particleMaster ! ComputeNext

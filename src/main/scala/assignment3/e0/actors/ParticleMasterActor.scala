@@ -20,22 +20,39 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
 
   def handleParticle: Receive = {
     case AddParticle(particle) =>
-//      log.info("adding new particle")
+      log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
       this.particleWorkers = particleWorkers :+ newParticle
 
     case Compute(particles) =>
       log.info(s"compute command received, number of slave actors: ${particleWorkers.length}")
 
-      this.sendComputationToParticles(particles)
-      context.become(receiveResults)
+      if (particles.nonEmpty) {
+        this.sendComputationToParticles(particles)
+        context.become(receiveResults)
+      }
+
 
     case ComputeNext =>
-      this.sendComputationToParticles(results)
-      context.become(receiveResults)
+      log.info("compute next received")
+      if (particleWorkers.nonEmpty) {
+        this.sendComputationToParticles(results)
+        context.become(receiveResults)
+      } else {
+        notifyComputationCompleted
+      }
 
     case RemoveParticle =>
-      particleWorkers = particleWorkers.tail
+      log.info("received remove message")
+      if (particleWorkers.length == 1) {
+        particleWorkers = Seq()
+        reset
+        notifyComputationCompleted
+
+      } else {
+        context.stop(particleWorkers.head)
+        particleWorkers = particleWorkers.tail
+      }
 
     case message => log.info(s"received $message")
 
@@ -48,13 +65,11 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
       //        log.info(s"received result $result, total: $resultsNumber")
       if (resultsNumber == particleWorkers.length) {
         //        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
-        controllerActor ! ComputationDone(results.toList)
-        unstashAll()
-        context.become(handleParticle)
+        notifyComputationCompleted
       }
 
     case message =>
-      log.info(s"received $message i cannot handle")
+      log.info(s"received $message i cannot handle and stashing")
       stash()
 
 
@@ -68,6 +83,13 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
   private def sendComputationToParticles(particles: Seq[Particle]): Unit = {
     reset
     particleWorkers.foreach(p => p ! ComputeParticle(particles))
+
+  }
+
+  private def notifyComputationCompleted = {
+    controllerActor ! ComputationDone(results.toList)
+    unstashAll()
+    context.become(handleParticle)
   }
 
 }

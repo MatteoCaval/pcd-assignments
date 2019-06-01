@@ -20,7 +20,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
   def idle: Receive = {
     case Start(nParticles) =>
       log.info("simulation started")
-      particleMaster = context.actorOf(Props[ParticleMasterActor])
+      particleMaster = context.actorOf(ParticleMasterActor.props(self))
 
       //particles created and added to master
       val particles = ParticleComputationUtils.createNParticles(nParticles)

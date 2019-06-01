@@ -1,17 +1,20 @@
 package assignment3.e0.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Stash}
 import assignment3.e0.Particle
 import assignment3.e0.actors.ActorActions._
 
 import scala.collection.mutable
 
-class ParticleMasterActor extends Actor with ActorLogging {
+object ParticleMasterActor {
+  def props(controllerRef: ActorRef) = Props(new ParticleMasterActor(controllerRef))
+}
+
+class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor with ActorLogging with Stash {
 
   var resultsNumber = 0
   var particleWorkers: Seq[ActorRef] = Seq()
   val results: mutable.MutableList[Particle] = mutable.MutableList()
-  var controller: ActorRef = _
 
   override def receive: Receive = handleParticle
 
@@ -23,8 +26,6 @@ class ParticleMasterActor extends Actor with ActorLogging {
 
     case Compute(particles) =>
       log.info(s"compute command received, number of slave actors: ${particleWorkers.length}")
-
-      controller = sender
 
       this.sendComputationToParticles(particles)
       context.become(receiveResults)
@@ -47,11 +48,16 @@ class ParticleMasterActor extends Actor with ActorLogging {
       //        log.info(s"received result $result, total: $resultsNumber")
       if (resultsNumber == particleWorkers.length) {
         //        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
-        controller ! ComputationDone(results.toList)
+        controllerActor ! ComputationDone(results.toList)
+        unstashAll()
         context.become(handleParticle)
       }
 
-    case message => log.info(s"received $message")
+    case message =>
+      log.info(s"received $message i cannot handle")
+      stash()
+
+
   }
 
   private def reset = {

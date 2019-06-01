@@ -20,3 +20,5 @@
 \.gradle/4\.10\.2/fileHashes/
 
 out/production/classes/META-INF/pcd-assignments\.main\.kotlin_module
+
+out/production/resources/application\.conf

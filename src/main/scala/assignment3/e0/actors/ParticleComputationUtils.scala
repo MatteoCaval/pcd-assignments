@@ -39,6 +39,5 @@ object ParticleComputationUtils {
     force = force.sum(p.getVel.mul(-p.getAttrCoeff))
     //    println(s"Force: $force")
     force
-
   }
 }

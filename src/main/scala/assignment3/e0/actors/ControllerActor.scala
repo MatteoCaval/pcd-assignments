@@ -87,6 +87,4 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
     /* update view */
     worldViewer.updateView()
   }
-
-
 }

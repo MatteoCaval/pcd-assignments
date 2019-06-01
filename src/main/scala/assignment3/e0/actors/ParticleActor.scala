@@ -19,5 +19,4 @@ class ParticleActor(private var particle: Particle) extends Actor with ActorLogg
     case message =>
       log.info(message.toString)
   }
-
 }

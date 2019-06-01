@@ -27,7 +27,6 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
       )
       this.particleWorkers = particleWorkers ++ particlesRef
 
-
     case AddParticle(particle) =>
       log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
@@ -40,7 +39,6 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
         this.sendComputationToParticles(particles)
         context.become(receiveResults)
       }
-
 
     case ComputeNext =>
       if (particleWorkers.nonEmpty) {
@@ -79,8 +77,6 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
     case message =>
       log.info(s"received $message i cannot handle and stashing")
       stash()
-
-
   }
 
   private def reset = {

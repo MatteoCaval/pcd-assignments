@@ -14,7 +14,6 @@ object ActorActions {
 
   case class ParticleResult(particle: Particle)
 
-
   // region messages from the ControllerActor to the ParticleActor
 
   case class Compute(particles: Seq[Particle])
@@ -22,7 +21,6 @@ object ActorActions {
   case object ComputeNext
 
   // endregion
-
 
   // region messages to the ControllerActor
 
@@ -46,5 +44,4 @@ object ActorActions {
 
 
   // endregion
-
 }

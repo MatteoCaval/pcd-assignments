@@ -110,6 +110,8 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
         }
       } else if (e.getSource eq removeButton){
         controller.notifyParticleRemoved
+      } else if (e.getSource eq nextButton){
+        controller.notifyNextStep
       }
     }
 

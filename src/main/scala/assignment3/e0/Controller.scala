@@ -31,4 +31,6 @@ class Controller(var world: World, var viewer: WorldViewer) {
 
   def notifyStepByStepMode = controllerActor ! StepByStepMode
 
+  def notifyNextStep = controllerActor ! ComputeNext
+
 }

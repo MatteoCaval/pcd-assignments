@@ -20,7 +20,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
 
   def handleParticle: Receive = {
     case AddParticle(particle) =>
-      log.info("adding new particle")
+//      log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
       this.particleWorkers = particleWorkers :+ newParticle
 

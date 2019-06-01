@@ -97,10 +97,10 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
         controller.notifyStopped
       } else if (e.getSource eq modeButton){
         if (e.getSource.asInstanceOf[JButton].getText == MODE_BUTTON_BECOME_CONTINUOUS){
-          //controller.notifyContinuousMode
+          controller.notifyContinuousMode
           modeButton.setText(MODE_BUTTON_BECOME_STEP_BY_STEP)
         } else {
-          //controller.notifyStepByStepMode
+          controller.notifyStepByStepMode
           modeButton.setText(MODE_BUTTON_BECOME_CONTINUOUS)
         }
       } else if (e.getSource eq removeButton){

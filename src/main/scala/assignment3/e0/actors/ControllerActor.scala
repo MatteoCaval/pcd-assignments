@@ -31,6 +31,17 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
 
       particleMaster ! Compute(particles)
       context.become(computation)
+
+    case ContinuousMode =>
+      log.info("mode changed to continuous")
+      mode = ContinuousMode
+
+    case StepByStepMode =>
+      log.info("mode changed to step by step")
+      mode = StepByStepMode
+
+    case message =>
+      log.info(s"received unhandled message: $message")
   }
 
   def computation: Receive = {
@@ -44,6 +55,7 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
       log.info("stopping simulation")
       context.stop(particleMaster)
       context.become(idle)
+
     case AddParticleByPosition(position) =>
       val particle = new Particle(position, new V2d(0, 0), 1, 1, 1)
       particleMaster ! AddParticle(particle)
@@ -51,10 +63,21 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
     case RemoveParticle =>
       particleMaster ! RemoveParticle
 
-    case ContinuousMode => mode = ContinuousMode
+    case ContinuousMode =>
+      log.info("mode changed to continuous")
+      mode = ContinuousMode
+      particleMaster ! ComputeNext
 
-    case StepByStepMode => mode = StepByStepMode
+    case StepByStepMode =>
+      log.info("mode changed to step by step")
+      mode = StepByStepMode
 
+    case ComputeNext =>
+      log.info("next computation")
+      particleMaster ! ComputeNext
+
+    case message =>
+      log.info(s"received unhandled message: $message")
 
   }
 

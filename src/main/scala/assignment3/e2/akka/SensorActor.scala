@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemoved, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
+import assignment3.e2.common.P2d
 
 case class RegisteredTemperature(sensorId: String, temperature: Double)
 

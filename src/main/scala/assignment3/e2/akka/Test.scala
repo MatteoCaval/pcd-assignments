@@ -3,6 +3,7 @@ package assignment3.e2.akka
 import java.util.UUID
 
 import akka.actor.{ActorSystem, PoisonPill, Props}
+import assignment3.e2.common.{P2d, Patch}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._

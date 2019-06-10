@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemoved, MemberUp, UnreachableMember}
 import akka.cluster.pubsub.DistributedPubSub
+import assignment3.e2.common.Patch
 
 object GuardianActor {
   private val MAX_TEMP: Double = 6.0

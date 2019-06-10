@@ -25,12 +25,6 @@ class SensorListenerActor extends Actor with ActorLogging {
 
   override def receive: Receive = {
     case MemberUp(member) if member.hasRole("sensor") =>
-      log.info("Member is Up: {}", member.address)
-      val workerSelection = context.actorSelection(s"${member.address}/user/sensor*")
-      workerSelection.resolveOne().foreach(ref => {
-        println(ref.path)
-        ref ! "ciao"
-      })
 
     case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
       log.info("Member is Removed: {} after {}", member.address, previousStatus)

@@ -14,11 +14,9 @@ object Test extends App {
     val config = getConfig(port)
     val system = ActorSystem("MapMonitor", config)
     val sensor = system.actorOf(SensorActor.props(P2d(0, 0)), s"sensor")
-    val sensor2 = system.actorOf(SensorActor.props(P2d(0, 0)), "sensor2")
     import system.dispatcher
-    system.scheduler.schedule(5 seconds, 3 seconds) {
+    system.scheduler.schedule(5 seconds, 10 seconds) {
       sensor ! "temperature"
-      sensor2 ! "temperature"
     }
 
   }
@@ -32,9 +30,10 @@ object Test extends App {
   //  }
   //
 
-//  for (i <- 1 to 2) {
-    startClusterWithSensors(2560 /*+ i*/)
-//  }
+  //  for (i <- 1 to 2) {
+  startClusterWithSensors(2560 /*+ i*/)
+  startClusterWithSensors(2561 /*+ i*/)
+  //  }
 
   //  startClusterWithGuardians(2551)
   //  startClusterWithGuardians(2552)
@@ -50,23 +49,64 @@ object Test extends App {
 }
 
 
-object Test2 extends App {
+object StartGuardians extends App {
 
 
   def startClusterWithGuardians(port: Int) = {
-    val config = getConfig(port)
-    val system = ActorSystem("MapMonitor", config)
+    val system = Utils.getSystemByPortWithRole(port, "guardian")
     val guardian = system.actorOf(GuardianActor.props(Patch(P2d(0, 0), P2d(1, 1))), "guardian")
-    system.actorOf(Props[SensorListenerActor], "sensorListenerActor")
-
   }
 
-  startClusterWithGuardians(2551)
+  startClusterWithGuardians(2580)
   //  startClusterWithGuardians(2552)
+
+
+}
+
+
+object StartDashboards extends App {
+
+  def startClusterWithDashboard(port: Int) = {
+    val system = Utils.getSystemByPort(port)
+    system.actorOf(Props[DashboardActor])
+  }
+
+  startClusterWithDashboard(2570)
+
+
+}
+
+
+object StartGuardianListenerActor extends App {
+
+  val system = Utils.getSystemByPort(2551)
+  system.actorOf(Props[GuardianListenerActor], "guardianListenerActor")
+
+}
+
+object Utils {
+
+  def getSystemByPort(port: Int): ActorSystem = {
+    val config = Utils.getConfig(port)
+    ActorSystem("MapMonitor", config)
+  }
+
+  def getSystemByPortWithRole(port: Int, role: String): ActorSystem = {
+    val config = Utils.getConfigWithRole(port, role)
+    ActorSystem("MapMonitor", config)
+  }
 
 
   def getConfig(port: Int) = ConfigFactory.parseString(
     s"""
+       |akka.remote.artery.canonical.port = $port
+      """.stripMargin)
+    .withFallback(ConfigFactory.load("es2.conf"))
+
+
+  def getConfigWithRole(port: Int, role: String) = ConfigFactory.parseString(
+    s"""
+       |akka.cluster.roles = ["$role"]
        |akka.remote.artery.canonical.port = $port
       """.stripMargin)
     .withFallback(ConfigFactory.load("es2.conf"))

@@ -15,26 +15,18 @@ object SensorActor {
   def props(initialPoint: P2d) = Props(new SensorActor(UUID.randomUUID().toString, initialPoint))
 }
 
-class SensorActor(sensorId: String, initialPosition: P2d) extends Actor with ActorLogging {
-
-  //  val cluster = Cluster(context.system)
+class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLogging {
 
   import akka.cluster.pubsub.DistributedPubSubMediator.{Publish}
 
   val mediator = DistributedPubSub(context.system).mediator
 
-  //  override def preStart(): Unit = {
-  //    cluster.subscribe(
-  //      self,
-  //      initialStateMode = InitialStateAsEvents,
-  //      classOf[MemberEvent]
-  //    )
-  //  }
 
   override def receive: Receive = {
     case "temperature" =>
       log.info(s"[$self]Received temp command")
-      mediator ! Publish("temperature", RegisteredTemperature(sensorId, 5.6))
+      mediator ! Publish(SubSubMessages.TEMPERATURE, RegisteredTemperature(sensorId, 5.6))
+      mediator ! Publish(SubSubMessages.SENSOR_POSITION, position)
 
     case m =>
       log.info(s"Boh, received $m")

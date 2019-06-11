@@ -16,17 +16,21 @@ case object RequestGuardianInformations
 
 case class GuardianRemoved(address: String)
 
+case class PathInAlert(patch: Patch)
+
 class GuardianListenerActor extends Actor with ActorLogging {
 
   import context.dispatcher
 
-  implicit val timeout: Timeout = Timeout(3 seconds)
+  implicit val timeout: Timeout = Timeout(5 seconds)
   val cluster: Cluster = Cluster(context.system)
+
 
   var guardians: Map[Address, GuardianInfo] = Map()
 
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
   mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
+  mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
 
   override def preStart(): Unit = {
     cluster.subscribe(
@@ -59,11 +63,19 @@ class GuardianListenerActor extends Actor with ActorLogging {
         guardians = guardians - member.address
       }
 
-
     case info@GuardianInfo(patch, state, _) =>
       log.info(s"Guardian ${sender.path.address}: state $state")
       guardians = guardians + (sender.path.address -> info)
-    // TODO: check if patch in alert and send message
+      // TODO: check if patch in alert and send message
+      if (isPatchInAlert(patch)) {
+        startAlertProcedure(patch)
+      }
+
+    case patch: Patch =>
+      log.info(s"alert for patch $patch terminated")
+      alertProcedures = alertProcedures - patch
+
+
   }
 
 
@@ -71,6 +83,25 @@ class GuardianListenerActor extends Actor with ActorLogging {
     val alertedGuardians = guardians.values.count { g => g.patch == patch && g.state == GuardianState.PREALERT }
     val totalGuardians = guardians.values.count { g => g.patch == patch }
     alertedGuardians / totalGuardians > 0.5
+  }
+
+
+  private var alertProcedures: Map[Patch, Boolean] = Map()
+
+  private def startAlertProcedure(patch: Patch): Unit = {
+    if (!alertProcedures.contains(patch) || !alertProcedures(patch)) {
+      alertProcedures = alertProcedures + (patch -> true)
+      log.info(s"Alert procedure for patch $patch started")
+      context.system.scheduler.scheduleOnce(4 seconds) {
+        if (isPatchInAlert(patch)) {
+          mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(patch))
+        } else {
+          alertProcedures = alertProcedures - patch
+        }
+      }
+    }
+
+
   }
 
 

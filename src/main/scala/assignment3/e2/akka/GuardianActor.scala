@@ -25,6 +25,8 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
 
   val mediator = DistributedPubSub(context.system).mediator
   mediator ! Subscribe(SubSubMessages.TEMPERATURE, self) // subscribe to topic "content"
+  mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self) // subscribe to topic "content"
+  mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
 
   val cluster = Cluster(context.system)
 
@@ -42,25 +44,21 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
 
   override def postStop(): Unit = cluster.unsubscribe(self)
 
-  override def receive: Receive = sensorInformations.orElse(informationRequest)
+  override def receive: Receive = sensorInformations.orElse(informationRequest).orElse(alertMessages)
 
   def sensorInformations: Receive = {
     case RegisteredTemperature(sensorId, temperature) =>
-      log.info(s"Received temperature $temperature from ${sender.path}")
+      log.info(s"Received temperature $temperature from ${sender.path.address}")
       receivedTemperatures = receivedTemperatures + (sender.path.toString -> temperature)
       updateAverageTemperature()
-
-      if (averageTemperature > Config.MAX_TEMP) {
-        state = GuardianState.PREALERT
-      } else {
-        state = GuardianState.OK
-      }
-
-      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
 
 
     case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
       log.info(s"Sensor ${member.address} removed")
+      if (receivedTemperatures.contains(member.address.toString)) {
+        receivedTemperatures = receivedTemperatures - member.address.toString
+        updateAverageTemperature()
+      }
   }
 
 
@@ -70,8 +68,30 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
       sender ! GuardianInfo(patch, state, averageTemperature)
   }
 
+  def alertMessages: Receive = {
+    case PathInAlert(alertedPatch) if alertedPatch == this.patch =>
+      log.info("My patch is in alert")
+      this.state = GuardianState.ALERT
+      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
 
-  private def updateAverageTemperature() =
+    case alertedPatch: Patch if alertedPatch == this.patch =>
+      log.info("Alert terminated")
+      this.state = GuardianState.OK
+      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
+
+  }
+
+
+  private def updateAverageTemperature(): Unit = {
     averageTemperature = receivedTemperatures.values.sum / receivedTemperatures.values.size
+
+    if (averageTemperature > Config.MAX_TEMP && state != GuardianState.ALERT) {
+      state = GuardianState.PREALERT
+    } else {
+      state = GuardianState.OK
+    }
+
+    mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
+  }
 
 }

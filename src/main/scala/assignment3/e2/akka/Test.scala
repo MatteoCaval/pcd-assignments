@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 
-object Test extends App {
+object Sensors extends App {
 
   def startClusterWithSensors(port: Int) = {
     val config = getConfig(port)
@@ -21,22 +21,8 @@ object Test extends App {
 
   }
 
-  //
-  //  def startClusterWithGuardians(port: Int) = {
-  //    val config = getConfig(port)
-  //    val system = ActorSystem("MapMonitor", config)
-  //    val guardian = system.actorOf(GuardianActor.props(Patch(P2d(0, 0), P2d(1, 1))), "guardian")
-  //
-  //  }
-  //
-
-  //  for (i <- 1 to 2) {
   startClusterWithSensors(2560 /*+ i*/)
   startClusterWithSensors(2561 /*+ i*/)
-  //  }
-
-  //  startClusterWithGuardians(2551)
-  //  startClusterWithGuardians(2552)
 
 
   def getConfig(port: Int) = ConfigFactory.parseString(
@@ -60,7 +46,6 @@ object StartGuardians extends App {
   startClusterWithGuardians(2580)
   //  startClusterWithGuardians(2552)
 
-
 }
 
 
@@ -73,15 +58,12 @@ object StartDashboards extends App {
 
   startClusterWithDashboard(2570)
 
-
 }
 
 
-object StartGuardianListenerActor extends App {
-
+object StartGuardianListener extends App {
   val system = Utils.getSystemByPort(2551)
   system.actorOf(Props[GuardianListenerActor], "guardianListenerActor")
-
 }
 
 object Utils {

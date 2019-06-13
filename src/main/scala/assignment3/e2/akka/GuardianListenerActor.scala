@@ -53,7 +53,7 @@ class GuardianListenerActor extends Actor with ActorLogging {
         future.map(info => (member.address, info)).pipeTo(self)
       })
 
-    case (address: Address, info@GuardianInfo(patch, state, _)) =>
+    case (address: Address, info@GuardianInfo(_,patch, state, _)) =>
       log.info(s"Received guardian info from $address: patch $patch, state: $state ")
       guardians = guardians + (address -> info)
 
@@ -63,7 +63,7 @@ class GuardianListenerActor extends Actor with ActorLogging {
         guardians = guardians - member.address
       }
 
-    case info@GuardianInfo(patch, state, _) =>
+    case info@GuardianInfo(_,patch, state, _) =>
       log.info(s"Guardian ${sender.path.address}: state $state")
       guardians = guardians + (sender.path.address -> info)
       // TODO: check if patch in alert and send message

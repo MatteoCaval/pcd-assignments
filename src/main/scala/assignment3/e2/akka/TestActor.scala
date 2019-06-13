@@ -20,10 +20,10 @@ class TestActor extends Actor with ActorLogging {
       context.actorSelection(RootActorPath(member.address) / "user" / "*") !
         RegistrateSensor
 
-    case SensorRegistrationData(sensorId, ref) =>
-      sensors = sensors + (ref -> sensorId)
-      context.watch(ref)
-      log.info(s"Sensor $sensorId with ${ref.path} registered, new size: ${sensors.size}")
+    case SensorPosition(sensorId, position) =>
+      sensors = sensors + (sender -> sensorId)
+      context.watch(sender)
+      log.info(s"Sensor $sensorId with ${sender.path} registered, new size: ${sensors.size}")
 
     case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
       sensors = sensors.filterNot(s => s._1.path.address.toString.contains(member.address.toString))

@@ -1,5 +1,7 @@
 package assignment3.e2.akka
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent}
@@ -13,13 +15,16 @@ object GuardianState {
   val ALERT = "alert"
 }
 
-case class GuardianInfo(patch: Patch, state: String, temperature: Double)
+case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Double)
+
+case object RegistrateGuardian
+
 
 object GuardianActor {
-  def props(patch: Patch) = Props(new GuardianActor(patch))
+  def props(patch: Patch) = Props(new GuardianActor(UUID.randomUUID().toString, patch))
 }
 
-class GuardianActor(patch: Patch) extends Actor with ActorLogging {
+class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with ActorLogging {
 
   import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
 
@@ -49,7 +54,7 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
   override def receive: Receive = sensorInformations.orElse(informationRequest).orElse(alertMessages)
 
   def sensorInformations: Receive = {
-    case RegisteredTemperature(sensorId, temperature, position) =>
+    case RegisteredTemperature(sensorId, temperature, position) => // check position inside patch
       log.info(s"Received temperature $temperature from ${sender.path}")
       receivedTemperatures = receivedTemperatures + (sender.path.toString -> temperature)
       updateAverageTemperature()
@@ -57,7 +62,7 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
         registeredSensors += (sender -> sensorId)
         context.watch(sender)
       }
-      
+
     // ha senso se osservo anche i ref?
     //    case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
     //      log.info(s"Sensor ${member.address} removed")
@@ -73,25 +78,29 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
       receivedTemperatures -= terminatedSensorId
       updateAverageTemperature()
 
+    case RegistrateGuardian =>
+      log.info(s"Received guardian registration request from ${sender.path}")
+      sender ! GuardianInfo(guardianId, patch, state, averageTemperature)
+
   }
 
 
   def informationRequest: Receive = {
     case RequestGuardianInformations =>
       log.info(s"Received information request")
-      sender ! GuardianInfo(patch, state, averageTemperature)
+      sender ! GuardianInfo(guardianId, patch, state, averageTemperature)
   }
 
   def alertMessages: Receive = {
     case PathInAlert(alertedPatch) if alertedPatch == this.patch =>
       log.info("My patch is in alert")
       this.state = GuardianState.ALERT
-      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
+      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
 
     case alertedPatch: Patch if alertedPatch == this.patch =>
       log.info("Alert terminated")
       this.state = GuardianState.OK
-      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
+      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
 
   }
 
@@ -105,7 +114,8 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
       state = GuardianState.OK
     }
     log.info(s"Updating temperature: $averageTemperature")
-    mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
+    mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
   }
+
 
 }

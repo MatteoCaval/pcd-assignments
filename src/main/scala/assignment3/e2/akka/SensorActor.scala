@@ -14,7 +14,12 @@ case class SensorPosition(sensorId: String, position: P2d)
 
 case object RegistrateSensor
 
+case object RegistrateSensorWithCompleteData
+
 case class SensorRegistrationData(sensorId: String, ref: ActorRef)
+
+case class SensorRegistrationCompleteData(sensorId: String, ref: ActorRef, temperature: Option[Double], position: P2d)
+
 
 object SensorActor {
   def props(initialPoint: P2d) = Props(new SensorActor(UUID.randomUUID().toString, initialPoint))
@@ -24,14 +29,16 @@ class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLoggi
 
   import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 
-  val mediator = DistributedPubSub(context.system).mediator
+  private val mediator = DistributedPubSub(context.system).mediator
+
+  private val registeredTemperature: Option[Double] = None
 
   import context.dispatcher
 
   override def preStart(): Unit = {
-    context.system.scheduler.schedule(5 second, 10 second) {
-      self ! "temperature"
-    }
+    //    context.system.scheduler.schedule(5 second, 10 second) {
+    //      self ! "temperature"
+    //    }
 
   }
 
@@ -42,7 +49,12 @@ class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLoggi
       mediator ! Publish(SubSubMessages.SENSOR_POSITION, SensorPosition(sensorId, position))
 
     case RegistrateSensor =>
-      sender() ! SensorRegistrationData(sensorId, self)
+      log.info(s"Received registration data from ${sender}")
+      sender() ! SensorPosition(sensorId, position)
+
+    case RegistrateSensorWithCompleteData =>
+      log.info(s"Received registration data from ${sender}")
+      sender() ! SensorRegistrationCompleteData(sensorId, self, registeredTemperature, position)
 
     case m =>
       log.info(s"Boh, received $m")

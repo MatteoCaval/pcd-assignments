@@ -11,26 +11,23 @@ import scala.concurrent.duration._
 object Sensors extends App {
 
   def startClusterWithSensors(port: Int) = {
-    val config = getConfig(port)
-    val system = ActorSystem("MapMonitor", config)
+    val system = Utils.getSystemByPortWithRole(port, "sensor")
     val sensor = system.actorOf(SensorActor.props(P2d(0, 0)), s"sensor")
     import system.dispatcher
-    system.scheduler.schedule(5 seconds, 10 seconds) {
-      sensor ! "temperature"
-    }
-
+//    system.scheduler.schedule(5 seconds, 10 seconds) {
+//      sensor ! "temperature"
+//    }
   }
 
   startClusterWithSensors(2560 /*+ i*/)
   startClusterWithSensors(2561 /*+ i*/)
 
 
-  def getConfig(port: Int) = ConfigFactory.parseString(
-    s"""
-       |akka.cluster.roles = ["sensor"]
-       |akka.remote.artery.canonical.port = $port
-      """.stripMargin)
-    .withFallback(ConfigFactory.load("es2.conf"))
+  val system = Utils.getSystemByPortWithRole(2563, "sensor")
+  scala.io.Source.stdin.getLines().foreach { line =>
+    system.actorOf(SensorActor.props(P2d(1, 1)), line)
+  }
+
 
 }
 

@@ -1,8 +1,8 @@
 package assignment3.e2.akka
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemoved}
+import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import assignment3.e2.common.Patch
@@ -23,14 +23,16 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
 
   import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
 
-  val mediator = DistributedPubSub(context.system).mediator
+  private val mediator = DistributedPubSub(context.system).mediator
   mediator ! Subscribe(SubSubMessages.TEMPERATURE, self) // subscribe to topic "content"
   mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self) // subscribe to topic "content"
   mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
 
-  val cluster = Cluster(context.system)
+  private val cluster = Cluster(context.system)
 
-  var receivedTemperatures: Map[String, Double] = Map()
+  private var receivedTemperatures: Map[String, Double] = Map()
+  private var registeredSensors: Map[ActorRef, String] = Map()
+
   var averageTemperature: Double = Double.NaN
   var state: String = GuardianState.OK
 
@@ -47,18 +49,30 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
   override def receive: Receive = sensorInformations.orElse(informationRequest).orElse(alertMessages)
 
   def sensorInformations: Receive = {
-    case RegisteredTemperature(sensorId, temperature) =>
-      log.info(s"Received temperature $temperature from ${sender.path.address}")
+    case RegisteredTemperature(sensorId, temperature, position) =>
+      log.info(s"Received temperature $temperature from ${sender.path}")
       receivedTemperatures = receivedTemperatures + (sender.path.toString -> temperature)
       updateAverageTemperature()
-
-
-    case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
-      log.info(s"Sensor ${member.address} removed")
-      if (receivedTemperatures.contains(member.address.toString)) {
-        receivedTemperatures = receivedTemperatures - member.address.toString
-        updateAverageTemperature()
+      if (!registeredSensors.contains(sender)) {
+        registeredSensors += (sender -> sensorId)
+        context.watch(sender)
       }
+      
+    // ha senso se osservo anche i ref?
+    //    case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
+    //      log.info(s"Sensor ${member.address} removed")
+    //      if (receivedTemperatures.contains(member.address.toString)) {
+    //        receivedTemperatures = receivedTemperatures - member.address.toString
+    //        updateAverageTemperature()
+    //      }
+
+    case Terminated(ref) =>
+      val terminatedSensorId = registeredSensors(ref)
+      log.info(s"Sensor with id $terminatedSensorId and path ${ref.path} terminated")
+      registeredSensors -= ref
+      receivedTemperatures -= terminatedSensorId
+      updateAverageTemperature()
+
   }
 
 
@@ -90,7 +104,7 @@ class GuardianActor(patch: Patch) extends Actor with ActorLogging {
     } else {
       state = GuardianState.OK
     }
-
+    log.info(s"Updating temperature: $averageTemperature")
     mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(patch, state, averageTemperature))
   }
 

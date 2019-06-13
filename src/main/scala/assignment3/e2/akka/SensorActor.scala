@@ -8,9 +8,13 @@ import assignment3.e2.common.P2d
 
 import scala.concurrent.duration._
 
-case class RegisteredTemperature(sensorId: String, temperature: Double)
+case class RegisteredTemperature(sensorId: String, temperature: Double, position: P2d)
+
+case class SensorPosition(sensorId: String, position: P2d)
+
 case object RegistrateSensor
-case class SensorRegistrationData(sensorId:String, ref: ActorRef)
+
+case class SensorRegistrationData(sensorId: String, ref: ActorRef)
 
 object SensorActor {
   def props(initialPoint: P2d) = Props(new SensorActor(UUID.randomUUID().toString, initialPoint))
@@ -25,7 +29,7 @@ class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLoggi
   import context.dispatcher
 
   override def preStart(): Unit = {
-    context.system.scheduler.scheduleOnce(5 second) {
+    context.system.scheduler.schedule(5 second, 10 second) {
       self ! "temperature"
     }
 
@@ -33,9 +37,9 @@ class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLoggi
 
   override def receive: Receive = {
     case "temperature" =>
-      log.info(s"[$self]Received temp command")
-      mediator ! Publish(SubSubMessages.TEMPERATURE, RegisteredTemperature(sensorId, 5.6))
-      mediator ! Publish(SubSubMessages.SENSOR_POSITION, position)
+      log.info(s"Received temp command")
+      mediator ! Publish(SubSubMessages.TEMPERATURE, RegisteredTemperature(sensorId, 5.6, position))
+      mediator ! Publish(SubSubMessages.SENSOR_POSITION, SensorPosition(sensorId, position))
 
     case RegistrateSensor =>
       sender() ! SensorRegistrationData(sensorId, self)

@@ -48,7 +48,7 @@ class DashboardActor extends Actor with ActorLogging {
     case MemberUp(member) if member.hasRole("guardian") =>
       log.info(s"Node ${member.address} up")
       context.actorSelection(RootActorPath(member.address) / "user" / "*") !
-        RegistrateGuardian
+        RequestGuardianInformations
 
     //    case MemberRemoved(member, previousStatus) if member.hasRole("guardian") =>
     //      log.info(s"Guardian ${member.address} removed")

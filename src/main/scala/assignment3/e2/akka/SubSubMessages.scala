@@ -8,4 +8,6 @@ object SubSubMessages {
   val PATCH_ALERT = "patch_alert"
   val TERMINATE_ALERT = "terminate_alert"
 
+  val GUARDIAN_UP = "guardian_up"
+
 }

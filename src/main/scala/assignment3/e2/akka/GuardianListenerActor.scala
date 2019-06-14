@@ -36,15 +36,14 @@ class GuardianListenerActor extends Actor with ActorLogging {
     cluster.subscribe(
       self,
       initialStateMode = InitialStateAsEvents,
-      classOf[MemberEvent],
-      classOf[UnreachableMember]
+      classOf[MemberEvent]
     )
   }
 
   override def postStop(): Unit = cluster.unsubscribe(self)
 
-
   override def receive: Receive = {
+
     case MemberUp(member) if member.hasRole("guardian") =>
       val actorselection = context.actorSelection(s"${member.address}/user/guardian")
       log.info(s"member up: ${member.address}")
@@ -53,7 +52,19 @@ class GuardianListenerActor extends Actor with ActorLogging {
         future.map(info => (member.address, info)).pipeTo(self)
       })
 
-    case (address: Address, info@GuardianInfo(_,patch, state, _)) =>
+
+
+
+
+
+
+
+
+
+
+
+
+    case (address: Address, info@GuardianInfo(_, patch, state, _)) =>
       log.info(s"Received guardian info from $address: patch $patch, state: $state ")
       guardians = guardians + (address -> info)
 
@@ -63,7 +74,7 @@ class GuardianListenerActor extends Actor with ActorLogging {
         guardians = guardians - member.address
       }
 
-    case info@GuardianInfo(_,patch, state, _) =>
+    case info@GuardianInfo(_, patch, state, _) =>
       log.info(s"Guardian ${sender.path.address}: state $state")
       guardians = guardians + (sender.path.address -> info)
       // TODO: check if patch in alert and send message

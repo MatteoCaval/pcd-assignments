@@ -4,10 +4,12 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent}
+import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import assignment3.e2.common.Patch
+
+import scala.concurrent.duration._
 
 object GuardianState {
   val OK = "ok"
@@ -17,7 +19,7 @@ object GuardianState {
 
 case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Double)
 
-case object RegistrateGuardian
+case class GuardianUp(patch: Patch, state: String)
 
 
 object GuardianActor {
@@ -27,16 +29,20 @@ object GuardianActor {
 class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with ActorLogging {
 
   import akka.cluster.pubsub.DistributedPubSubMediator.Subscribe
-
-  private val mediator = DistributedPubSub(context.system).mediator
-  mediator ! Subscribe(SubSubMessages.TEMPERATURE, self) // subscribe to topic "content"
-  mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self) // subscribe to topic "content"
-  mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
+  import context.dispatcher
 
   private val cluster = Cluster(context.system)
+  private val mediator = DistributedPubSub(context.system).mediator
+
+  mediator ! Subscribe(SubSubMessages.TEMPERATURE, self)
+  mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self)
+  mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
+  mediator ! Subscribe(SubSubMessages.GUARDIAN_UP, self)
+
 
   private var receivedTemperatures: Map[String, Double] = Map()
   private var registeredSensors: Map[ActorRef, String] = Map()
+  private var patchGuardians: Map[ActorRef, String] = Map()
 
   var averageTemperature: Double = Double.NaN
   var state: String = GuardianState.OK
@@ -47,13 +53,23 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
       initialStateMode = InitialStateAsEvents,
       classOf[MemberEvent]
     )
+
   }
 
   override def postStop(): Unit = cluster.unsubscribe(self)
 
-  override def receive: Receive = sensorInformations.orElse(informationRequest).orElse(alertMessages)
+  override def receive: Receive = {
+    case MemberUp(_) =>
+      log.info("UPPPPPP")
+      context.become(sensorInformations.orElse(alertMessages))
+      context.system.scheduler.scheduleOnce(4 seconds) {
+        mediator ! Publish(SubSubMessages.GUARDIAN_UP, GuardianUp(this.patch, this.state))
+      }
+
+  }
 
   def sensorInformations: Receive = {
+
     case RegisteredTemperature(sensorId, temperature, position) => // check position inside patch
       log.info(s"Received temperature $temperature from ${sender.path}")
       receivedTemperatures = receivedTemperatures + (sender.path.toString -> temperature)
@@ -63,32 +79,38 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
         context.watch(sender)
       }
 
-    // ha senso se osservo anche i ref?
-    //    case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
-    //      log.info(s"Sensor ${member.address} removed")
-    //      if (receivedTemperatures.contains(member.address.toString)) {
-    //        receivedTemperatures = receivedTemperatures - member.address.toString
-    //        updateAverageTemperature()
-    //      }
+    // messaggio inviato da un guardiano quando va su
+    case GuardianUp(senderPatch, senderState) if senderPatch == this.patch && sender != self =>
+      log.info(s"Guardian ${sender} up")
+      patchGuardians += (sender -> senderState)
+      sender ! GuardianInfo(guardianId, this.patch, this.state, this.averageTemperature)
 
-    case Terminated(ref) =>
+    //sensor actor termination
+    case Terminated(ref) if registeredSensors.contains(ref) =>
       val terminatedSensorId = registeredSensors(ref)
       log.info(s"Sensor with id $terminatedSensorId and path ${ref.path} terminated")
       registeredSensors -= ref
       receivedTemperatures -= terminatedSensorId
       updateAverageTemperature()
 
-    case RegistrateGuardian =>
-      log.info(s"Received guardian registration request from ${sender.path}")
-      sender ! GuardianInfo(guardianId, patch, state, averageTemperature)
 
-  }
+    case Terminated(ref) if patchGuardians.contains(ref) =>
+      log.info(s"Guardian ${ref.path} terminated")
+      patchGuardians -= ref
 
-
-  def informationRequest: Receive = {
+    // messaggio inviato dalla dashboard
     case RequestGuardianInformations =>
       log.info(s"Received information request")
       sender ! GuardianInfo(guardianId, patch, state, averageTemperature)
+
+    // ricevuto da un altro guardiano
+    case GuardianInfo(_, senderPatch, state, _) if senderPatch == this.patch =>
+      if (!patchGuardians.contains(sender)) {
+        context.watch(sender)
+      }
+      patchGuardians += (sender -> state)
+
+
   }
 
   def alertMessages: Receive = {
@@ -104,18 +126,16 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
   }
 
-
   private def updateAverageTemperature(): Unit = {
     averageTemperature = receivedTemperatures.values.sum / receivedTemperatures.values.size
-
     if (averageTemperature > Config.MAX_TEMP && state != GuardianState.ALERT) {
       state = GuardianState.PREALERT
     } else {
       state = GuardianState.OK
     }
+
     log.info(s"Updating temperature: $averageTemperature")
     mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
   }
-
 
 }

@@ -12,23 +12,30 @@ object Sensors extends App {
 
   def startClusterWithSensors(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "sensor")
-    val sensor = system.actorOf(SensorActor.props(P2d(0, 0)), s"sensor")
+    system.actorOf(SensorActor.props(P2d(0, 0)))
+    system.actorOf(SensorActor.props(P2d(0, 0)))
+    system.actorOf(SensorActor.props(P2d(0, 0)))
     import system.dispatcher
-//    system.scheduler.schedule(5 seconds, 10 seconds) {
-//      sensor ! "temperature"
-//    }
+    //    system.scheduler.schedule(5 seconds, 10 seconds) {
+    //      sensor ! "temperature"
+    //    }
   }
 
+  startClusterWithSensors(2551 /*+ i*/)
+  startClusterWithSensors(2552)
   startClusterWithSensors(2560 /*+ i*/)
-  startClusterWithSensors(2561 /*+ i*/)
+  //  startClusterWithSensors(2561 /*+ i*/)
 
 
-  val system = Utils.getSystemByPortWithRole(2563, "sensor")
+
   scala.io.Source.stdin.getLines().foreach { line =>
+    val system = Utils.getSystemByPortWithRole(0, "sensor")
     system.actorOf(SensorActor.props(P2d(1, 1)), line)
   }
+}
 
-
+object Ehi extends App {
+  Utils.getSystemByPort(0).actorOf(Props[TestActor], "sensorRegistrationTest")
 }
 
 
@@ -53,7 +60,7 @@ object StartDashboards extends App {
     system.actorOf(Props[DashboardActor])
   }
 
-  startClusterWithDashboard(2570)
+  startClusterWithDashboard(0)
 
 }
 
@@ -78,7 +85,7 @@ object Utils {
 
   def getConfig(port: Int) = ConfigFactory.parseString(
     s"""
-       |akka.remote.artery.canonical.port = $port
+       |akka.remote.netty.tcp.port = $port
       """.stripMargin)
     .withFallback(ConfigFactory.load("es2.conf"))
 
@@ -86,7 +93,7 @@ object Utils {
   def getConfigWithRole(port: Int, role: String) = ConfigFactory.parseString(
     s"""
        |akka.cluster.roles = ["$role"]
-       |akka.remote.artery.canonical.port = $port
+       |akka.remote.netty.tcp.port = $port
       """.stripMargin)
     .withFallback(ConfigFactory.load("es2.conf"))
 

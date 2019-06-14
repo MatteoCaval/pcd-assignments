@@ -1,6 +1,6 @@
 package assignment3.e2.common
 
-case class Patch(topPoint: P2d, bottomPoint: P2d) {
+case class Patch(id: Int, topPoint: P2d, bottomPoint: P2d) {
 
   def includePoint(point: P2d): Boolean =
     point.x >= topPoint.x &&
@@ -15,6 +15,5 @@ case class Patch(topPoint: P2d, bottomPoint: P2d) {
     }
     false
   }
-
 
 }

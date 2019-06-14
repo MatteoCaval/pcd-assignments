@@ -27,7 +27,6 @@ object Sensors extends App {
   //  startClusterWithSensors(2561 /*+ i*/)
 
 
-
   scala.io.Source.stdin.getLines().foreach { line =>
     val system = Utils.getSystemByPortWithRole(0, "sensor")
     system.actorOf(SensorActor.props(P2d(1, 1)), line)
@@ -44,11 +43,20 @@ object StartGuardians extends App {
 
   def startClusterWithGuardians(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "guardian")
-    val guardian = system.actorOf(GuardianActor.props(Patch(P2d(0, 0), P2d(1, 1))), "guardian")
+    val guardian = system.actorOf(GuardianActor.props(Patch(1, P2d(0, 0), P2d(1, 1))), "guardian")
   }
 
-  startClusterWithGuardians(2580)
+
+  startClusterWithGuardians(2551)
+  startClusterWithGuardians(2552)
+  //  startClusterWithGuardians(0)
   //  startClusterWithGuardians(2552)
+
+  scala.io.Source.stdin.getLines().foreach { line =>
+    val system = Utils.getSystemByPortWithRole(0, "guardian")
+    system.actorOf(GuardianActor.props(Patch(1, P2d(0, 0), P2d(1, 1))), line)
+  }
+
 
 }
 

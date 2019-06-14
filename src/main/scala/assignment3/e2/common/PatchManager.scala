@@ -1,15 +1,16 @@
 package assignment3.e2.common
 
+import assignment3.e2.akka.Config
+
 
 object PatchManager {
+  val N: Int = Config.N
+  val M: Int = Config.M
 
-  val N = 4 //width
-  val M = 2
+  val width: Double = 1000
+  val height: Double = 500
 
-  val width: Double = 100
-  val height: Double = 50
-
-  def getPatches(): List[Patch] = {
+  def getPatches: List[Patch] = {
 
     var list: List[Patch] = List()
     val deltaW = width / N
@@ -17,14 +18,14 @@ object PatchManager {
 
     for (i <- 0 until M) {
       for (j <- 0 until N) {
-        list = list :+ Patch(P2d(j * deltaW, i * deltaH), P2d(j * deltaW + deltaW, i * deltaH + deltaH))
+        // id della Patch ottenuto con list.size -> 0,1,2,3..
+        list = list :+ Patch(list.size, P2d(j * deltaW, i * deltaH), P2d(j * deltaW + deltaW, i * deltaH + deltaH))
       }
     }
     list
   }
-
 }
 
 object Test extends App {
-  println(PatchManager.getPatches().toString)
+  println(PatchManager.getPatches.toString)
 }

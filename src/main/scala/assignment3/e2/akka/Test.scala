@@ -3,38 +3,28 @@ package assignment3.e2.akka
 import java.util.UUID
 
 import akka.actor.{ActorSystem, PoisonPill, Props}
-import assignment3.e2.common.{P2d, Patch}
+import assignment3.e2.common.{P2d, Patch, PatchManager}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
+import scala.util.Random
 
 object Sensors extends App {
 
   def startClusterWithSensors(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "sensor")
-    system.actorOf(SensorActor.props(P2d(0, 0)))
-    system.actorOf(SensorActor.props(P2d(0, 0)))
-    system.actorOf(SensorActor.props(P2d(0, 0)))
-    import system.dispatcher
-    //    system.scheduler.schedule(5 seconds, 10 seconds) {
-    //      sensor ! "temperature"
-    //    }
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+//    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+//    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
   }
 
-  startClusterWithSensors(2551 /*+ i*/)
   startClusterWithSensors(2552)
-  startClusterWithSensors(2560 /*+ i*/)
-  //  startClusterWithSensors(2561 /*+ i*/)
 
 
   scala.io.Source.stdin.getLines().foreach { line =>
     val system = Utils.getSystemByPortWithRole(0, "sensor")
-    system.actorOf(SensorActor.props(P2d(1, 1)), line)
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap), line)
   }
-}
-
-object Ehi extends App {
-  Utils.getSystemByPort(0).actorOf(Props[TestActor], "sensorRegistrationTest")
 }
 
 
@@ -43,19 +33,16 @@ object StartGuardians extends App {
 
   def startClusterWithGuardians(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "guardian")
-    val guardian = system.actorOf(GuardianActor.props(Patch(1, P2d(0, 0), P2d(1, 1))), "guardian")
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(1)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(2)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(3)))
   }
 
 
-  startClusterWithGuardians(2551)
-  startClusterWithGuardians(2552)
+  startClusterWithGuardians(0)
   //  startClusterWithGuardians(0)
   //  startClusterWithGuardians(2552)
-
-  scala.io.Source.stdin.getLines().foreach { line =>
-    val system = Utils.getSystemByPortWithRole(0, "guardian")
-    system.actorOf(GuardianActor.props(Patch(1, P2d(0, 0), P2d(1, 1))), line)
-  }
 
 
 }
@@ -68,14 +55,8 @@ object StartDashboards extends App {
     system.actorOf(Props[DashboardActor])
   }
 
-  startClusterWithDashboard(0)
+  startClusterWithDashboard(2551)
 
-}
-
-
-object StartGuardianListener extends App {
-  val system = Utils.getSystemByPort(2551)
-  system.actorOf(Props[GuardianListenerActor], "guardianListenerActor")
 }
 
 object Utils {

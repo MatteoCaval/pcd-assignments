@@ -4,13 +4,12 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.pubsub.DistributedPubSub
-import assignment3.e2.common.P2d
+import assignment3.e2.common.{P2d, PatchManager}
 
 import scala.concurrent.duration._
+import scala.util.Random
 
-case class RegisteredTemperature(sensorId: String, temperature: Double, position: P2d)
-
-case class SensorPosition(sensorId: String, position: P2d)
+case class SensorData(sensorId: String, temperature: Option[Double], position: P2d)
 
 case object RegistrateSensor
 
@@ -25,39 +24,62 @@ object SensorActor {
   def props(initialPoint: P2d) = Props(new SensorActor(UUID.randomUUID().toString, initialPoint))
 }
 
-class SensorActor(sensorId: String, position: P2d) extends Actor with ActorLogging {
+class SensorActor(val sensorId: String, var position: P2d) extends Actor with ActorLogging {
 
   import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 
   private val mediator = DistributedPubSub(context.system).mediator
 
-  private val registeredTemperature: Option[Double] = None
+  private var registeredTemperature: Option[Double] = None
 
   import context.dispatcher
 
   override def preStart(): Unit = {
-    //    context.system.scheduler.schedule(5 second, 10 second) {
-    //      self ! "temperature"
-    //    }
+    context.system.scheduler.schedule(10 second, 3 second) {
+      randomBehaviour()
+    }
 
   }
 
   override def receive: Receive = {
-    case "temperature" =>
-      log.info(s"Received temp command")
-      mediator ! Publish(SubSubMessages.TEMPERATURE, RegisteredTemperature(sensorId, 5.6, position))
-      mediator ! Publish(SubSubMessages.SENSOR_POSITION, SensorPosition(sensorId, position))
 
     case RegistrateSensor =>
-      log.info(s"Received registration data from ${sender}")
-      sender() ! SensorPosition(sensorId, position)
+      log.info(s"Received registration data from $sender")
+      sender() ! SensorData(sensorId, registeredTemperature, position)
 
     case RegistrateSensorWithCompleteData =>
-      log.info(s"Received registration data from ${sender}")
+      log.info(s"Received registration data from $sender")
       sender() ! SensorRegistrationCompleteData(sensorId, self, registeredTemperature, position)
 
     case m =>
       log.info(s"Boh, received $m")
   }
 
+
+  private def randomBehaviour(): Unit = {
+    val randomNum = Random.nextInt(5)
+    if (randomNum == 4) {
+      updateRandomPosition()
+
+    } else if (randomNum > 2) {
+      updateRandomTemperature()
+
+    }
+  }
+
+
+  private def updateRandomTemperature(): Unit = {
+    this.registeredTemperature = Some(Random.nextDouble() * 10)
+    log.info(s"Updating sensor temperature to $registeredTemperature")
+    mediator ! Publish(SubSubMessages.SENSOR_DATA, SensorData(sensorId, registeredTemperature, position))
+  }
+
+  private def updateRandomPosition(): Unit = {
+    this.position = PatchManager.getRandomPositionInsideMap
+    log.info(s"Updating sensor position to $position")
+    mediator ! Publish(SubSubMessages.SENSOR_DATA, SensorData(sensorId, this.registeredTemperature, position))
+  }
+
+
 }
+

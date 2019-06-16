@@ -5,6 +5,6 @@ object Config {
   val ALARM_TEMP = 20
   val ALERT_MIN_TIME = 6000
 
-  val N = 4 // col number
+  val N = 2 // col number
   val M = 2 // row number
 }

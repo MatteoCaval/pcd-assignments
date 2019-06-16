@@ -17,9 +17,13 @@ object GuardianState {
   val ALERT = "alert"
 }
 
-case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Double)
+case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Option[Double])
 
 case class GuardianUp(patch: Patch, state: String)
+
+case object RequestGuardianInformations
+
+case class PathInAlert(patch: Patch)
 
 
 object GuardianActor {
@@ -34,17 +38,19 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private val cluster = Cluster(context.system)
   private val mediator = DistributedPubSub(context.system).mediator
 
-  mediator ! Subscribe(SubSubMessages.TEMPERATURE, self)
   mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self)
   mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
+
   mediator ! Subscribe(SubSubMessages.GUARDIAN_UP, self)
+  mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
 
 
   private var receivedTemperatures: Map[String, Double] = Map()
   private var registeredSensors: Map[ActorRef, String] = Map()
+
   private var patchGuardians: Map[ActorRef, String] = Map()
 
-  var averageTemperature: Double = Double.NaN
+  var averageTemperature: Option[Double] = None
   var state: String = GuardianState.OK
 
   override def preStart(): Unit = {
@@ -61,7 +67,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   override def receive: Receive = {
     case MemberUp(_) =>
       log.info("UPPPPPP")
-      context.become(sensorInformations.orElse(alertMessages))
+      context.become(sensorInformations)
       context.system.scheduler.scheduleOnce(4 seconds) {
         mediator ! Publish(SubSubMessages.GUARDIAN_UP, GuardianUp(this.patch, this.state))
       }
@@ -70,14 +76,22 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
   def sensorInformations: Receive = {
 
-    case RegisteredTemperature(sensorId, temperature, position) => // check position inside patch
-      log.info(s"Received temperature $temperature from ${sender.path}")
-      receivedTemperatures = receivedTemperatures + (sender.path.toString -> temperature)
+    case SensorData(sensorId, Some(temperature), position) if patch.includePoint(position) => // check position inside patch
+      log.info(s"Received sensor data $temperature from ${sender.path}, position: $position¶")
+      receivedTemperatures = receivedTemperatures + (sensorId -> temperature)
       updateAverageTemperature()
       if (!registeredSensors.contains(sender)) {
         registeredSensors += (sender -> sensorId)
         context.watch(sender)
       }
+
+
+    case SensorData(id, _, position) if registeredSensors.contains(sender) && !patch.includePoint(position) =>
+      log.info(s"[Patch${this.patch.id}] Deleting sensor, I have ${registeredSensors.size}")
+      registeredSensors -= sender
+      receivedTemperatures -= id
+      updateAverageTemperature()
+
 
     // messaggio inviato da un guardiano quando va su
     case GuardianUp(senderPatch, senderState) if senderPatch == this.patch && sender != self =>
@@ -113,28 +127,30 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
   }
 
-  def alertMessages: Receive = {
-    case PathInAlert(alertedPatch) if alertedPatch == this.patch =>
-      log.info("My patch is in alert")
-      this.state = GuardianState.ALERT
-      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
-
-    case alertedPatch: Patch if alertedPatch == this.patch =>
-      log.info("Alert terminated")
-      this.state = GuardianState.OK
-      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
-
-  }
+  //  def alertMessages: Receive = {
+  //    case PathInAlert(alertedPatch) if alertedPatch == this.patch =>
+  //      log.info("My patch is in alert")
+  //      this.state = GuardianState.ALERT
+  //      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
+  //
+  //    case alertedPatch: Patch if alertedPatch == this.patch =>
+  //      log.info("Alert terminated")
+  //      this.state = GuardianState.OK
+  //      mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
+  //
+  //  }
 
   private def updateAverageTemperature(): Unit = {
-    averageTemperature = receivedTemperatures.values.sum / receivedTemperatures.values.size
-    if (averageTemperature > Config.MAX_TEMP && state != GuardianState.ALERT) {
+    val numOfTempValues = receivedTemperatures.size
+    averageTemperature = if (numOfTempValues > 0) Some(receivedTemperatures.values.sum / numOfTempValues) else None
+
+    if (averageTemperature.isDefined && averageTemperature.get > Config.MAX_TEMP && state != GuardianState.ALERT) {
       state = GuardianState.PREALERT
     } else {
       state = GuardianState.OK
     }
 
-    log.info(s"Updating temperature: $averageTemperature")
+    log.info(s"Updating temperature (sensors ${registeredSensors.size} and temps ${receivedTemperatures.size}) with: $averageTemperature")
     mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
   }
 

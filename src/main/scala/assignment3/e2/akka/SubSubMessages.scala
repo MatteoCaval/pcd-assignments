@@ -2,9 +2,9 @@ package assignment3.e2.akka
 
 object SubSubMessages {
 
-  val TEMPERATURE = "temperature"
+  val SENSOR_DATA = "sensor_data"
   val GUARDIAN_INFO = "guardian_info"
-  val SENSOR_POSITION = "sensor_position"
+
   val PATCH_ALERT = "patch_alert"
   val TERMINATE_ALERT = "terminate_alert"
 

@@ -6,7 +6,7 @@ import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemov
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe}
 import akka.util.Timeout
-import assignment3.e2.common.P2d
+import assignment3.e2.common.{DashboardGuardianState, DashboardSensorPosition, GuardianStateEnum, MapMonitorViewImpl, P2d, PatchManager, ViewListener}
 
 import scala.concurrent.duration._
 
@@ -15,17 +15,24 @@ class DashboardActor extends Actor with ActorLogging {
   import context.dispatcher
 
   private var guardians: Map[ActorRef, GuardianInfo] = Map()
-  private var sensors: Map[ActorRef, SensorPosition] = Map()
+  private var sensors: Map[ActorRef, SensorData] = Map()
 
   private val cluster: Cluster = Cluster(context.system)
   private val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
   mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
-  mediator ! Subscribe(SubSubMessages.SENSOR_POSITION, self)
+  mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
   mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self)
 
 
+  val view = new MapMonitorViewImpl(new ViewListener {
+    override def resetAlarmPressed(patchId: Int): Unit = {
+      println(patchId)
+    }
+  }, PatchManager.getPatches.size)
+
   override def preStart(): Unit = {
+    view.show()
     cluster.subscribe(
       self,
       initialStateMode = InitialStateAsEvents,
@@ -65,21 +72,24 @@ class DashboardActor extends Actor with ActorLogging {
 
 
   private def uiInformationRetrieval: Receive = {
-    case s: SensorPosition =>
+    case s@SensorData(id, _, position) =>
       log.info(s"Received position of sensor ${sender.path}: $s")
       if (!sensors.contains(sender)) {
         context.watch(sender)
       }
       sensors += (sender -> s)
+
+      view.notifySensor(DashboardSensorPosition(id, position))
     // TODO: Update ui
 
-    case info: GuardianInfo =>
+    case info@GuardianInfo(id, patch, state, temp) =>
       log.info(s"Received temperature from ${sender.path}: temperature ${info.temperature} at patch ${info.patch}")
       if (!guardians.contains(sender)) {
         context.watch(sender)
       }
       guardians += (sender -> info)
-    // TODO update ui
+      // TODO update ui
+      view.notifyGuardian(DashboardGuardianState(id, temp.getOrElse(0), GuardianStateEnum.IDLE, patch))
 
 
     case PathInAlert(patch) => // FIXME

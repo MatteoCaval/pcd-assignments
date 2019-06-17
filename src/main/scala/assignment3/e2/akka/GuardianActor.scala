@@ -25,6 +25,8 @@ case object RequestGuardianInformations
 
 case class PathInAlert(patch: Patch)
 
+case class PatchReleaseMessage(patchId: Int)
+
 case class GuardianStateMesssage(state: String, alertTime: Option[Long])
 
 
@@ -55,7 +57,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   var averageTemperature: Option[Double] = None
   var state: String = GuardianState.OK
 
-  var patchAlertTimer: Cancellable = Cancellable.alreadyCancelled
+  var patchAlertTimer: Cancellable = null
 
   override def preStart(): Unit = {
     cluster.subscribe(
@@ -79,7 +81,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
     // data of sensor inside my patch
     case SensorData(sensorId, Some(temperature), position) if patch.includePoint(position) =>
-      log.info(s"Received sensor data $temperature from ${sender.path}, position: $position¶")
+      log.info(s"Received sensor data $temperature from ${sender.path}, position: $position")
       receivedTemperatures = receivedTemperatures + (sensorId -> temperature)
       updateAverageTemperature()
       if (!registeredSensors.contains(sender)) {
@@ -137,16 +139,23 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     case GuardianStateMesssage(senderState, time) =>
       senderState match {
         case GuardianState.ALERT => //switch my state to alert and notify dashboards
+          log.info("guardian of my patch in alert, now me")
           this.state = GuardianState.ALERT
           this.alertedGuardian = Map()
           mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
 
         case GuardianState.PREALERT =>
           this.alertedGuardian += (sender -> time)
+          log.info(s"Guardian of my patch in prealert, now ${alertedGuardian.size}/${patchGuardians.size}")
 
         case GuardianState.OK =>
           this.alertedGuardian -= sender //removes sender from alerted guardians
       }
+
+    case PatchReleaseMessage(patchId) if this.patch.id == patchId =>
+      this.alertedGuardian = Map()
+      this.state = GuardianState.OK
+      this.broadcastGuardianInfos()
 
 
   }
@@ -155,25 +164,25 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private def updateAverageTemperature(): Unit = {
     val numOfTempValues = receivedTemperatures.size
     averageTemperature = if (numOfTempValues > 0) Some(receivedTemperatures.values.sum / numOfTempValues) else None
-
-    log.info(s"New average $averageTemperature, my state is $state")
     this.handleState(averageTemperature)
-
-    log.info(s"Updating temperature (sensors ${registeredSensors.size} and temps ${receivedTemperatures.size}) with: $averageTemperature")
     this.broadcastGuardianInfos()
   }
 
 
   private def handleState(temperature: Option[Double]) = temperature match {
     case Some(temp) if temp > Config.MAX_TEMP && state == GuardianState.OK =>
+      log.info("PREALERT")
       state = GuardianState.PREALERT
       this.notifyStateToPatchGuardians()
       this.checkAlertState()
 
     case Some(temp) if temp <= Config.MAX_TEMP && state == GuardianState.PREALERT =>
+      log.info("IDLE")
       state = GuardianState.OK
       this.notifyStateToPatchGuardians()
-      this.patchAlertTimer.cancel()
+      if (this.patchAlertTimer != null) {
+        this.patchAlertTimer.cancel()
+      }
 
     case None if state == GuardianState.PREALERT => // not very sure
       state = GuardianState.OK
@@ -195,26 +204,31 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   }
 
   private def checkAlertState(): Unit = {
-    if (this.state == GuardianState.PREALERT && isMajorityOfGuardiansInPreAlert) {
-      this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
-        if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
-          mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
-          this.notifyStateToPatchGuardians()
-          this.alertedGuardian = Map()
-        }
+    log.info(s"checking alert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}, mayority $isMajorityOfGuardiansInPreAlert")
+    //    if (this.state == GuardianState.PREALERT && isMajorityOfGuardiansInPreAlert) {
+    log.info("Majority in alert")
+    this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
+      log.info("sec elapsed")
+      if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
+        log.info(s"Patch ${patch.id} in alert")
+        mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
+        this.notifyStateToPatchGuardians()
+        this.alertedGuardian = Map()
       }
     }
+    //    }
   }
 
   private def isMajorityOfGuardiansInPreAlert = {
-    (this.alertedGuardian.size + 1) / this.patchGuardians.size > 0.5
+    (this.alertedGuardian.size + 1) / (this.patchGuardians.size + 1) > 0.5
   }
 
   private def isMajorityOfGuardiansInPreAlertWithElapsedTime: Boolean =
-    (this.getNumberOfGuardiansWithElapsedTime + 1) / this.patchGuardians.size > 0.5
+    (this.getNumberOfGuardiansWithElapsedTime + 1) / (this.patchGuardians.size + 1) > 0.5
 
   private def getNumberOfGuardiansWithElapsedTime: Int = {
     val currentTime = System.currentTimeMillis()
+    log.info(s"alerted: ${this.alertedGuardian.toString()}")
     this.alertedGuardian.count(g => g._2.isEmpty || currentTime - g._2.get > Config.ALERT_MIN_TIME)
   }
 

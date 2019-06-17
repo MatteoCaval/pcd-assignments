@@ -27,7 +27,7 @@ class DashboardActor extends Actor with ActorLogging {
 
   val view = new MapMonitorViewImpl(new ViewListener {
     override def resetAlarmPressed(patchId: Int): Unit = {
-      println(patchId)
+      mediator ! Publish(SubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
     }
   }, PatchManager.getPatches.size)
 
@@ -100,11 +100,28 @@ class DashboardActor extends Actor with ActorLogging {
       }
       guardians += (sender -> info)
       // TODO update ui
-      view.notifyGuardian(DashboardGuardianState(id, temp, GuardianStateEnum.IDLE, patch))
+
+      val guardianState = state match {
+        case GuardianState.OK => GuardianStateEnum.IDLE
+        case GuardianState.ALERT => GuardianStateEnum.ALERT
+        case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
+      }
+
+
+      view.notifyGuardian(DashboardGuardianState(id, temp, guardianState, patch))
 
 
     case PathInAlert(patch) => // FIXME
       log.info(s"Patch $patch in alert")
+      this.view.notifyAlarmState(patch.id)
+      val guardian = guardians(sender)
+
+      val guardianState = guardian.state match {
+        case GuardianState.OK => GuardianStateEnum.IDLE
+        case GuardianState.ALERT => GuardianStateEnum.ALERT
+        case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
+      }
+      this.view.notifyGuardian(DashboardGuardianState(guardian.guardianId, guardian.temperature, guardianState, guardian.patch))
     //      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
     //        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
     //      }

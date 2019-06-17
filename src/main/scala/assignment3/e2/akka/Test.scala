@@ -9,8 +9,10 @@ object Sensors extends App {
   def startClusterWithSensors(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "sensor")
     system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
-//    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
-//    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
   }
 
   startClusterWithSensors(2552)
@@ -29,9 +31,8 @@ object StartGuardians extends App {
   def startClusterWithGuardians(port: Int) = {
     val system = Utils.getSystemByPortWithRole(port, "guardian")
     system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
-    system.actorOf(GuardianActor.props(PatchManager.getPatches(1)))
-    system.actorOf(GuardianActor.props(PatchManager.getPatches(2)))
-    system.actorOf(GuardianActor.props(PatchManager.getPatches(3)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
   }
 
 

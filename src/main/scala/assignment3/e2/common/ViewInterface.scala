@@ -4,4 +4,10 @@ trait MapMonitorView {
   def notifySensor(sensorPos: DashboardSensorPosition): Unit
 
   def notifyGuardian(guardianState: DashboardGuardianState): Unit
+
+  def notifySensorRemoved(sensorId: String)
+
+  def notifyGuardianRemoved(guardianId: String, patchId: Int)
+
+  def notifyAlarmState(patchId: Int)
 }

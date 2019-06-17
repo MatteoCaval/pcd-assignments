@@ -12,22 +12,39 @@ trait ViewListener {
 
 object TestView extends App {
 
-  val asd = new MapMonitorViewImpl(new ViewListener {
+  val view = new MapMonitorViewImpl(new ViewListener {
     override def resetAlarmPressed(patchId: Int): Unit = {
       println(patchId)
     }
   }, PatchManager.getPatches.size)
 
-  asd.show()
-  asd.notifySensor(DashboardSensorPosition("1", P2d(50,50)))
-  asd.notifySensor(DashboardSensorPosition("2", P2d(80,80)))
+  view.show()
+  view.notifySensor(DashboardSensorPosition("1", P2d(50,50)))
+  view.notifySensor(DashboardSensorPosition("2", P2d(80,80)))
 
-  asd.notifyGuardian(DashboardGuardianState("0", 58.3, GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
-  //asd.notifyGuardian(DashboardGuardianState("1", 58.3, GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
-  //asd.notifyGuardian(DashboardGuardianState("2", 15.3, GuardianStateEnum.ALERT, PatchManager.getPatches(0)))
- // asd.notifyGuardian(DashboardGuardianState("3", 17.4, GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
-  //asd.notifyGuardian(DashboardGuardianState("4", 19.3, GuardianStateEnum.PRE_ALERT, PatchManager.getPatches(1)))
+  view.notifyGuardian(DashboardGuardianState("0", Some(58.3), GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
+  view.notifyGuardian(DashboardGuardianState("1", Some(58.3), GuardianStateEnum.ALERT, PatchManager.getPatches(1)))
+
+  Thread.sleep(2000)
+
+  view.notifySensorRemoved("1")
+
+
+  Thread.sleep(2000)
+
+  view.notifyAlarmState(2)
+
+
+  Thread.sleep(2000)
+
+  view.notifyGuardianRemoved("0" ,0)
+
+
+
+
+
 }
+
 
 class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMonitorView {
   private val rowNum = PatchManager.M
@@ -47,7 +64,7 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
   def updateMap(): Unit = frame.repaint()
 
   override def notifySensor(sensorPos: DashboardSensorPosition): Unit = {
-    sensorMap = sensorMap + (sensorPos.id -> sensorPos.position)
+    sensorMap += (sensorPos.id -> sensorPos.position)
     updateMap()
   }
 
@@ -55,9 +72,26 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     val patchId = guardianState.patch.id
     var guardianMap:Map[String, DashboardGuardianState] = if (patchMap.contains(patchId)) patchMap(patchId) else Map()
     guardianMap = guardianMap + (guardianState.id -> guardianState)
-    patchMap = patchMap + (patchId -> guardianMap)
+    patchMap += (patchId -> guardianMap)
 
     patchPanelList(patchId).updateGuardian()
+  }
+
+  override def notifySensorRemoved(sensorId: String): Unit = {
+    sensorMap -= sensorId
+    updateMap()
+  }
+
+  override def notifyGuardianRemoved(guardianId: String, patchId: Int): Unit = {
+    var guardianMap:Map[String, DashboardGuardianState] = patchMap(patchId)
+    guardianMap -= guardianId
+    patchMap += (patchId -> guardianMap)
+
+    patchPanelList(patchId).updateGuardian()
+  }
+
+  override def notifyAlarmState(patchId: Int): Unit = {
+    patchPanelList(patchId).setAlarm()
   }
 
   private class VisualiserFrame(val w: Int, val h: Int) extends JFrame(".:: MapMonitor ::.") {
@@ -126,16 +160,17 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     headerPanel.setLayout(new BorderLayout)
 
     val patchLabel = new JLabel("Patch" + patchId)
-    val resetButton = new JButton("Stop alarm")
+    val disableAlarmBtn = new JButton("Stop alarm")
 
-    resetButton.addActionListener{e => {
+    disableAlarmBtn.addActionListener{ e => {
       listener.resetAlarmPressed(patchId)
+      resetAlarmButton()
     }}
 
-    resetButton.setEnabled(true)
+    resetAlarmButton()
 
     headerPanel.add(BorderLayout.WEST, patchLabel)
-    headerPanel.add(BorderLayout.EAST, resetButton)
+    headerPanel.add(BorderLayout.EAST, disableAlarmBtn)
 
     val guardianListPanel = new JPanel()
     guardianListPanel.setLayout(new BorderLayout)
@@ -153,9 +188,23 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     def updateGuardian(): Unit ={
       guardianListModel.clear()
       addAllPatchGuardians()
-      //guardianListModel.addElement("sciao!")
-      //println("ciao")
     }
+
+    def setAlarm(): Unit = {
+      this.disableAlarmBtn.setEnabled(true)
+      this.disableAlarmBtn.setBackground(Color.RED)
+      this.disableAlarmBtn.setForeground(Color.WHITE)
+      this.disableAlarmBtn.setBorderPainted(true)
+    }
+
+    def resetAlarmButton(): Unit = {
+      this.disableAlarmBtn.setBorderPainted(false)
+      this.disableAlarmBtn.setBackground(null)
+      this.disableAlarmBtn.setForeground(null)
+      this.disableAlarmBtn.setEnabled(false)
+
+    }
+
 
     private def addAllPatchGuardians(): Unit ={
       var guardianMap: Map[String, DashboardGuardianState] = patchMap(patchId)

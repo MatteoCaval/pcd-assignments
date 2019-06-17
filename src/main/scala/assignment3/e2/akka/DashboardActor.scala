@@ -89,7 +89,7 @@ class DashboardActor extends Actor with ActorLogging {
       }
       guardians += (sender -> info)
       // TODO update ui
-      view.notifyGuardian(DashboardGuardianState(id, temp.getOrElse(0), GuardianStateEnum.IDLE, patch))
+      view.notifyGuardian(DashboardGuardianState(id, temp, GuardianStateEnum.IDLE, patch))
 
 
     case PathInAlert(patch) => // FIXME

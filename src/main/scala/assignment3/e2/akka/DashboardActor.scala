@@ -94,9 +94,9 @@ class DashboardActor extends Actor with ActorLogging {
 
     case PathInAlert(patch) => // FIXME
       log.info(s"Patch $patch in alert")
-      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
-        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
-      }
+//      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
+//        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
+//      }
   }
 
 }

@@ -1,13 +1,8 @@
 package assignment3.e2.akka
 
-import java.util.UUID
-
-import akka.actor.{ActorSystem, PoisonPill, Props}
-import assignment3.e2.common.{P2d, Patch, PatchManager}
+import akka.actor.{ActorSystem, Props}
+import assignment3.e2.common.PatchManager
 import com.typesafe.config.ConfigFactory
-
-import scala.concurrent.duration._
-import scala.util.Random
 
 object Sensors extends App {
 

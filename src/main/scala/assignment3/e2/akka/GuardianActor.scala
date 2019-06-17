@@ -197,7 +197,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private def checkAlertState(): Unit = {
     if (this.state == GuardianState.PREALERT && isMajorityOfGuardiansInPreAlert) {
       this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
-        if (isMajorityOfGuardiansInPreAlert) {
+        if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
           mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
           this.notifyStateToPatchGuardians()
           this.alertedGuardian = Map()
@@ -206,12 +206,17 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     }
   }
 
-  private def isMajorityOfGuardiansInPreAlert: Boolean =
-    (this.alertedGuardian.size + 1) / getNumberOfGuardiansWithElapsedTime > 0.5
+  private def isMajorityOfGuardiansInPreAlert = {
+    (this.alertedGuardian.size + 1) / this.patchGuardians.size > 0.5
+  }
+
+  private def isMajorityOfGuardiansInPreAlertWithElapsedTime: Boolean =
+    (this.getNumberOfGuardiansWithElapsedTime + 1) / this.patchGuardians.size > 0.5
 
   private def getNumberOfGuardiansWithElapsedTime: Int = {
     val currentTime = System.currentTimeMillis()
     this.alertedGuardian.count(g => g._2.isEmpty || currentTime - g._2.get > Config.ALERT_MIN_TIME)
   }
+
 
 }

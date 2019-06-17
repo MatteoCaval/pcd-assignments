@@ -64,10 +64,21 @@ class DashboardActor extends Actor with ActorLogging {
     //      log.info(s"Sensor ${member.address} removed")
 
     case Terminated(actorRef) =>
-      log.info(s"Actor ${actorRef.path} terminated")
-      guardians -= actorRef // controllare se crasha quando non presente
-      sensors -= actorRef
-    //TODO update ui
+
+
+      if (guardians.contains(actorRef)) {
+        log.info(s"Actor guardian ${guardians(actorRef).guardianId} terminated")
+        this.view.notifyGuardianRemoved(guardians(actorRef).guardianId, guardians(actorRef).patch.id)
+        guardians -= actorRef // controllare se crasha quando non presente
+
+      }
+
+      if (sensors.contains(actorRef)) {
+        log.info(s"Actor sensor ${sensors(actorRef).sensorId} terminated")
+        this.view.notifySensorRemoved(sensors(actorRef).sensorId)
+        sensors -= actorRef
+      }
+
   }
 
 
@@ -94,9 +105,9 @@ class DashboardActor extends Actor with ActorLogging {
 
     case PathInAlert(patch) => // FIXME
       log.info(s"Patch $patch in alert")
-//      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
-//        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
-//      }
+    //      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
+    //        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
+    //      }
   }
 
 }

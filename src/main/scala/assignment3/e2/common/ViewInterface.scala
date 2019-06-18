@@ -9,5 +9,5 @@ trait MapMonitorView {
 
   def notifyGuardianRemoved(guardianId: String, patchId: Int)
 
-  def notifyAlarmState(patchId: Int)
+  def notifyAlarmStateEnabled(patchId: Int, enabled: Boolean)
 }

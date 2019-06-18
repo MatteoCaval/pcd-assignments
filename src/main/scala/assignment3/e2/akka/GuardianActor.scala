@@ -1,6 +1,6 @@
 package assignment3.e2.akka
 
-import java.util.{Date, UUID}
+import java.util.UUID
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable, Props, Terminated}
 import akka.cluster.Cluster
@@ -23,8 +23,6 @@ case class GuardianUp(patch: Patch, state: String)
 
 case object RequestGuardianInformations
 
-case class PathInAlert(patch: Patch)
-
 case class PatchReleaseMessage(patchId: Int)
 
 case class GuardianStateMesssage(state: String, alertTime: Option[Long])
@@ -45,6 +43,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
   mediator ! Subscribe(SubSubMessages.GUARDIAN_UP, self)
   mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
+  mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
 
 
   private var receivedTemperatures: Map[String, Double] = Map()
@@ -124,6 +123,11 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
         context.watch(sender)
       }
       patchGuardians += (sender -> senderState)
+      if (this.state != GuardianState.ALERT && senderState == GuardianState.ALERT) {
+        this.state = GuardianState.ALERT
+        this.alertedGuardian = Map()
+        this.broadcastGuardianInfos()
+      }
 
     // guardian termination
     case Terminated(ref) if patchGuardians.contains(ref) =>
@@ -139,14 +143,12 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     case GuardianStateMesssage(senderState, time) =>
       senderState match {
         case GuardianState.ALERT => //switch my state to alert and notify dashboards
-          log.info("guardian of my patch in alert, now me")
-          this.state = GuardianState.ALERT
-          this.alertedGuardian = Map()
-          mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
+        //          this.patchAlertTimer.cancel()
+        //          this.state = GuardianState.ALERT
+        //          this.alertedGuardian = Map()
 
         case GuardianState.PREALERT =>
           this.alertedGuardian += (sender -> time)
-          log.info(s"Guardian of my patch in prealert, now ${alertedGuardian.size}/${patchGuardians.size}")
 
         case GuardianState.OK =>
           this.alertedGuardian -= sender //removes sender from alerted guardians
@@ -205,18 +207,15 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
   private def checkAlertState(): Unit = {
     log.info(s"checking alert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}, mayority $isMajorityOfGuardiansInPreAlert")
-    //    if (this.state == GuardianState.PREALERT && isMajorityOfGuardiansInPreAlert) {
-    log.info("Majority in alert")
     this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
-      log.info("sec elapsed")
       if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
         log.info(s"Patch ${patch.id} in alert")
-        mediator ! Publish(SubSubMessages.PATCH_ALERT, PathInAlert(this.patch))
-        this.notifyStateToPatchGuardians()
+        this.state = GuardianState.ALERT
+        broadcastGuardianInfos()
         this.alertedGuardian = Map()
+
       }
     }
-    //    }
   }
 
   private def isMajorityOfGuardiansInPreAlert = {

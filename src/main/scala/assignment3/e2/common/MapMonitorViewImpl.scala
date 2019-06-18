@@ -19,8 +19,8 @@ object TestView extends App {
   }, PatchManager.getPatches.size)
 
   view.show()
-  view.notifySensor(DashboardSensorPosition("1", P2d(50,50)))
-  view.notifySensor(DashboardSensorPosition("2", P2d(80,80)))
+  view.notifySensor(DashboardSensorPosition("1", P2d(50, 50)))
+  view.notifySensor(DashboardSensorPosition("2", P2d(80, 80)))
 
   view.notifyGuardian(DashboardGuardianState("0", Some(58.3), GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
   view.notifyGuardian(DashboardGuardianState("1", Some(58.3), GuardianStateEnum.ALERT, PatchManager.getPatches(1)))
@@ -32,30 +32,27 @@ object TestView extends App {
 
   Thread.sleep(2000)
 
-  view.notifyAlarmState(2)
+  view.notifyAlarmStateEnabled(2, enabled = true)
 
 
   Thread.sleep(2000)
 
-  view.notifyGuardianRemoved("0" ,0)
-
-
-
+  view.notifyGuardianRemoved("0", 0)
 
 
 }
 
 
-class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMonitorView {
+class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMonitorView {
   private val rowNum = PatchManager.M
   private val colNum = PatchManager.N
 
   private val w: Int = PatchManager.width.toInt
   private val h: Int = PatchManager.height.toInt
 
-  private var sensorMap:Map[String, P2d] = Map()
-  private var patchMap:Map[Int, Map[String, DashboardGuardianState]] = Map()
-  private var patchPanelList:Seq[PatchVisualizerPanel] = Seq()
+  private var sensorMap: Map[String, P2d] = Map()
+  private var patchMap: Map[Int, Map[String, DashboardGuardianState]] = Map()
+  private var patchPanelList: Seq[PatchVisualizerPanel] = Seq()
 
   private val frame: VisualiserFrame = new VisualiserFrame(w, h)
 
@@ -70,7 +67,7 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
 
   override def notifyGuardian(guardianState: DashboardGuardianState): Unit = {
     val patchId = guardianState.patch.id
-    var guardianMap:Map[String, DashboardGuardianState] = if (patchMap.contains(patchId)) patchMap(patchId) else Map()
+    var guardianMap: Map[String, DashboardGuardianState] = if (patchMap.contains(patchId)) patchMap(patchId) else Map()
     guardianMap = guardianMap + (guardianState.id -> guardianState)
     patchMap += (patchId -> guardianMap)
 
@@ -83,15 +80,15 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
   }
 
   override def notifyGuardianRemoved(guardianId: String, patchId: Int): Unit = {
-    var guardianMap:Map[String, DashboardGuardianState] = patchMap(patchId)
+    var guardianMap: Map[String, DashboardGuardianState] = patchMap(patchId)
     guardianMap -= guardianId
     patchMap += (patchId -> guardianMap)
 
     patchPanelList(patchId).updateGuardian()
   }
 
-  override def notifyAlarmState(patchId: Int): Unit = {
-    patchPanelList(patchId).setAlarm()
+  override def notifyAlarmStateEnabled(patchId: Int, enabled: Boolean): Unit = {
+    patchPanelList(patchId).setAlarmEnabled(enabled)
   }
 
   private class VisualiserFrame(val w: Int, val h: Int) extends JFrame(".:: MapMonitor ::.") {
@@ -109,7 +106,7 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     }
 
     private val scrollPanel = new JScrollPane(controlPanel)
-    scrollPanel.setPreferredSize(new Dimension(450, h))
+    scrollPanel.setPreferredSize(new Dimension(550, h))
 
     val cp = new JPanel
     cp.setLayout(new BorderLayout)
@@ -142,8 +139,8 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
           g.drawLine(i * rowWid.toInt, 0, i * rowWid.toInt, height.toInt)
         }
 
-        if (sensorMap.nonEmpty){
-          for(pos <- sensorMap.values){
+        if (sensorMap.nonEmpty) {
+          for (pos <- sensorMap.values) {
             val x0 = pos.x
             val y0 = pos.y
             g2.drawOval(x0.toInt, y0.toInt, 5, 5)
@@ -151,6 +148,7 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
         }
       }
     }
+
   }
 
   private class PatchVisualizerPanel(patchId: Int) extends JPanel {
@@ -162,12 +160,13 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     val patchLabel = new JLabel("Patch" + patchId)
     val disableAlarmBtn = new JButton("Stop alarm")
 
-    disableAlarmBtn.addActionListener{ e => {
+    disableAlarmBtn.addActionListener { e => {
       listener.resetAlarmPressed(patchId)
-      resetAlarmButton()
-    }}
+      setAlarmEnabled(false)
+    }
+    }
 
-    resetAlarmButton()
+    setAlarmEnabled(false)
 
     headerPanel.add(BorderLayout.WEST, patchLabel)
     headerPanel.add(BorderLayout.EAST, disableAlarmBtn)
@@ -185,30 +184,30 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
     add(BorderLayout.NORTH, headerPanel)
     add(BorderLayout.SOUTH, guardianScrollPanel)
 
-    def updateGuardian(): Unit ={
+    def updateGuardian(): Unit = {
       guardianListModel.clear()
       addAllPatchGuardians()
     }
 
-    def setAlarm(): Unit = {
-      this.disableAlarmBtn.setEnabled(true)
-      this.disableAlarmBtn.setBackground(Color.RED)
-      this.disableAlarmBtn.setForeground(Color.WHITE)
-      this.disableAlarmBtn.setBorderPainted(true)
+    def setAlarmEnabled(enabled: Boolean): Unit = {
+      if (enabled) {
+        this.disableAlarmBtn.setEnabled(true)
+        this.disableAlarmBtn.setBackground(Color.RED)
+        this.disableAlarmBtn.setForeground(Color.WHITE)
+        this.disableAlarmBtn.setBorderPainted(true)
+      } else {
+        this.disableAlarmBtn.setBorderPainted(false)
+        this.disableAlarmBtn.setBackground(null)
+        this.disableAlarmBtn.setForeground(null)
+        this.disableAlarmBtn.setEnabled(false)
+      }
+
     }
 
-    def resetAlarmButton(): Unit = {
-      this.disableAlarmBtn.setBorderPainted(false)
-      this.disableAlarmBtn.setBackground(null)
-      this.disableAlarmBtn.setForeground(null)
-      this.disableAlarmBtn.setEnabled(false)
 
-    }
-
-
-    private def addAllPatchGuardians(): Unit ={
+    private def addAllPatchGuardians(): Unit = {
       var guardianMap: Map[String, DashboardGuardianState] = patchMap(patchId)
-      if (guardianListModel == null){
+      if (guardianListModel == null) {
         guardianListModel = new DefaultListModel()
       }
       println("Numero guardiani in patch " + patchId + " : " + guardianMap.size)
@@ -219,4 +218,5 @@ class MapMonitorViewImpl(listener:ViewListener, patchNumber:Int) extends MapMoni
       })
     }
   }
+
 }

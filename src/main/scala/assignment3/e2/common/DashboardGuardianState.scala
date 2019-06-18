@@ -6,7 +6,7 @@ import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 case class DashboardGuardianState(id: String, averageTemp: Option[Double], state: GuardianStateEnum, patch: Patch) {
 
   override def toString: String = {
-    s"Guardian $id - state: ${state.toString} - average temp: $averageTemp"
+    s"Guardian $id - ${state.toString} - Avg temp: ${averageTemp.getOrElse(" - ")}"
   }
 
 }

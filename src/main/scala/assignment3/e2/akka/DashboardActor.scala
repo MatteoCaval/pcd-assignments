@@ -22,7 +22,6 @@ class DashboardActor extends Actor with ActorLogging {
 
   mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
   mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
-  mediator ! Subscribe(SubSubMessages.PATCH_ALERT, self)
 
 
   val view = new MapMonitorViewImpl(new ViewListener {
@@ -57,15 +56,7 @@ class DashboardActor extends Actor with ActorLogging {
       context.actorSelection(RootActorPath(member.address) / "user" / "*") !
         RequestGuardianInformations
 
-    //    case MemberRemoved(member, previousStatus) if member.hasRole("guardian") =>
-    //      log.info(s"Guardian ${member.address} removed")
-    //
-    //    case MemberRemoved(member, previousStatus) if member.hasRole("sensor") =>
-    //      log.info(s"Sensor ${member.address} removed")
-
     case Terminated(actorRef) =>
-
-
       if (guardians.contains(actorRef)) {
         log.info(s"Actor guardian ${guardians(actorRef).guardianId} terminated")
         this.view.notifyGuardianRemoved(guardians(actorRef).guardianId, guardians(actorRef).patch.id)
@@ -91,15 +82,15 @@ class DashboardActor extends Actor with ActorLogging {
       sensors += (sender -> s)
 
       view.notifySensor(DashboardSensorPosition(id, position))
-    // TODO: Update ui
+
 
     case info@GuardianInfo(id, patch, state, temp) =>
-      log.info(s"Received temperature from ${sender.path}: temperature ${info.temperature} at patch ${info.patch}")
+      log.info(s"Received temperature from ${sender.path}: temperature ${info.temperature} at patch ${info.patch} with state $state")
       if (!guardians.contains(sender)) {
         context.watch(sender)
       }
       guardians += (sender -> info)
-      // TODO update ui
+
 
       val guardianState = state match {
         case GuardianState.OK => GuardianStateEnum.IDLE
@@ -108,23 +99,11 @@ class DashboardActor extends Actor with ActorLogging {
       }
 
 
+      this.view.notifyAlarmStateEnabled(patch.id, state == GuardianState.ALERT)
+
       view.notifyGuardian(DashboardGuardianState(id, temp, guardianState, patch))
 
 
-    case PathInAlert(patch) => // FIXME
-      log.info(s"Patch $patch in alert")
-      this.view.notifyAlarmState(patch.id)
-      val guardian = guardians(sender)
-
-      val guardianState = guardian.state match {
-        case GuardianState.OK => GuardianStateEnum.IDLE
-        case GuardianState.ALERT => GuardianStateEnum.ALERT
-        case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
-      }
-      this.view.notifyGuardian(DashboardGuardianState(guardian.guardianId, guardian.temperature, guardianState, guardian.patch))
-    //      context.system.scheduler.scheduleOnce(4 seconds) { // TODO: UI event
-    //        mediator ! Publish(SubSubMessages.TERMINATE_ALERT, patch)
-    //      }
   }
 
 }

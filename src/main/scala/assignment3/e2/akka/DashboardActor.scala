@@ -103,7 +103,6 @@ class DashboardActor extends Actor with ActorLogging {
 
       view.notifyGuardian(DashboardGuardianState(id, temp, guardianState, patch))
 
-
   }
 
 }

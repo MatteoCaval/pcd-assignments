@@ -4,7 +4,6 @@ import assignment3.e2.akka.Config
 
 import scala.util.Random
 
-
 object PatchManager {
   val N: Int = Config.N
   val M: Int = Config.M
@@ -36,6 +35,3 @@ object PatchManager {
   }
 }
 
-object Test extends App {
-  println(PatchManager.getPatches.toString)
-}

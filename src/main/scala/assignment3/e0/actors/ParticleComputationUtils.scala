@@ -22,8 +22,6 @@ object ParticleComputationUtils {
     var force = new V2d(0, 0)
     val alpha: Double = p.getAlpha
 
-    //    println(s"calculating force of particle with pos ${p.getPos}, total particles: ${particles.length}")
-
     for (i <- particles.indices) {
       val p2 = particles(i)
       if (p.getPos.x != p2.getPos.x || p.getPos.y != p2.getPos.y) {

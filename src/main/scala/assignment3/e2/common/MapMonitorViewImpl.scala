@@ -210,11 +210,11 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
       if (guardianListModel == null) {
         guardianListModel = new DefaultListModel()
       }
-      println("Numero guardiani in patch " + patchId + " : " + guardianMap.size)
+//      println("Numero guardiani in patch " + patchId + " : " + guardianMap.size)
       guardianMap.values.foreach(d => {
-        println(d.toString)
+//        println(d.toString)
         guardianListModel.addElement(d.toString)
-        println(s"Size: ${guardianListModel.size()}")
+//        println(s"Size: ${guardianListModel.size()}")
       })
     }
   }

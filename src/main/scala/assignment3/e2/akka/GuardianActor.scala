@@ -118,7 +118,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   def guardianInformations: Receive = {
 
     // ricevuto da un altro guardiano
-    case GuardianInfo(_, senderPatch, senderState, _) if senderPatch == this.patch =>
+    case GuardianInfo(_, senderPatch, senderState, _) if senderPatch == this.patch && sender != self =>
       if (!patchGuardians.contains(sender)) {
         context.watch(sender)
       }
@@ -206,7 +206,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   }
 
   private def checkAlertState(): Unit = {
-    log.info(s"checking alert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}, mayority $isMajorityOfGuardiansInPreAlert")
+    log.info(s"checking alert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}")
     this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
       if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
         log.info(s"Patch ${patch.id} in alert")
@@ -214,6 +214,8 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
         broadcastGuardianInfos()
         this.alertedGuardian = Map()
 
+      } else {
+        log.info("Majority not in alert")
       }
     }
   }
@@ -225,9 +227,9 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private def isMajorityOfGuardiansInPreAlertWithElapsedTime: Boolean =
     (this.getNumberOfGuardiansWithElapsedTime + 1) / (this.patchGuardians.size + 1) > 0.5
 
+
   private def getNumberOfGuardiansWithElapsedTime: Int = {
     val currentTime = System.currentTimeMillis()
-    log.info(s"alerted: ${this.alertedGuardian.toString()}")
     this.alertedGuardian.count(g => g._2.isEmpty || currentTime - g._2.get > Config.ALERT_MIN_TIME)
   }
 

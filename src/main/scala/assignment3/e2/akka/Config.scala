@@ -6,5 +6,5 @@ object Config {
   val ALERT_MIN_TIME = 6000
 
   val N = 2 // col number
-  val M = 2 // row number
+  val M = 1 // row number
 }

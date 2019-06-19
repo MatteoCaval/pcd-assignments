@@ -2,17 +2,13 @@ package assignment3.e2.akka
 
 import akka.actor.{Actor, ActorLogging, ActorRef, RootActorPath, Terminated}
 import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemoved, MemberUp, UnreachableMember}
+import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe}
-import akka.util.Timeout
-import assignment3.e2.common.{DashboardGuardianState, DashboardSensorPosition, GuardianStateEnum, MapMonitorViewImpl, P2d, PatchManager, ViewListener}
-
-import scala.concurrent.duration._
+import assignment3.e2.akka.ActorMessages._
+import assignment3.e2.common._
 
 class DashboardActor extends Actor with ActorLogging {
-
-  import context.dispatcher
 
   private var guardians: Map[ActorRef, GuardianInfo] = Map()
   private var sensors: Map[ActorRef, SensorData] = Map()

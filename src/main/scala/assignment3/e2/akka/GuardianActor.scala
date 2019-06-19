@@ -7,6 +7,7 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
+import assignment3.e2.akka.ActorMessages._
 import assignment3.e2.common.Patch
 
 import scala.concurrent.duration._
@@ -16,16 +17,6 @@ object GuardianState {
   val PREALERT = "prealert"
   val ALERT = "alert"
 }
-
-case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Option[Double])
-
-case class GuardianUp(patch: Patch, state: String)
-
-case object RequestGuardianInformations
-
-case class PatchReleaseMessage(patchId: Int)
-
-case class GuardianStateMesssage(state: String, alertTime: Option[Long])
 
 
 object GuardianActor {

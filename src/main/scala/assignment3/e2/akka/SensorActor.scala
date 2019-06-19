@@ -4,20 +4,11 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.pubsub.DistributedPubSub
+import assignment3.e2.akka.ActorMessages._
 import assignment3.e2.common.{P2d, PatchManager}
 
 import scala.concurrent.duration._
 import scala.util.Random
-
-case class SensorData(sensorId: String, temperature: Option[Double], position: P2d)
-
-case object RegistrateSensor
-
-case object RegistrateSensorWithCompleteData
-
-case class SensorRegistrationData(sensorId: String, ref: ActorRef)
-
-case class SensorRegistrationCompleteData(sensorId: String, ref: ActorRef, temperature: Option[Double], position: P2d)
 
 
 object SensorActor {

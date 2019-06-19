@@ -3,16 +3,18 @@ package assignment3.e2.rmi.remoteobjects
 import java.io.Serializable
 import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.stream.Collectors
 
-import assignment3.e2.common.{GuardianStateEnum, MapMonitorViewImpl}
+import assignment3.e2.common.{DashboardGuardianState, GuardianStateEnum, MapMonitorViewImpl, PatchManager}
 import assignment3.e2.rmi.Config
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 import javax.swing.SwingUtilities
 
 @SerialVersionUID(5377073057466013968L)
-class DashboardImpl(var name: String, var view: MapMonitorViewImpl) extends Dashboard with Serializable {
+class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashboard with Serializable {
   private val guardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
   private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap()
+  private val guardiansState: ConcurrentHashMap[String, DashboardGuardianState] = new ConcurrentHashMap()
 
   private val brokenSensors: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
   private val brokenGuardians: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
@@ -45,33 +47,47 @@ class DashboardImpl(var name: String, var view: MapMonitorViewImpl) extends Dash
   @throws[RemoteException]
   override def update(): Unit = {
     guardians.entrySet().forEach(g => {
-      val guardianObj = g.getValue.getRemoteObject
+      val guardian = g.getValue
+      val guardianObj = guardian.getRemoteObject
       try {
-        val guardianState = guardianObj.getGuardiansStatus
-        view.notifyGuardian(guardianState)
-        eventuallyRemoveFromBrokenGuardians(g.getKey)
-        if (guardianState.state == GuardianStateEnum.ALARM) {
+        val guardianState = guardianObj.getGuardiansState
+        guardiansState.put(guardianState.id, guardianState)
+        view.notifyGuardian(DashboardGuardianState(guardianState.id, guardianState.averageTemp, guardianState.state, guardianState.patch))
+
+        val allInAlarmState: Boolean = guardiansState.values().stream().filter(g => g.patch.id == guardianState.patch.id).allMatch(g => g.state == GuardianStateEnum.ALARM)
+
+        if (allInAlarmState) {
           view.notifyAlarmStateEnabled(guardianState.patch.id, enabled = true)
         }
-        //println(state.averageTemp)
+
+        eventuallyRemoveFromBrokenGuardians(guardian.getId)
       } catch {
         case _: Exception =>
-          checkForBrokenGuardian(g.getKey, g.getValue.getPatchId)
+          checkForBrokenGuardian(guardian.getId, guardian.getPatchId)
       }
     })
 
     sensors.entrySet().forEach(s => {
-      val sensorObj = s.getValue.getRemoteObject
+      val sensor = s.getValue
+      val sensorObj = sensor.getRemoteObject
 
       SwingUtilities.invokeLater(() => {
         try {
           val pos = sensorObj.getDashboardPosition
           view.notifySensor(pos)
-          eventuallyRemoveFromBrokenSensors(s.getKey)
+          eventuallyRemoveFromBrokenSensors(sensor.getId)
         } catch {
-          case _: Exception => checkForBrokenSensor(s.getKey)
+          case _: Exception => checkForBrokenSensor(sensor.getId)
         }
       })
+    })
+
+
+    PatchManager.getPatches.foreach(patch => {
+      val patchId = patch.id
+      if (guardiansState.values().stream().filter(g => g.patch.id == patchId).allMatch(g => g.state != GuardianStateEnum.ALARM)) {
+        view.notifyAlarmStateEnabled(patchId, enabled = false)
+      }
     })
   }
 
@@ -83,7 +99,7 @@ class DashboardImpl(var name: String, var view: MapMonitorViewImpl) extends Dash
         val guardianObj = guardian.getRemoteObject
         try {
           guardianObj.setState(GuardianStateEnum.IDLE)
-          eventuallyRemoveFromBrokenGuardians(g.getKey)
+          eventuallyRemoveFromBrokenGuardians(guardian.getId)
 
         } catch {
           case e: Exception =>
@@ -125,5 +141,4 @@ class DashboardImpl(var name: String, var view: MapMonitorViewImpl) extends Dash
       brokenSensors.put(sensorId, currentTime)
     }
   }
-
 }

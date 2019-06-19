@@ -72,7 +72,6 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
           if (averageTemp.get < CommonConfig.ALERT_TEMP) {
             changeState(GuardianStateEnum.IDLE)
             timer.cancel()
-            // torno in idle
           }
         }
 
@@ -82,7 +81,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   }
 
   @throws[RemoteException]
-  override def getGuardiansStatus: DashboardGuardianState = {
+  override def getGuardiansState: DashboardGuardianState = {
     DashboardGuardianState(id, averageTemp, state, patch)
   }
 
@@ -122,13 +121,16 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
     setState(state)
 
     patchGuardians.entrySet().forEach(p => {
+      val patchGuardian = p.getValue
+
       try {
-        if (p.getKey != id) {
-          p.getValue.getRemoteObject.notifyNewGuardianState(p.getKey, StateMessage(state, Some(time)))
-          eventuallyRemoveFromBrokenGuardians(p.getKey)
+        if (patchGuardian.getId != id) {
+          if (state == GuardianStateEnum.ALARM)
+          p.getValue.getRemoteObject.notifyNewGuardianState(patchGuardian.getId, StateMessage(state, Some(time)))
+          eventuallyRemoveFromBrokenGuardians(patchGuardian.getId)
         }
       } catch {
-        case _: RemoteException => checkForBrokenGuardian(p.getKey)
+        case _: RemoteException => checkForBrokenGuardian(patchGuardian.getId)
       }
     })
 
@@ -140,17 +142,18 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   private def updateSensorsData(): Unit = {
     detections.clear()
     sensors.entrySet().forEach(s => {
-      val sensorObj = s.getValue.getRemoteObject
+      val sensor = s.getValue
+      val sensorObj = sensor.getRemoteObject
       try {
         val detection = sensorObj.getDetection
 
         if (patch.includePoint(detection.position)) {
-          detections.put(s.getKey, detection)
+          detections.put(sensor.getId, detection)
           calculateAverageTemp()
-          eventuallyRemoveFromBrokenSensors(s.getKey)
+          eventuallyRemoveFromBrokenSensors(sensor.getId)
         }
       } catch {
-        case _: RemoteException => checkForBrokenSensor(s.getKey)
+        case _: RemoteException => checkForBrokenSensor(sensor.getId)
       }
     })
   }

@@ -4,6 +4,5 @@ object GuardianStateEnum extends Enumeration {
   type GuardianStateEnum = Value
   val IDLE: GuardianStateEnum.Value = Value("Idle")
   val PRE_ALERT: GuardianStateEnum.Value = Value("Pre-alert")
-  val ALARM: GuardianStateEnum.Value = Value("Alert")
-
+  val ALARM: GuardianStateEnum.Value = Value("Alarm")
 }

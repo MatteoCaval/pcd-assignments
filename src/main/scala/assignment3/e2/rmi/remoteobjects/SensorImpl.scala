@@ -6,14 +6,11 @@ import assignment3.e2.rmi.Config
 import assignment3.e2.common._
 
 @SerialVersionUID(5377073057466013968L)
-class SensorImpl(var name: String) extends Sensor with Serializable {
+class SensorImpl(var id: String) extends Sensor with Serializable {
   var temperature: Option[Double] = None
   var position: P2d = SensorManager.getRandomPosition
 
   var lastUpdate:Long = 0
-
-  @throws[RemoteException]
-  override def getName: String = name
 
   @throws[RemoteException]
   override def tell(text: String): Unit = System.out.println(text)
@@ -26,7 +23,7 @@ class SensorImpl(var name: String) extends Sensor with Serializable {
   @throws[RemoteException]
   override def getDashboardPosition: DashboardSensorPosition = {
     fresh()
-    DashboardSensorPosition(name, position)
+    DashboardSensorPosition(id, position)
   }
 
   // allow to make live the sensor

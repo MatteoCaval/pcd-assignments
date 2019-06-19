@@ -6,7 +6,7 @@ object PatchManager {
   val N: Int = CommonConfig.N
   val M: Int = CommonConfig.M
 
-  val width: Double = 1000
+  val width: Double = 500
   val height: Double = 500
 
   val patchNumber: Int = N * M

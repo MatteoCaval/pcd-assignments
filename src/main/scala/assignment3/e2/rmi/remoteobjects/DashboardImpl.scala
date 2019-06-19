@@ -3,8 +3,9 @@ package assignment3.e2.rmi.remoteobjects
 import java.io.Serializable
 import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.stream.Collectors
 
-import assignment3.e2.common.{DashboardGuardianState, GuardianStateEnum, MapMonitorViewImpl}
+import assignment3.e2.common.{DashboardGuardianState, GuardianStateEnum, MapMonitorViewImpl, PatchManager}
 import assignment3.e2.rmi.Config
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 import javax.swing.SwingUtilities
@@ -13,6 +14,7 @@ import javax.swing.SwingUtilities
 class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashboard with Serializable {
   private val guardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
   private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap()
+  private val guardiansState: ConcurrentHashMap[String, DashboardGuardianState] = new ConcurrentHashMap()
 
   private val brokenSensors: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
   private val brokenGuardians: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
@@ -49,11 +51,16 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
       val guardianObj = guardian.getRemoteObject
       try {
         val guardianState = guardianObj.getGuardiansState
+        guardiansState.put(guardianState.id, guardianState)
         view.notifyGuardian(DashboardGuardianState(guardianState.id, guardianState.averageTemp, guardianState.state, guardianState.patch))
-        eventuallyRemoveFromBrokenGuardians(guardian.getId)
-        if (guardianState.state == GuardianStateEnum.ALARM) {
+
+        val allInAlarmState: Boolean = guardiansState.values().stream().filter(g => g.patch.id == guardianState.patch.id).allMatch(g => g.state == GuardianStateEnum.ALARM)
+
+        if (allInAlarmState) {
           view.notifyAlarmStateEnabled(guardianState.patch.id, enabled = true)
         }
+
+        eventuallyRemoveFromBrokenGuardians(guardian.getId)
       } catch {
         case _: Exception =>
           checkForBrokenGuardian(guardian.getId, guardian.getPatchId)
@@ -73,6 +80,14 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
           case _: Exception => checkForBrokenSensor(sensor.getId)
         }
       })
+    })
+
+
+    PatchManager.getPatches.foreach(patch => {
+      val patchId = patch.id
+      if (guardiansState.values().stream().filter(g => g.patch.id == patchId).allMatch(g => g.state != GuardianStateEnum.ALARM)) {
+        view.notifyAlarmStateEnabled(patchId, enabled = false)
+      }
     })
   }
 

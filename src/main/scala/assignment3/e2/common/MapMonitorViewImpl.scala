@@ -23,7 +23,7 @@ object TestView extends App {
   view.notifySensor(DashboardSensorPosition("2", P2d(80, 80)))
 
   view.notifyGuardian(DashboardGuardianState("0", Some(58.3), GuardianStateEnum.IDLE, PatchManager.getPatches(0)))
-  view.notifyGuardian(DashboardGuardianState("1", Some(58.3), GuardianStateEnum.ALERT, PatchManager.getPatches(1)))
+  view.notifyGuardian(DashboardGuardianState("1", Some(58.3), GuardianStateEnum.IDLE, PatchManager.getPatches(1)))
 
   Thread.sleep(2000)
 
@@ -56,9 +56,17 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
 
   private val frame: VisualiserFrame = new VisualiserFrame(w, h)
 
-  def show(): Unit = frame.setVisible(true)
+  def show(): Unit = {
+    SwingUtilities.invokeLater(() => {
+      frame.setVisible(true)
+    })
+  }
 
-  def updateMap(): Unit = frame.repaint()
+  def updateMap(): Unit = {
+    SwingUtilities.invokeLater(() => {
+      frame.repaint()
+    })
+  }
 
   override def notifySensor(sensorPos: DashboardSensorPosition): Unit = {
     sensorMap += (sensorPos.id -> sensorPos.position)
@@ -67,6 +75,8 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
 
   override def notifyGuardian(guardianState: DashboardGuardianState): Unit = {
     val patchId = guardianState.patch.id
+
+    // aggiungo o aggiorno nella patch indicata
     var guardianMap: Map[String, DashboardGuardianState] = if (patchMap.contains(patchId)) patchMap(patchId) else Map()
     guardianMap = guardianMap + (guardianState.id -> guardianState)
     patchMap += (patchId -> guardianMap)
@@ -81,10 +91,12 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
 
   override def notifyGuardianRemoved(guardianId: String, patchId: Int): Unit = {
     var guardianMap: Map[String, DashboardGuardianState] = patchMap(patchId)
-    guardianMap -= guardianId
-    patchMap += (patchId -> guardianMap)
+    if (patchMap != null){
+      guardianMap -= guardianId
+      patchMap += (patchId -> guardianMap)
 
-    patchPanelList(patchId).updateGuardian()
+      patchPanelList(patchId).updateGuardian()
+    }
   }
 
   override def notifyAlarmStateEnabled(patchId: Int, enabled: Boolean): Unit = {
@@ -185,8 +197,10 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
     add(BorderLayout.SOUTH, guardianScrollPanel)
 
     def updateGuardian(): Unit = {
-      guardianListModel.clear()
-      addAllPatchGuardians()
+      SwingUtilities.invokeLater(() =>  {
+        guardianListModel.clear()
+        addAllPatchGuardians()
+      })
     }
 
     def setAlarmEnabled(enabled: Boolean): Unit = {
@@ -212,8 +226,11 @@ class MapMonitorViewImpl(listener: ViewListener, patchNumber: Int) extends MapMo
       }
 //      println("Numero guardiani in patch " + patchId + " : " + guardianMap.size)
       guardianMap.values.foreach(d => {
+
 //        println(d.toString)
-        guardianListModel.addElement(d.toString)
+
+          guardianListModel.addElement(d.toString)
+
 //        println(s"Size: ${guardianListModel.size()}")
       })
     }

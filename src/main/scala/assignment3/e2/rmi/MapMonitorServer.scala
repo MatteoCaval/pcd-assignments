@@ -3,7 +3,6 @@ package assignment3.e2.rmi
 import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 
-import assignment3.e2.common.Config
 import assignment3.e2.rmi.remoteobjects.{MapMonitor, MapMonitorImpl}
 
 object MapMonitorServer extends App {

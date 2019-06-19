@@ -4,7 +4,6 @@ import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 import java.util.UUID
 
-import assignment3.e2.common.Config
 import assignment3.e2.rmi.mapentry.SensorEntry
 import assignment3.e2.rmi.remoteobjects.{MapMonitor, Sensor, SensorImpl}
 

@@ -4,7 +4,7 @@ import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 import java.util.UUID
 
-import assignment3.e2.common.{Config, MapMonitorViewImpl, PatchManager, ViewListener}
+import assignment3.e2.common.{MapMonitorViewImpl, PatchManager, ViewListener}
 import assignment3.e2.rmi.mapentry.DashboardEntry
 import assignment3.e2.rmi.remoteobjects.{Dashboard, DashboardImpl, MapMonitor}
 

@@ -4,12 +4,13 @@ import java.io.Serializable
 import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
 
-import assignment3.e2.common.{Config, GuardianStateEnum, MapMonitorViewImpl}
+import assignment3.e2.common.{GuardianStateEnum, MapMonitorViewImpl}
+import assignment3.e2.rmi.Config
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 import javax.swing.SwingUtilities
 
 @SerialVersionUID(5377073057466013968L)
-class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashboard with Serializable {
+class DashboardImpl(var name: String, var view: MapMonitorViewImpl) extends Dashboard with Serializable {
   private val guardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
   private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap()
 
@@ -49,7 +50,7 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
         val guardianState = guardianObj.getGuardiansStatus
         view.notifyGuardian(guardianState)
         eventuallyRemoveFromBrokenGuardians(g.getKey)
-        if (guardianState.state == GuardianStateEnum.ALARM){
+        if (guardianState.state == GuardianStateEnum.ALARM) {
           view.notifyAlarmStateEnabled(guardianState.patch.id, enabled = true)
         }
         //println(state.averageTemp)
@@ -78,7 +79,7 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
   override def notifyAlarmOff(patchId: Int): Unit = {
     guardians.entrySet().forEach(g => {
       val guardian = g.getValue
-      if (guardian.getPatchId == patchId){
+      if (guardian.getPatchId == patchId) {
         val guardianObj = guardian.getRemoteObject
         try {
           guardianObj.setState(GuardianStateEnum.IDLE)

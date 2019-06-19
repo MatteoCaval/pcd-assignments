@@ -7,6 +7,7 @@ import java.util.{Timer, TimerTask}
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common._
+import assignment3.e2.rmi.Config
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 @SerialVersionUID(5377073057466013968L)
@@ -19,7 +20,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   private val brokenGuardians: ConcurrentHashMap[String, Long] = new ConcurrentHashMap
 
   private val preAlertGuardians: ConcurrentHashMap[String, Option[Long]] = new ConcurrentHashMap
-  private var timer:Timer = _
+  private var timer: Timer = _
 
   private var averageTemp: Option[Double] = None
 
@@ -45,15 +46,15 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
     state match {
       case GuardianStateEnum.IDLE =>
         updateSensorsData()
-        if (averageTemp.isDefined){
-          if (averageTemp.get > Config.ALARM_TEMP) {
+        if (averageTemp.isDefined) {
+          if (averageTemp.get > CommonConfig.ALERT_TEMP) {
             changeState(GuardianStateEnum.PRE_ALERT)
 
             timer = new Timer()
             timer.schedule(new TimerTask {
               override def run(): Unit = {
-                if (state == GuardianStateEnum.PRE_ALERT){
-                  if (enoughAlertGuardiansTimeElapsed){
+                if (state == GuardianStateEnum.PRE_ALERT) {
+                  if (enoughAlertGuardiansTimeElapsed) {
                     changeState(GuardianStateEnum.ALARM)
                   }
                 }
@@ -68,7 +69,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
       case GuardianStateEnum.PRE_ALERT =>
         updateSensorsData()
         if (averageTemp.isDefined) {
-          if (averageTemp.get < Config.ALARM_TEMP){
+          if (averageTemp.get < CommonConfig.ALERT_TEMP) {
             changeState(GuardianStateEnum.IDLE)
             timer.cancel()
             // torno in idle
@@ -105,15 +106,15 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
 
   @throws[RemoteException]
   override def notifyNewGuardianState(guardianId: String, message: StateMessage): Unit = {
-      message.state match {
-        case GuardianStateEnum.IDLE =>
-          preAlertGuardians.remove(guardianId)
-        case GuardianStateEnum.PRE_ALERT =>
-          preAlertGuardians.put(guardianId, message.time)
-        case GuardianStateEnum.ALARM =>
-          state = GuardianStateEnum.ALARM
-          preAlertGuardians.clear()
-      }
+    message.state match {
+      case GuardianStateEnum.IDLE =>
+        preAlertGuardians.remove(guardianId)
+      case GuardianStateEnum.PRE_ALERT =>
+        preAlertGuardians.put(guardianId, message.time)
+      case GuardianStateEnum.ALARM =>
+        state = GuardianStateEnum.ALARM
+        preAlertGuardians.clear()
+    }
   }
 
   private def changeState(state: GuardianStateEnum): Unit = {
@@ -131,7 +132,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
       }
     })
 
-    if (state == GuardianStateEnum.ALARM){
+    if (state == GuardianStateEnum.ALARM) {
       preAlertGuardians.clear()
     }
   }
@@ -158,8 +159,8 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
     var count: Int = 0
     val currentTime = System.currentTimeMillis()
     preAlertGuardians.entrySet().forEach(p => {
-      if (p.getValue.isDefined){
-        if ((currentTime - p.getValue.get) > Config.ALERT_MIN_TIME ){
+      if (p.getValue.isDefined) {
+        if ((currentTime - p.getValue.get) > CommonConfig.ALERT_MIN_TIME) {
           count += 1
         }
       } else {

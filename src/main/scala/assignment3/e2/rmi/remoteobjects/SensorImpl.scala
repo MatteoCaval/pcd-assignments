@@ -2,7 +2,7 @@ package assignment3.e2.rmi.remoteobjects
 
 import java.io.Serializable
 import java.rmi.RemoteException
-
+import assignment3.e2.rmi.Config
 import assignment3.e2.common._
 
 @SerialVersionUID(5377073057466013968L)

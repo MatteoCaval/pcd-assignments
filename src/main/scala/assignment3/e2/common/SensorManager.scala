@@ -1,5 +1,7 @@
 package assignment3.e2.common
 
+import assignment3.e2.rmi.Config
+
 import scala.util.Random
 
 object TestRandoms extends App {
@@ -24,8 +26,8 @@ object TestRandoms extends App {
 object SensorManager {
 
   def getRandomPosition: P2d ={
-    val x = getRandomBetweenNumbers(0, Config.MAX_MAP_X)
-    val y = getRandomBetweenNumbers(0, Config.MAX_MAP_Y)
+    val x = getRandomBetweenNumbers(0, CommonConfig.MAX_MAP_X)
+    val y = getRandomBetweenNumbers(0, CommonConfig.MAX_MAP_Y)
 
     P2d(x,y)
   }
@@ -41,7 +43,7 @@ object SensorManager {
   }
 
   def getRandomTemperature: Option[Double] = {
-    Some(getRandomBetweenNumbers(Config.MIN_TEMP, Config.MAX_TEMP))
+    Some(getRandomBetweenNumbers(CommonConfig.MIN_TEMP, CommonConfig.MAX_TEMP))
   }
 
   private def getRandomBetweenNumbers(start: Double, end: Double): Double ={

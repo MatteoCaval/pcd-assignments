@@ -4,7 +4,7 @@ import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 import java.util.UUID
 
-import assignment3.e2.common.{Config, GuardianStateEnum, PatchManager}
+import assignment3.e2.common.{GuardianStateEnum, PatchManager}
 import assignment3.e2.rmi.mapentry.GuardianEntry
 import assignment3.e2.rmi.remoteobjects.{Guardian, GuardianImpl, MapMonitor}
 
@@ -44,7 +44,7 @@ object GuardianClient extends App {
 
     state = guardian.getState
 
-    if (state != GuardianStateEnum.ALARM){
+    if (state != GuardianStateEnum.ALARM) {
       guardian.freshSensorDetections()
     }
   }

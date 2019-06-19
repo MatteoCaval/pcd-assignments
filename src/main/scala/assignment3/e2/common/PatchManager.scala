@@ -3,8 +3,8 @@ package assignment3.e2.common
 import scala.util.Random
 
 object PatchManager {
-  val N: Int = Config.N
-  val M: Int = Config.M
+  val N: Int = CommonConfig.N
+  val M: Int = CommonConfig.M
 
   val width: Double = 1000
   val height: Double = 500

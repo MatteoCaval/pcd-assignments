@@ -1,10 +1,10 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
 import scala.util.Random
 
 object ParticleComputationUtils {
 
-  import assignment3.e0._
+  import assignment3.e1._
 
   val dt = 0.01
   private val kParam = 1

@@ -1,8 +1,8 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import assignment3.e0.{Chrono, Particle, V2d, World, WorldViewer}
-import assignment3.e0.actors.ActorActions._
+import assignment3.e1.{Chrono, Particle, V2d, World, WorldViewer}
+import assignment3.e1.actors.ActorActions._
 
 import scala.collection.mutable.ArrayBuffer
 

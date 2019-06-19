@@ -1,6 +1,6 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
-import assignment3.e0.{P2d, Particle}
+import assignment3.e1.{P2d, Particle}
 
 object ActorActions {
 

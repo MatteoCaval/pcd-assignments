@@ -1,12 +1,12 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
 import akka.actor.{ActorSystem, Props}
-import assignment3.e0.actors.ActorActions.Start
+import assignment3.e1.actors.ActorActions.Start
 
 
 object TestWithParticles extends App {
 
-  import assignment3.e0._
+  import assignment3.e1._
 
   //  case class AddParticle(particle: Particle)
   //

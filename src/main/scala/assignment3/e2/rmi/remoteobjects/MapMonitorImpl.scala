@@ -4,16 +4,16 @@ import java.io.Serializable
 import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
 
-import assignment3.e2.rmi.mapentry.{DashboardStr, GuardianStr, SensorStr}
+import assignment3.e2.rmi.mapentry.{DashboardEntry, GuardianEntry, SensorEntry}
 
 @SerialVersionUID(3925347100510516824L)
 class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
-  private val dashboards: ConcurrentHashMap[String, DashboardStr] = new ConcurrentHashMap()
-  private val guardians: ConcurrentHashMap[String, GuardianStr] = new ConcurrentHashMap()
-  private val sensors: ConcurrentHashMap[String, SensorStr] = new ConcurrentHashMap()
+  private val dashboards: ConcurrentHashMap[String, DashboardEntry] = new ConcurrentHashMap()
+  private val guardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
+  private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap()
 
   @throws[RemoteException]
-  override def addDashboard(dashboard: DashboardStr): Unit = {
+  override def addDashboard(dashboard: DashboardEntry): Unit = {
     this.dashboards.put(dashboard.getId, dashboard)
 
     val dashboardObj = dashboard.getRemoteObject
@@ -27,7 +27,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
   }
 
   @throws[RemoteException]
-  override def addGuardian(guardian: GuardianStr): Unit = {
+  override def addGuardian(guardian: GuardianEntry): Unit = {
     this.guardians.put(guardian.getId, guardian)
 
     val guardianObj = guardian.getRemoteObject
@@ -57,7 +57,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
     guardianObj.setSensors(this.sensors)
 
     // Give the guardian knowledge of guardians in same patch
-    val samePatchGuardians: ConcurrentHashMap[String, GuardianStr] = new ConcurrentHashMap()
+    val samePatchGuardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
     guardians.entrySet.forEach(g => {
       if (g.getValue.getPatchId.equals(guardian.getPatchId)) {
         samePatchGuardians.put(g.getKey, g.getValue)
@@ -69,7 +69,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
   }
 
   @throws[RemoteException]
-  override def addSensor(sensor: SensorStr): Unit = {
+  override def addSensor(sensor: SensorEntry): Unit = {
     this.sensors.put(sensor.getId, sensor)
 
     val sensorObj = sensor.getRemoteObject

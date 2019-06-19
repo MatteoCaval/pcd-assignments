@@ -5,13 +5,13 @@ import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
 
 import assignment3.e2.common.{Config, GuardianStateEnum, MapMonitorViewImpl}
-import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
+import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 import javax.swing.SwingUtilities
 
 @SerialVersionUID(5377073057466013968L)
 class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashboard with Serializable {
-  private val guardians: ConcurrentHashMap[String, GuardianStr] = new ConcurrentHashMap()
-  private val sensors: ConcurrentHashMap[String, SensorStr] = new ConcurrentHashMap()
+  private val guardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap()
+  private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap()
 
   private val brokenSensors: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
   private val brokenGuardians: ConcurrentHashMap[String, Long] = new ConcurrentHashMap()
@@ -22,22 +22,22 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
   }
 
   @throws[RemoteException]
-  override def notifyNewGuardian(guardian: GuardianStr): Unit = {
+  override def notifyNewGuardian(guardian: GuardianEntry): Unit = {
     guardians.put(guardian.getId, guardian)
   }
 
   @throws[RemoteException]
-  override def notifyNewSensor(sensor: SensorStr): Unit = {
+  override def notifyNewSensor(sensor: SensorEntry): Unit = {
     sensors.put(sensor.getId, sensor)
   }
 
   @throws[RemoteException]
-  override def setSensors(systemSensors: ConcurrentHashMap[String, SensorStr]): Unit = {
+  override def setSensors(systemSensors: ConcurrentHashMap[String, SensorEntry]): Unit = {
     sensors.putAll(systemSensors)
   }
 
   @throws[RemoteException]
-  override def setGuardians(systemGuardians: ConcurrentHashMap[String, GuardianStr]): Unit = {
+  override def setGuardians(systemGuardians: ConcurrentHashMap[String, GuardianEntry]): Unit = {
     guardians.putAll(systemGuardians)
   }
 

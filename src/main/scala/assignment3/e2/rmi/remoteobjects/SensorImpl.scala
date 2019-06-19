@@ -20,7 +20,6 @@ class SensorImpl(var name: String) extends Sensor with Serializable {
 
   @throws[RemoteException]
   override def getDetection: SensorDetection = {
-    fresh()
     SensorDetection(position, temperature)
   }
 

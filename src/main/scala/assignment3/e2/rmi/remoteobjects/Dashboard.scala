@@ -3,7 +3,7 @@ package assignment3.e2.rmi.remoteobjects
 import java.rmi.{Remote, RemoteException}
 import java.util.concurrent.ConcurrentHashMap
 
-import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
+import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 trait Dashboard extends Remote {
 
@@ -17,14 +17,14 @@ trait Dashboard extends Remote {
   def tell(text: String): Unit
 
   @throws[RemoteException]
-  def notifyNewGuardian(guardian: GuardianStr): Unit
+  def notifyNewGuardian(guardian: GuardianEntry): Unit
 
   @throws[RemoteException]
-  def notifyNewSensor(sensor: SensorStr): Unit
+  def notifyNewSensor(sensor: SensorEntry): Unit
 
   @throws[RemoteException]
-  def setSensors(clone: ConcurrentHashMap[String, SensorStr]): Unit
+  def setSensors(clone: ConcurrentHashMap[String, SensorEntry]): Unit
 
   @throws[RemoteException]
-  def setGuardians(clone: ConcurrentHashMap[String, GuardianStr]): Unit
+  def setGuardians(clone: ConcurrentHashMap[String, GuardianEntry]): Unit
 }

@@ -7,12 +7,12 @@ import java.util.{Timer, TimerTask}
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common._
-import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
+import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 @SerialVersionUID(5377073057466013968L)
 class GuardianImpl(private var id: String, private var patch: Patch) extends Guardian with Serializable {
-  private val sensors: ConcurrentHashMap[String, SensorStr] = new ConcurrentHashMap
-  private val patchGuardians: ConcurrentHashMap[String, GuardianStr] = new ConcurrentHashMap
+  private val sensors: ConcurrentHashMap[String, SensorEntry] = new ConcurrentHashMap
+  private val patchGuardians: ConcurrentHashMap[String, GuardianEntry] = new ConcurrentHashMap
   private val detections: ConcurrentHashMap[String, SensorDetection] = new ConcurrentHashMap
 
   private val brokenSensors: ConcurrentHashMap[String, Long] = new ConcurrentHashMap
@@ -31,12 +31,12 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   }
 
   @throws[RemoteException]
-  override def notifyNewSensor(sensor: SensorStr): Unit = {
+  override def notifyNewSensor(sensor: SensorEntry): Unit = {
     sensors.put(sensor.getId, sensor)
   }
 
   @throws[RemoteException]
-  override def setSensors(systemSensors: ConcurrentHashMap[String, SensorStr]): Unit = {
+  override def setSensors(systemSensors: ConcurrentHashMap[String, SensorEntry]): Unit = {
     sensors.putAll(systemSensors)
   }
 
@@ -86,12 +86,12 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   }
 
   @throws[RemoteException]
-  override def setPatchGuardians(systemPatchGuardians: ConcurrentHashMap[String, GuardianStr]): Unit = {
+  override def setPatchGuardians(systemPatchGuardians: ConcurrentHashMap[String, GuardianEntry]): Unit = {
     patchGuardians.putAll(systemPatchGuardians)
   }
 
   @throws[RemoteException]
-  override def notifyNewGuardian(guardian: GuardianStr): Unit = {
+  override def notifyNewGuardian(guardian: GuardianEntry): Unit = {
     patchGuardians.put(guardian.getId, guardian)
   }
 

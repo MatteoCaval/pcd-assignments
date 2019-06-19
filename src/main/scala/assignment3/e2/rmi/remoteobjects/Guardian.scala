@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common.{DashboardGuardianState, StateMessage}
-import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
+import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 trait Guardian extends Remote {
 
@@ -16,19 +16,19 @@ trait Guardian extends Remote {
   def getGuardiansStatus: DashboardGuardianState
 
   @throws[RemoteException]
-  def setPatchGuardians(stringToGuardian: ConcurrentHashMap[String, GuardianStr]): Unit
+  def setPatchGuardians(stringToGuardian: ConcurrentHashMap[String, GuardianEntry]): Unit
 
   @throws[RemoteException]
-  def notifyNewGuardian(guardian: GuardianStr)
+  def notifyNewGuardian(guardian: GuardianEntry)
 
   @throws[RemoteException]
   def tell(text: String): Unit
 
   @throws[RemoteException]
-  def notifyNewSensor(sensor: SensorStr): Unit
+  def notifyNewSensor(sensor: SensorEntry): Unit
 
   @throws[RemoteException]
-  def setSensors(sensors: ConcurrentHashMap[String, SensorStr]): Unit
+  def setSensors(sensors: ConcurrentHashMap[String, SensorEntry]): Unit
 
   @throws[RemoteException]
   def setState(state: GuardianStateEnum)

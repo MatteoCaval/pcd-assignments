@@ -20,13 +20,13 @@ class DashboardActor extends Actor with ActorLogging {
   private val cluster: Cluster = Cluster(context.system)
   private val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
-  mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
-  mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
+  mediator ! Subscribe(PubSubMessages.GUARDIAN_INFO, self)
+  mediator ! Subscribe(PubSubMessages.SENSOR_DATA, self)
 
 
   val view = new MapMonitorViewImpl(new ViewListener {
     override def resetAlarmPressed(patchId: Int): Unit = {
-      mediator ! Publish(SubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
+      mediator ! Publish(PubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
     }
   }, PatchManager.getPatches.size)
 

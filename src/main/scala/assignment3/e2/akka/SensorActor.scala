@@ -71,13 +71,13 @@ class SensorActor(val sensorId: String, var position: P2d) extends Actor with Ac
   private def updateRandomTemperature(): Unit = {
     this.registeredTemperature = Some(Random.nextDouble() * 10)
     log.info(s"Updating sensor temperature to $registeredTemperature")
-    mediator ! Publish(SubSubMessages.SENSOR_DATA, SensorData(sensorId, registeredTemperature, position))
+    mediator ! Publish(PubSubMessages.SENSOR_DATA, SensorData(sensorId, registeredTemperature, position))
   }
 
   private def updateRandomPosition(): Unit = {
     this.position = PatchManager.getRandomPositionInsideMap
     log.info(s"Updating sensor position to $position")
-    mediator ! Publish(SubSubMessages.SENSOR_DATA, SensorData(sensorId, this.registeredTemperature, position))
+    mediator ! Publish(PubSubMessages.SENSOR_DATA, SensorData(sensorId, this.registeredTemperature, position))
   }
 
 

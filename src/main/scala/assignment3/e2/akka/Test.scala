@@ -24,6 +24,25 @@ object Sensors extends App {
   }
 }
 
+object Sensors2 extends App {
+
+  def startClusterWithSensors(port: Int) = {
+    val system = Utils.getSystemByPortWithRole(port, "sensor")
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap))
+  }
+
+  startClusterWithSensors(0)
+
+
+  scala.io.Source.stdin.getLines().foreach { line =>
+    val system = Utils.getSystemByPortWithRole(0, "sensor")
+    system.actorOf(SensorActor.props(PatchManager.getRandomPositionInsideMap), line)
+  }
+}
+
 
 object StartGuardians extends App {
 

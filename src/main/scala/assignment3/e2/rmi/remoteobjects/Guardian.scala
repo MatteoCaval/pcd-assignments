@@ -13,7 +13,7 @@ trait Guardian extends Remote {
   def notifyNewGuardianState(id: String, message: StateMessage)
 
   @throws[RemoteException]
-  def getGuardiansStatus: DashboardGuardianState
+  def getGuardiansState: DashboardGuardianState
 
   @throws[RemoteException]
   def setPatchGuardians(stringToGuardian: ConcurrentHashMap[String, GuardianEntry]): Unit

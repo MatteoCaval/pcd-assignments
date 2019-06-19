@@ -13,8 +13,5 @@ trait Sensor extends Remote {
   def getDetection: SensorDetection
 
   @throws[RemoteException]
-  def getName: String
-
-  @throws[RemoteException]
   def tell(text: String): Unit
 }

@@ -7,6 +7,7 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
+import assignment3.e2.akka.ActorMessages._
 import assignment3.e2.common.Patch
 
 import scala.concurrent.duration._
@@ -16,16 +17,6 @@ object GuardianState {
   val PREALERT = "prealert"
   val ALERT = "alert"
 }
-
-case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Option[Double])
-
-case class GuardianUp(patch: Patch, state: String)
-
-case object RequestGuardianInformations
-
-case class PatchReleaseMessage(patchId: Int)
-
-case class GuardianStateMesssage(state: String, alertTime: Option[Long])
 
 
 object GuardianActor {
@@ -40,10 +31,10 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private val cluster = Cluster(context.system)
   private val mediator = DistributedPubSub(context.system).mediator
 
-  mediator ! Subscribe(SubSubMessages.TERMINATE_ALERT, self)
-  mediator ! Subscribe(SubSubMessages.GUARDIAN_UP, self)
-  mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
-  mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
+  mediator ! Subscribe(PubSubMessages.TERMINATE_ALERT, self)
+  mediator ! Subscribe(PubSubMessages.GUARDIAN_UP, self)
+  mediator ! Subscribe(PubSubMessages.SENSOR_DATA, self)
+  mediator ! Subscribe(PubSubMessages.GUARDIAN_INFO, self)
 
 
   private var receivedTemperatures: Map[String, Double] = Map()
@@ -72,7 +63,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     case MemberUp(_) =>
       context.become(sensorInformations.orElse(guardianInformations))
       context.system.scheduler.scheduleOnce(4 seconds) {
-        mediator ! Publish(SubSubMessages.GUARDIAN_UP, GuardianUp(this.patch, this.state))
+        mediator ! Publish(PubSubMessages.GUARDIAN_UP, GuardianUp(this.patch, this.state))
       }
   }
 
@@ -195,7 +186,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   }
 
   private def broadcastGuardianInfos(): Unit =
-    mediator ! Publish(SubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
+    mediator ! Publish(PubSubMessages.GUARDIAN_INFO, GuardianInfo(guardianId, patch, state, averageTemperature))
 
   /**
     * send state to all patch guardians

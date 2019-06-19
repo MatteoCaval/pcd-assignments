@@ -1,10 +1,10 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
 import scala.util.Random
 
 object ParticleComputationUtils {
 
-  import assignment3.e0._
+  import assignment3.e1._
 
   val dt = 0.01
   private val kParam = 1
@@ -21,8 +21,6 @@ object ParticleComputationUtils {
   def computeForce(p: Particle, particles: Seq[Particle]): V2d = {
     var force = new V2d(0, 0)
     val alpha: Double = p.getAlpha
-
-    //    println(s"calculating force of particle with pos ${p.getPos}, total particles: ${particles.length}")
 
     for (i <- particles.indices) {
       val p2 = particles(i)

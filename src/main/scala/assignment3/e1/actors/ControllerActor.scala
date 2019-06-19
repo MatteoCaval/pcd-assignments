@@ -1,19 +1,26 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import assignment3.e0.V2d
-import assignment3.e0.actors.ActorActions._
-import assignment3.e0.{Particle, World, WorldViewer}
+import assignment3.e1.{Chrono, Particle, V2d, World, WorldViewer}
+import assignment3.e1.actors.ActorMessages._
 
 import scala.collection.mutable.ArrayBuffer
 
 object ControllerActor {
   def props(world: World, worldViewer: WorldViewer, mode: Mode) = Props(new ControllerActor(world, worldViewer, mode))
+
+  def props(world: World, nSteps: Int) = Props(new ControllerActor(world, null, ContinuousMode, nSteps))
+
 }
 
-class ControllerActor(private val world: World, private val worldViewer: WorldViewer, private var mode: Mode) extends Actor with ActorLogging {
+class ControllerActor(private val world: World, private val worldViewer: WorldViewer, private var mode: Mode,
+                      private var nSteps: Int = Integer.MAX_VALUE) extends Actor with ActorLogging {
 
   var particleMaster: ActorRef = _
+
+  private var stepsDone: Int = 0
+  private var chrono: Chrono = _
+
 
   override def receive: Receive = idle
 
@@ -29,6 +36,8 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
       particleMaster ! AddParticles(particles)
 
       particleMaster ! Compute(particles)
+      chrono = new Chrono
+      chrono.start()
       context.become(computation)
 
     case ContinuousMode =>
@@ -81,10 +90,21 @@ class ControllerActor(private val world: World, private val worldViewer: WorldVi
   }
 
   private def updateWorld(results: List[Particle]): Unit = {
-    world.backupPositions(ArrayBuffer(results.toArray: _*))
-    world.pushSnapshotToDisplay()
     world.updateTime()
-    /* update view */
-    worldViewer.updateView()
+    if (worldViewer != null) {
+      world.backupPositions(ArrayBuffer(results.toArray: _*))
+      world.pushSnapshotToDisplay()
+
+      /* update view */
+      worldViewer.updateView()
+    } else {
+      if (world.getCurrentSteps == this.nSteps) {
+        println(s"Done in ${this.chrono.stop().getTime}")
+        context.stop(self)
+      }
+
+    }
+
+
   }
 }

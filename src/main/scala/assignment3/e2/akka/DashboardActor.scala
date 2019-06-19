@@ -2,17 +2,13 @@ package assignment3.e2.akka
 
 import akka.actor.{Actor, ActorLogging, ActorRef, RootActorPath, Terminated}
 import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberRemoved, MemberUp, UnreachableMember}
+import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe}
-import akka.util.Timeout
-import assignment3.e2.common.{DashboardGuardianState, DashboardSensorPosition, GuardianStateEnum, MapMonitorViewImpl, P2d, PatchManager, ViewListener}
-
-import scala.concurrent.duration._
+import assignment3.e2.akka.ActorMessages._
+import assignment3.e2.common._
 
 class DashboardActor extends Actor with ActorLogging {
-
-  import context.dispatcher
 
   private var guardians: Map[ActorRef, GuardianInfo] = Map()
   private var sensors: Map[ActorRef, SensorData] = Map()
@@ -20,13 +16,13 @@ class DashboardActor extends Actor with ActorLogging {
   private val cluster: Cluster = Cluster(context.system)
   private val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
-  mediator ! Subscribe(SubSubMessages.GUARDIAN_INFO, self)
-  mediator ! Subscribe(SubSubMessages.SENSOR_DATA, self)
+  mediator ! Subscribe(PubSubMessages.GUARDIAN_INFO, self)
+  mediator ! Subscribe(PubSubMessages.SENSOR_DATA, self)
 
 
   val view = new MapMonitorViewImpl(new ViewListener {
     override def resetAlarmPressed(patchId: Int): Unit = {
-      mediator ! Publish(SubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
+      mediator ! Publish(PubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
     }
   }, PatchManager.getPatches.size)
 

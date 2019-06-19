@@ -1,4 +1,4 @@
-package assignment3.e0
+package assignment3.e1
 
 class Chrono() {
   private var running = false
@@ -9,9 +9,10 @@ class Chrono() {
     startTime = System.currentTimeMillis
   }
 
-  def stop(): Unit = {
+  def stop(): Chrono = {
     startTime = getTime
     running = false
+    return this
   }
 
   def getTime: Long = {

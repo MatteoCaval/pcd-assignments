@@ -1,10 +1,11 @@
-package assignment3.e0.actors
+package assignment3.e1.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props, Stash}
-import assignment3.e0.Particle
-import assignment3.e0.actors.ActorActions._
+import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props, Stash}
+import assignment3.e1.Particle
+import assignment3.e1.actors.ActorMessages._
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object ParticleMasterActor {
   def props(controllerRef: ActorRef) = Props(new ParticleMasterActor(controllerRef))
@@ -14,7 +15,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
 
   var resultsNumber = 0
   var particleWorkers: Seq[ActorRef] = Seq()
-  val results: mutable.MutableList[Particle] = mutable.MutableList()
+  val particleResults: ArrayBuffer[Particle] = ArrayBuffer()
 
   override def receive: Receive = handleParticle
 
@@ -31,8 +32,11 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
       log.info("adding new particle")
       val newParticle = context.actorOf(ParticleActor.props(particle))
       this.particleWorkers = particleWorkers :+ newParticle
+      log.info(s"before ${particleResults.length}")
+      particleResults += particle
+      log.info(s"after ${particleResults.length}")
 
-    case Compute(particles) =>
+    case Compute(particles) => // FIXME
       log.info(s"compute command received, number of slave actors: ${particleWorkers.length}")
 
       if (particles.nonEmpty) {
@@ -40,9 +44,10 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
         context.become(receiveResults)
       }
 
-    case ComputeNext =>
+
+    case ComputeNext => //FIXME
       if (particleWorkers.nonEmpty) {
-        this.sendComputationToParticles(results)
+        this.sendComputationToParticles(particleResults)
         context.become(receiveResults)
       } else {
         notifyComputationCompleted
@@ -56,7 +61,8 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
         notifyComputationCompleted
 
       } else {
-        context.stop(particleWorkers.head)
+//        context.stop(particleWorkers.head)
+        particleWorkers.head ! PoisonPill // da testare
         particleWorkers = particleWorkers.tail
       }
 
@@ -67,7 +73,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
   def receiveResults: Receive = {
     case ParticleResult(result) =>
       resultsNumber += 1
-      results += result
+      particleResults += result
       //        log.info(s"received result $result, total: $resultsNumber")
       if (resultsNumber == particleWorkers.length) {
         //        log.info(s"all ${particleWorkers.length} results received, final result: ${results.map(p => p.getPos.toString)}")
@@ -81,17 +87,19 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
 
   private def reset = {
     resultsNumber = 0
-    results.clear()
+    particleResults.clear()
   }
 
-  private def sendComputationToParticles(particles: Seq[Particle]): Unit = {
+  private def sendComputationToParticles(particles: Seq[Particle]): Unit = { // FIXME
+    val list: ArrayBuffer[Particle] = ArrayBuffer()
+    particles.foreach(p => list += p)
     reset
-    particleWorkers.foreach(p => p ! ComputeParticle(particles))
+    particleWorkers.foreach(p => p ! ComputeParticle(list))
 
   }
 
   private def notifyComputationCompleted = {
-    controllerActor ! ComputationDone(results.toList)
+    controllerActor ! ComputationDone(particleResults.toList)
     unstashAll()
     context.become(handleParticle)
   }

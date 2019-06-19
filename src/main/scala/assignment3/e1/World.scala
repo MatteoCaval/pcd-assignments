@@ -1,4 +1,4 @@
-package assignment3.e0
+package assignment3.e1
 
 import java.util._
 
@@ -48,6 +48,8 @@ class World(var dt: Double) {
   def getNumParticles: Int = particles.size
 
   def updateTime(): Unit = currentStep += 1
+
+  def getCurrentSteps: Long = currentStep
 
   def getCurrentTime: Double = currentStep * dt
 

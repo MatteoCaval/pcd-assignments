@@ -49,6 +49,8 @@ class World(var dt: Double) {
 
   def updateTime(): Unit = currentStep += 1
 
+  def getCurrentSteps: Long = currentStep
+
   def getCurrentTime: Double = currentStep * dt
 
   def dump(): Unit = {

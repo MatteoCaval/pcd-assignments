@@ -17,12 +17,6 @@
  */
 package assignment3.e0
 
-/**
-  *
-  * 2-dimensional vector
-  * objects are completely state-less
-  *
-  */
 class V2d(var x: Double, var y: Double) extends Serializable {
   def sum(v: V2d) = new V2d(x + v.x, y + v.y)
 

@@ -9,9 +9,10 @@ class Chrono() {
     startTime = System.currentTimeMillis
   }
 
-  def stop(): Unit = {
+  def stop(): Chrono = {
     startTime = getTime
     running = false
+    return this
   }
 
   def getTime: Long = {

@@ -15,7 +15,7 @@
  * Use is subject to license terms.
  *
  */
-package assignment3.e0
+package assignment3.e1
 
 class V2d(var x: Double, var y: Double) extends Serializable {
   def sum(v: V2d) = new V2d(x + v.x, y + v.y)

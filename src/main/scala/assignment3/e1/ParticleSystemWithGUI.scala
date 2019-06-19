@@ -1,4 +1,4 @@
-package assignment3.e0
+package assignment3.e1
 
 object ParticleSystemWithGUI extends App {
 

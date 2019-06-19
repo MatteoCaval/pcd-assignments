@@ -1,8 +1,8 @@
-package assignment3.e0
+package assignment3.e1
 
 import akka.actor.{ActorSystem, Props}
-import assignment3.e0.actors.ActorActions.{AddParticleByPosition, RemoveParticle, Start, Stop}
-import assignment3.e0.actors.{ActorActions, ControllerActor}
+import assignment3.e1.actors.ActorActions.{AddParticleByPosition, RemoveParticle, Start, Stop}
+import assignment3.e1.actors.{ActorActions, ControllerActor}
 
 
 class Controller(var world: World, var viewer: WorldViewer) {

@@ -1,4 +1,4 @@
-package assignment3.e0
+package assignment3.e1
 
 import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, MouseEvent, MouseListener}
@@ -22,7 +22,7 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
 
   protected def notifyNewParticle(pos: P2d): Unit = controller.notifyNewParticle(pos)
 
-  private[e0] class VisualiserFrame(val w: Int, val h: Int) extends JFrame(".:: Particle System ::.") with ActionListener {
+  private[e1] class VisualiserFrame(val w: Int, val h: Int) extends JFrame(".:: Particle System ::.") with ActionListener {
     setSize(w, h)
 
     private var startButton: JButton = _

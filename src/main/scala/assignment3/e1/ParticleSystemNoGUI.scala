@@ -1,8 +1,8 @@
-package assignment3.e0
+package assignment3.e1
 
 import akka.actor.ActorSystem
-import assignment3.e0.actors.ActorActions.Start
-import assignment3.e0.actors.{ActorActions, ControllerActor}
+import assignment3.e1.actors.ActorActions.Start
+import assignment3.e1.actors.{ActorActions, ControllerActor}
 
 
 object ParticleSystemNoGUI {

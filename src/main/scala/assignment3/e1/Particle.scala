@@ -1,4 +1,4 @@
-package assignment3.e0
+package assignment3.e1
 
 class Particle(var pos: P2d, var vel: V2d, var alpha: Double, var mass: Double, var kAttr: Double) {
   def update(force: V2d, dt: Double): Unit = {

@@ -2,7 +2,7 @@ package assignment3.e1.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props, Stash}
 import assignment3.e1.Particle
-import assignment3.e1.actors.ActorActions._
+import assignment3.e1.actors.ActorMessages._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

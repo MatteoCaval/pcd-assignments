@@ -2,7 +2,8 @@ package assignment3.e2.rmi.remoteobjects
 
 import java.io.Serializable
 import java.rmi.RemoteException
-import assignment3.e2.rmi.Config
+
+import assignment3.e2.rmi.{Config, SensorDetection}
 import assignment3.e2.common._
 
 @SerialVersionUID(5377073057466013968L)
@@ -26,7 +27,7 @@ class SensorImpl(var id: String) extends Sensor with Serializable {
     DashboardSensorPosition(id, position)
   }
 
-  // allow to make live the sensor
+  // allow to simulate the sensor liveness
   private def fresh(): Unit = {
     if (System.currentTimeMillis() - lastUpdate > Config.SENSOR_REFRESH_RATE){
       lastUpdate = System.currentTimeMillis()

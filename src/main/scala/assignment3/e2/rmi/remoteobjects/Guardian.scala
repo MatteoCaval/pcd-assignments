@@ -4,7 +4,8 @@ import java.rmi.{Remote, RemoteException}
 import java.util.concurrent.ConcurrentHashMap
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
-import assignment3.e2.common.{DashboardGuardianState, StateMessage}
+import assignment3.e2.common.DashboardGuardianState
+import assignment3.e2.rmi.StateMessage
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 trait Guardian extends Remote {

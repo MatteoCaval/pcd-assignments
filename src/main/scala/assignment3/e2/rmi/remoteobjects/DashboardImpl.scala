@@ -62,7 +62,7 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
 
         eventuallyRemoveFromBrokenGuardians(guardian.getId)
       } catch {
-        case _: Exception =>
+        case _: RemoteException =>
           checkForBrokenGuardian(guardian.getId, guardian.getPatchId)
       }
     })
@@ -77,7 +77,7 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
           view.notifySensor(pos)
           eventuallyRemoveFromBrokenSensors(sensor.getId)
         } catch {
-          case _: Exception => checkForBrokenSensor(sensor.getId)
+          case _: RemoteException => checkForBrokenSensor(sensor.getId)
         }
       })
     })
@@ -102,7 +102,7 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
           eventuallyRemoveFromBrokenGuardians(guardian.getId)
 
         } catch {
-          case e: Exception =>
+          case e: RemoteException =>
             println(e.printStackTrace())
             checkForBrokenGuardian(guardian.getId, guardian.getPatchId)
         }
@@ -123,6 +123,8 @@ class DashboardImpl(var id: String, var view: MapMonitorViewImpl) extends Dashbo
     if (brokenGuardians.containsKey(guardianId)) {
       if (currentTime - brokenGuardians.get(guardianId) > Config.MAX_RETRY_TIME) {
         guardians.remove(guardianId)
+        guardiansState.remove(guardianId)
+        brokenGuardians.remove(guardianId)
         view.notifyGuardianRemoved(guardianId, patchId)
       }
     } else {

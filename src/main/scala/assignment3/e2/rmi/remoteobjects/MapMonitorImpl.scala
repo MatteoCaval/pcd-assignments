@@ -34,7 +34,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
       dashboardObj.tell(TAG + "Server connected to dashboard " + dashboard.getId)
       if (brokenDashboards.contains(dashboard.getId)) brokenDashboards.remove(dashboard.getId)
     } catch {
-      case _: Exception => checkForBrokenDashboard(dashboard.getId)
+      case _: RemoteException => checkForBrokenDashboard(dashboard.getId)
     }
   }
 
@@ -49,7 +49,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
         d.getValue.getRemoteObject.notifyNewGuardian(guardian)
         if (brokenDashboards.contains(d.getKey)) brokenDashboards.remove(d.getKey)
       } catch {
-        case _: Exception => checkForBrokenDashboard(d.getKey)
+        case _: RemoteException => checkForBrokenDashboard(d.getKey)
       }
     })
 
@@ -60,7 +60,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
           g.getValue.getRemoteObject.notifyNewGuardian(guardian)
           if (brokenGuardians.contains(g.getKey)) brokenGuardians.remove(g.getKey)
         } catch {
-          case _: Exception => checkForBrokenGuardian(g.getKey)
+          case _: RemoteException => checkForBrokenGuardian(g.getKey)
         }
       }
     })
@@ -82,7 +82,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
       guardianObj.tell(TAG + "Server connected to guardian " + guardian.getId)
       if (brokenGuardians.contains(guardian.getId)) brokenGuardians.remove(guardian.getId)
     } catch {
-      case _: Exception => checkForBrokenGuardian(guardian.getId)
+      case _: RemoteException => checkForBrokenGuardian(guardian.getId)
     }
   }
 
@@ -97,7 +97,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
         g.getValue.getRemoteObject.notifyNewSensor(sensor)
         if (brokenGuardians.contains(g.getKey)) brokenGuardians.remove(g.getKey)
       } catch {
-        case _: Exception => checkForBrokenGuardian(g.getKey)
+        case _: RemoteException => checkForBrokenGuardian(g.getKey)
       }
     })
 
@@ -107,7 +107,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
         d.getValue.getRemoteObject.notifyNewSensor(sensor)
         if (brokenDashboards.contains(d.getKey)) brokenDashboards.remove(d.getKey)
       } catch {
-        case _: Exception => checkForBrokenDashboard(d.getKey)
+        case _: RemoteException => checkForBrokenDashboard(d.getKey)
       }
     })
 
@@ -115,7 +115,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
       sensorObj.tell(TAG + "Server connected to sensor " + sensor.getId)
       if (brokenSensors.contains(sensor.getId)) brokenSensors.remove(sensor.getId)
     } catch {
-      case _: Exception => checkForBrokenSensor(sensor.getId)
+      case _: RemoteException => checkForBrokenSensor(sensor.getId)
     }
   }
 
@@ -124,6 +124,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
     if (brokenGuardians.containsKey(guardianId)) {
       if (currentTime - brokenGuardians.get(guardianId) > Config.MAX_RETRY_TIME) {
         guardians.remove(guardianId)
+        brokenGuardians.remove(guardianId)
       }
     } else {
       brokenGuardians.put(guardianId, currentTime)
@@ -135,6 +136,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
     if (brokenSensors.containsKey(sensorId)) {
       if (currentTime - brokenSensors.get(sensorId) > Config.MAX_RETRY_TIME) {
         sensors.remove(sensorId)
+        brokenSensors.remove(sensorId)
       }
     } else {
       brokenSensors.put(sensorId, currentTime)
@@ -146,6 +148,7 @@ class MapMonitorImpl(var TAG: String) extends MapMonitor with Serializable {
     if (brokenDashboards.containsKey(dashboardId)) {
       if (currentTime - brokenDashboards.get(dashboardId) > Config.MAX_RETRY_TIME) {
         sensors.remove(dashboardId)
+        brokenDashboards.remove(dashboardId)
       }
     } else {
       brokenDashboards.put(dashboardId, currentTime)

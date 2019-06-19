@@ -1,4 +1,4 @@
-package assignment3.e2.common
+package assignment3.e2.rmi
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 

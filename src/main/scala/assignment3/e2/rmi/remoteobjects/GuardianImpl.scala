@@ -7,7 +7,7 @@ import java.util.{Timer, TimerTask}
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common._
-import assignment3.e2.rmi.Config
+import assignment3.e2.rmi.{Config, SensorDetection, StateMessage}
 import assignment3.e2.rmi.mapentry.{GuardianEntry, SensorEntry}
 
 @SerialVersionUID(5377073057466013968L)
@@ -203,6 +203,8 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
     if (brokenGuardians.containsKey(guardianId)) {
       if (currentTime - brokenGuardians.get(guardianId) > Config.MAX_RETRY_TIME) {
         patchGuardians.remove(guardianId)
+        brokenGuardians.remove(guardianId)
+        preAlertGuardians.remove(guardianId)
       }
     } else {
       brokenGuardians.put(guardianId, currentTime)

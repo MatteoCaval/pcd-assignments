@@ -3,7 +3,8 @@ package assignment3.e2.rmi.remoteobjects
 
 import java.rmi.{Remote, RemoteException}
 
-import assignment3.e2.common.{DashboardSensorPosition, SensorDetection}
+import assignment3.e2.common.DashboardSensorPosition
+import assignment3.e2.rmi.SensorDetection
 
 trait Sensor extends Remote {
   @throws[RemoteException]

@@ -19,4 +19,7 @@ object Config {
 
   val MAX_RETRY_TIME = 5000
 
+  val RMI_DEFAULT_HOST = "169.254.38.10"
+  val RMI_DEFAULT_PORT = 1500
+
 }

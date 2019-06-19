@@ -1,10 +1,11 @@
-package assignment3.e2.rmi.stub_scheleton
+package assignment3.e2.rmi.remoteobjects
 
 import java.io.Serializable
 import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentHashMap
 
 import assignment3.e2.common.{Config, GuardianStateEnum, MapMonitorViewImpl}
+import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
 import javax.swing.SwingUtilities
 
 @SerialVersionUID(5377073057466013968L)
@@ -43,13 +44,13 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
   @throws[RemoteException]
   override def update(): Unit = {
     guardians.entrySet().forEach(g => {
-      val guardianObj = g.getValue.getGuardian
+      val guardianObj = g.getValue.getRemoteObject
       try {
         val guardianState = guardianObj.getGuardiansStatus
         view.notifyGuardian(guardianState)
         eventuallyRemoveFromBrokenGuardians(g.getKey)
         if (guardianState.state == GuardianStateEnum.ALARM){
-          view.notifyAlarmStateEnabled(guardianState.patch.id, true)
+          view.notifyAlarmStateEnabled(guardianState.patch.id, enabled = true)
         }
         //println(state.averageTemp)
       } catch {
@@ -59,17 +60,15 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
     })
 
     sensors.entrySet().forEach(s => {
-      val sensorObj = s.getValue.getSensor
+      val sensorObj = s.getValue.getRemoteObject
 
-      SwingUtilities.invokeLater(new Runnable {
-        override def run(): Unit = {
-          try {
-            val pos = sensorObj.getDashboardPosition
-            view.notifySensor(pos)
-            eventuallyRemoveFromBrokenSensors(s.getKey)
-          } catch {
-            case _: Exception => checkForBrokenSensor(s.getKey)
-          }
+      SwingUtilities.invokeLater(() => {
+        try {
+          val pos = sensorObj.getDashboardPosition
+          view.notifySensor(pos)
+          eventuallyRemoveFromBrokenSensors(s.getKey)
+        } catch {
+          case _: Exception => checkForBrokenSensor(s.getKey)
         }
       })
     })
@@ -80,7 +79,7 @@ class DashboardImpl(var name: String, var view:MapMonitorViewImpl) extends Dashb
     guardians.entrySet().forEach(g => {
       val guardian = g.getValue
       if (guardian.getPatchId == patchId){
-        val guardianObj = guardian.getGuardian
+        val guardianObj = guardian.getRemoteObject
         try {
           guardianObj.setState(GuardianStateEnum.IDLE)
           eventuallyRemoveFromBrokenGuardians(g.getKey)

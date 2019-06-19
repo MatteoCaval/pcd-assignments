@@ -1,4 +1,4 @@
-package assignment3.e2.rmi.stub_scheleton
+package assignment3.e2.rmi.remoteobjects
 
 import java.io.Serializable
 import java.rmi.RemoteException
@@ -7,6 +7,7 @@ import java.util.{Timer, TimerTask}
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common._
+import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
 
 @SerialVersionUID(5377073057466013968L)
 class GuardianImpl(private var id: String, private var patch: Patch) extends Guardian with Serializable {
@@ -122,7 +123,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
     patchGuardians.entrySet().forEach(p => {
       try {
         if (p.getKey != id) {
-          p.getValue.getGuardian.notifyNewGuardianState(p.getKey, StateMessage(state, Some(time)))
+          p.getValue.getRemoteObject.notifyNewGuardianState(p.getKey, StateMessage(state, Some(time)))
           eventuallyRemoveFromBrokenGuardians(p.getKey)
         }
       } catch {
@@ -138,7 +139,7 @@ class GuardianImpl(private var id: String, private var patch: Patch) extends Gua
   private def updateSensorsData(): Unit = {
     detections.clear()
     sensors.entrySet().forEach(s => {
-      val sensorObj = s.getValue.getSensor
+      val sensorObj = s.getValue.getRemoteObject
       try {
         val detection = sensorObj.getDetection
 

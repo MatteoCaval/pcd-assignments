@@ -1,10 +1,11 @@
-package assignment3.e2.rmi.stub_scheleton
+package assignment3.e2.rmi.remoteobjects
 
 import java.rmi.{Remote, RemoteException}
 import java.util.concurrent.ConcurrentHashMap
 
 import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
 import assignment3.e2.common.{DashboardGuardianState, StateMessage}
+import assignment3.e2.rmi.mapentry.{GuardianStr, SensorStr}
 
 trait Guardian extends Remote {
 

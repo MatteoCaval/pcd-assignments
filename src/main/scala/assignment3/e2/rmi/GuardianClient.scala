@@ -4,15 +4,15 @@ import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 import java.util.UUID
 
-import assignment3.e2.common.{GuardianStateEnum, PatchManager}
-import assignment3.e2.rmi.stub_scheleton.{Guardian, GuardianImpl, GuardianStr, MapMonitor}
+import assignment3.e2.common.{Config, GuardianStateEnum, PatchManager}
+import assignment3.e2.rmi.mapentry.GuardianEntry
+import assignment3.e2.rmi.remoteobjects.{Guardian, GuardianImpl, MapMonitor}
 
 import scala.util.Random
 
-object GuardianServer extends App {
-  val TAG = "GuardianServer - "
+object GuardianClient extends App {
+  val TAG = "GuardianClient - "
 
-  val host = null
   //if (args.length < 1) null else args(0)
   val id = if (args.length < 3) UUID.randomUUID().toString else args(0)
   val patchNum: Int = if (args.length < 3) Random.nextInt(PatchManager.getPatches.size) else args(1).toInt
@@ -23,14 +23,14 @@ object GuardianServer extends App {
   try {
     println(TAG + "Started")
 
-    val registry = LocateRegistry.getRegistry("169.254.38.10", 1500)
+    val registry = LocateRegistry.getRegistry(Config.RMI_DEFAULT_HOST, Config.RMI_DEFAULT_PORT)
     val server = registry.lookup("monitorObj").asInstanceOf[MapMonitor]
 
     val assignedPatch = PatchManager.getPatches(patchNum)
     guardian = new GuardianImpl(id, assignedPatch)
     UnicastRemoteObject.exportObject(guardian, port)
 
-    server.addGuardian(GuardianStr(id, patchNum, guardian))
+    server.addGuardian(GuardianEntry(id, patchNum, guardian))
   } catch {
     case e: Exception =>
       println(TAG + "Exception: " + e)
@@ -46,8 +46,6 @@ object GuardianServer extends App {
 
     if (state != GuardianStateEnum.ALARM){
       guardian.freshSensorDetections()
-    } else {
-      println("Client: sono in allarme, non posso fare nulla")
     }
   }
 }

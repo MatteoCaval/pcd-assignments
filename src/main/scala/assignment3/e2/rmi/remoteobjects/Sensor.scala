@@ -1,5 +1,5 @@
 
-package assignment3.e2.rmi.stub_scheleton
+package assignment3.e2.rmi.remoteobjects
 
 import java.rmi.{Remote, RemoteException}
 

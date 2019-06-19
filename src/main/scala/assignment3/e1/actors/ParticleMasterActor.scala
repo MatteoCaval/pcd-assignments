@@ -36,7 +36,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
       particleResults += particle
       log.info(s"after ${particleResults.length}")
 
-    case Compute(particles) => // FIXME
+    case Compute(particles) =>
       log.info(s"compute command received, number of slave actors: ${particleWorkers.length}")
 
       if (particles.nonEmpty) {
@@ -45,7 +45,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
       }
 
 
-    case ComputeNext => //FIXME
+    case ComputeNext =>
       if (particleWorkers.nonEmpty) {
         this.sendComputationToParticles(particleResults)
         context.become(receiveResults)
@@ -90,7 +90,7 @@ class ParticleMasterActor(private val controllerActor: ActorRef) extends Actor w
     particleResults.clear()
   }
 
-  private def sendComputationToParticles(particles: Seq[Particle]): Unit = { // FIXME
+  private def sendComputationToParticles(particles: Seq[Particle]): Unit = {
     val list: ArrayBuffer[Particle] = ArrayBuffer()
     particles.foreach(p => list += p)
     reset

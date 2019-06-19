@@ -1,7 +1,5 @@
 package assignment3.e2.common
 
-import assignment3.e2.akka.Config
-
 import scala.util.Random
 
 object PatchManager {

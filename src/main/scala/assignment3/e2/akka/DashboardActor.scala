@@ -94,7 +94,7 @@ class DashboardActor extends Actor with ActorLogging {
 
       val guardianState = state match {
         case GuardianState.OK => GuardianStateEnum.IDLE
-        case GuardianState.ALERT => GuardianStateEnum.ALERT
+        case GuardianState.ALERT => GuardianStateEnum.ALARM
         case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
       }
 

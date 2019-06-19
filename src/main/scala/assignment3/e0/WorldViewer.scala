@@ -9,6 +9,10 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
   private val MODE_BUTTON_BECOME_CONTINUOUS = "to Continuous Mode"
   private val MODE_BUTTON_BECOME_STEP_BY_STEP = "to Step by Step Mode"
 
+
+  private val rownum = 2
+  private val colnum = 4
+
   private var frame: VisualiserFrame = new VisualiserFrame(w, h)
   frame.setResizable(false)
 
@@ -152,6 +156,22 @@ class WorldViewer(var world: World, val w: Int, val h: Int, var scale: Double) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
         g2.clearRect(0, 0, this.getWidth, this.getHeight)
+
+        var width = 1200
+        var height = 1000
+
+        // draw the rows
+        val rowHt = height / rownum
+        val rowWid = width / colnum
+
+        for (i<-0 until rownum){
+          g2.drawLine(0, i * rowHt, width, i * rowHt)
+        }
+
+        for (i<-0 until colnum){
+          g.drawLine(i * rowWid, 0, i * rowWid, height)
+        }
+
         val snap = world.getSnapshotToDisplay
         if (snap != null) {
           val currentPosSnapshot = snap.getPosList

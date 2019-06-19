@@ -124,6 +124,9 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     case Terminated(ref) if patchGuardians.contains(ref) =>
       log.info(s"Guardian ${ref.path} terminated")
       patchGuardians -= ref
+      if (alertedGuardian.contains(ref)) {
+        alertedGuardian -= ref
+      }
 
     // messaggio inviato dalla dashboard
     case RequestGuardianInformations =>

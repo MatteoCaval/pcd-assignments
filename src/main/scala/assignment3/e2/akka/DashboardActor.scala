@@ -18,11 +18,13 @@ class DashboardActor extends Actor with ActorLogging {
 
   mediator ! Subscribe(PubSubMessages.GUARDIAN_INFO, self)
   mediator ! Subscribe(PubSubMessages.SENSOR_DATA, self)
+  mediator ! Subscribe(PubSubMessages.ALARM_ENABLED, self)
 
 
   val view = new MapMonitorViewImpl(new ViewListener {
     override def resetAlarmPressed(patchId: Int): Unit = {
-      mediator ! Publish(PubSubMessages.TERMINATE_ALERT, PatchReleaseMessage(patchId))
+
+      mediator ! Publish(PubSubMessages.ALARM_ENABLED, PatchAlarmEnabled(patchId, enabled = false))
     }
   }, PatchManager.getPatches.size)
 
@@ -94,10 +96,10 @@ class DashboardActor extends Actor with ActorLogging {
         case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
       }
 
-
-      this.view.notifyAlarmStateEnabled(patch.id, state == GuardianState.ALERT)
-
       view.notifyGuardian(DashboardGuardianState(id, temp, guardianState, patch))
+
+    case PatchAlarmEnabled(patchId, alarmEnabled) =>
+      this.view.notifyAlarmStateEnabled(patchId, alarmEnabled)
 
   }
 

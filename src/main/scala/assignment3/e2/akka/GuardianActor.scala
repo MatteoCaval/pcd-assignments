@@ -31,7 +31,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private val cluster = Cluster(context.system)
   private val mediator = DistributedPubSub(context.system).mediator
 
-  mediator ! Subscribe(PubSubMessages.TERMINATE_ALERT, self)
+  mediator ! Subscribe(PubSubMessages.ALARM_ENABLED, self)
   mediator ! Subscribe(PubSubMessages.GUARDIAN_UP, self)
   mediator ! Subscribe(PubSubMessages.SENSOR_DATA, self)
   mediator ! Subscribe(PubSubMessages.GUARDIAN_INFO, self)
@@ -148,7 +148,8 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
           this.alertedGuardian -= sender //removes sender from alerted guardians
       }
 
-    case PatchReleaseMessage(patchId) if this.patch.id == patchId =>
+    // alarm released
+    case PatchAlarmEnabled(patchId, false) if this.patch.id == patchId =>
       this.alertedGuardian = Map()
       this.state = GuardianState.OK
       this.broadcastGuardianInfos()
@@ -205,6 +206,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
       if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
         log.info(s"Patch ${patch.id} in alert")
         this.state = GuardianState.ALERT
+        mediator ! Publish(PubSubMessages.ALARM_ENABLED, PatchAlarmEnabled(this.patch.id, enabled = true))
         broadcastGuardianInfos()
         this.alertedGuardian = Map()
 

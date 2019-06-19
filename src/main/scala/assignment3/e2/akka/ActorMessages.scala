@@ -7,11 +7,12 @@ object ActorMessages {
 
   case class GuardianInfo(guardianId: String, patch: Patch, state: String, temperature: Option[Double])
 
+  // message send by guardian on start to nofity all guardians (also the ones in his patch) about his presence
   case class GuardianUp(patch: Patch, state: String)
 
   case object RequestGuardianInformations
 
-  case class PatchReleaseMessage(patchId: Int)
+  case class PatchAlarmEnabled(patchId: Int, enabled:Boolean)
 
   case class GuardianStateMesssage(state: String, alertTime: Option[Long])
 

@@ -49,7 +49,7 @@ class DashboardActor extends Actor with ActorLogging {
         RegistrateSensor
 
 
-    case MemberUp(member) if member.hasRole("guardian") =>
+    case MemberUp(member) if member.hasRole(Roles.GUARDIAN_ROLE) =>
       log.info(s"Node ${member.address} up")
       context.actorSelection(RootActorPath(member.address) / "user" / "*") !
         RequestGuardianInformations

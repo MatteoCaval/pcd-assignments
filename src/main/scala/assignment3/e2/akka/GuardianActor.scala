@@ -2,7 +2,7 @@ package assignment3.e2.akka
 
 import java.util.UUID
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable, Props, RootActorPath, Terminated}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
@@ -62,6 +62,10 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   }
 
   def sensorInformations: Receive = {
+
+    case MemberUp(member) if member.hasRole(Roles.SENSOR_ROLE) =>
+      context.actorSelection(RootActorPath(member.address) / "user" / "*") !
+        RegistrateSensor
 
     // data of sensor inside my patch
     case SensorData(sensorId, Some(temperature), position) if patch.includePoint(position) =>

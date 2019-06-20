@@ -8,7 +8,7 @@ import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import assignment3.e2.akka.ActorMessages._
-import assignment3.e2.common.Patch
+import assignment3.e2.common.{CommonConfig, Patch}
 
 import scala.concurrent.duration._
 
@@ -167,13 +167,13 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
 
   private def handleState(temperature: Option[Double]) = temperature match {
-    case Some(temp) if temp > Config.MAX_TEMP && state == GuardianState.OK =>
+    case Some(temp) if temp > CommonConfig.ALERT_TEMP && state == GuardianState.OK =>
       log.info("PREALERT")
       state = GuardianState.PREALERT
       this.notifyStateToPatchGuardians()
       this.checkAlertState()
 
-    case Some(temp) if temp <= Config.MAX_TEMP && state == GuardianState.PREALERT =>
+    case Some(temp) if temp <= CommonConfig.ALERT_TEMP && state == GuardianState.PREALERT =>
       log.info("IDLE")
       state = GuardianState.OK
       this.notifyStateToPatchGuardians()
@@ -201,8 +201,8 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   }
 
   private def checkAlertState(): Unit = {
-    log.info(s"checking alert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}")
-    this.patchAlertTimer = context.system.scheduler.scheduleOnce(Config.ALERT_MIN_TIME millis) {
+    log.info(s"checking prealert, my state is $state, alerted: ${alertedGuardian.size}, total: ${patchGuardians.size}")
+    this.patchAlertTimer = context.system.scheduler.scheduleOnce(CommonConfig.ALERT_MIN_TIME millis) {
       if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
         log.info(s"Patch ${patch.id} in alert")
         this.state = GuardianState.ALERT
@@ -226,7 +226,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
   private def getNumberOfGuardiansWithElapsedTime: Int = {
     val currentTime = System.currentTimeMillis()
-    this.alertedGuardian.count(g => g._2.isEmpty || currentTime - g._2.get > Config.ALERT_MIN_TIME)
+    this.alertedGuardian.count(g => g._2.isEmpty || currentTime - g._2.get > CommonConfig.ALERT_MIN_TIME)
   }
 
 

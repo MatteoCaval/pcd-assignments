@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.pubsub.DistributedPubSub
 import assignment3.e2.akka.ActorMessages._
-import assignment3.e2.common.{P2d, PatchManager}
+import assignment3.e2.common.{P2d, PatchManager, SensorManager}
 
 import scala.concurrent.duration._
 import scala.util.Random
@@ -60,7 +60,7 @@ class SensorActor(val sensorId: String, var position: P2d) extends Actor with Ac
 
 
   private def updateRandomTemperature(): Unit = {
-    this.registeredTemperature = Some(Random.nextDouble() * 10)
+    this.registeredTemperature = SensorManager.getRandomTemperature
     log.info(s"Updating sensor temperature to $registeredTemperature")
     mediator ! Publish(PubSubMessages.SENSOR_DATA, SensorData(sensorId, registeredTemperature, position))
   }

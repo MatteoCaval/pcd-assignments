@@ -44,6 +44,10 @@ object StartGuardians extends App {
     system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
     system.actorOf(GuardianActor.props(PatchManager.getPatches(0)))
     system.actorOf(GuardianActor.props(PatchManager.getPatches(1)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(2)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(2)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(3)))
+    system.actorOf(GuardianActor.props(PatchManager.getPatches(3)))
   }
 
   startClusterWithGuardians(0)

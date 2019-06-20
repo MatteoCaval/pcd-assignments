@@ -90,13 +90,7 @@ class DashboardActor extends Actor with ActorLogging {
       guardians += (sender -> info)
 
 
-      val guardianState = state match {
-        case GuardianState.OK => GuardianStateEnum.IDLE
-        case GuardianState.ALERT => GuardianStateEnum.ALARM
-        case GuardianState.PREALERT => GuardianStateEnum.PRE_ALERT
-      }
-
-      view.notifyGuardian(DashboardGuardianState(id, temp, guardianState, patch))
+      view.notifyGuardian(DashboardGuardianState(id, temp, state, patch))
 
     case PatchAlarmEnabled(patchId, alarmEnabled) =>
       this.view.notifyAlarmStateEnabled(patchId, alarmEnabled)

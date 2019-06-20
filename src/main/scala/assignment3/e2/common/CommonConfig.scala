@@ -9,7 +9,7 @@ object CommonConfig {
   val MAX_MAP_X = 500
   val MAX_MAP_Y = 500
 
-  val ALERT_TEMP = 16
+  val ALERT_TEMP = 23
   val MIN_TEMP = 15
   val MAX_TEMP = 40
 

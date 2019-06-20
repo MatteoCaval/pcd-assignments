@@ -8,16 +8,10 @@ import akka.cluster.ClusterEvent.{InitialStateAsEvents, MemberEvent, MemberUp}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import assignment3.e2.akka.ActorMessages._
-import assignment3.e2.common.{CommonConfig, Patch}
+import assignment3.e2.common.GuardianStateEnum.GuardianStateEnum
+import assignment3.e2.common.{CommonConfig, GuardianStateEnum, Patch}
 
 import scala.concurrent.duration._
-
-object GuardianState {
-  val OK = "ok"
-  val PREALERT = "prealert"
-  val ALERT = "alert"
-}
-
 
 object GuardianActor {
   def props(patch: Patch) = Props(new GuardianActor(UUID.randomUUID().toString, patch))
@@ -40,12 +34,12 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
   private var receivedTemperatures: Map[String, Double] = Map()
   private var registeredSensors: Map[ActorRef, String] = Map()
 
-  private var patchGuardians: Map[ActorRef, String] = Map()
+  private var patchGuardians: Map[ActorRef, GuardianStateEnum] = Map()
 
   private var alertedGuardian: Map[ActorRef, Option[Long]] = Map()
 
   var averageTemperature: Option[Double] = None
-  var state: String = GuardianState.OK
+  var state: GuardianStateEnum = GuardianStateEnum.IDLE
 
   var patchAlertTimer: Cancellable = null
 
@@ -89,7 +83,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     // messaggio inviato da un guardiano quando va su
     case GuardianUp(senderPatch, senderState) if senderPatch == this.patch && sender != self =>
       log.info(s"Guardian ${sender} up")
-      if (senderState == GuardianState.PREALERT && !alertedGuardian.contains(sender)) {
+      if (senderState == GuardianStateEnum.PRE_ALERT && !alertedGuardian.contains(sender)) {
         alertedGuardian += (sender -> None)
       }
 
@@ -114,8 +108,8 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
         context.watch(sender)
       }
       patchGuardians += (sender -> senderState)
-      if (this.state != GuardianState.ALERT && senderState == GuardianState.ALERT) {
-        this.state = GuardianState.ALERT
+      if (this.state != GuardianStateEnum.ALARM && senderState == GuardianStateEnum.ALARM) {
+        this.state = GuardianStateEnum.ALARM
         this.alertedGuardian = Map()
         this.broadcastGuardianInfos()
       }
@@ -136,22 +130,22 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     // guardian state, send by other guardians on state changes
     case GuardianStateMesssage(senderState, time) =>
       senderState match {
-        case GuardianState.ALERT => //switch my state to alert and notify dashboards
+        case GuardianStateEnum.ALARM => //switch my state to alert and notify dashboards
         //          this.patchAlertTimer.cancel()
         //          this.state = GuardianState.ALERT
         //          this.alertedGuardian = Map()
 
-        case GuardianState.PREALERT =>
+        case GuardianStateEnum.PRE_ALERT =>
           this.alertedGuardian += (sender -> time)
 
-        case GuardianState.OK =>
+        case GuardianStateEnum.IDLE =>
           this.alertedGuardian -= sender //removes sender from alerted guardians
       }
 
     // alarm released
     case PatchAlarmEnabled(patchId, false) if this.patch.id == patchId =>
       this.alertedGuardian = Map()
-      this.state = GuardianState.OK
+      this.state = GuardianStateEnum.IDLE
       this.broadcastGuardianInfos()
 
 
@@ -167,22 +161,22 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
 
 
   private def handleState(temperature: Option[Double]) = temperature match {
-    case Some(temp) if temp > CommonConfig.ALERT_TEMP && state == GuardianState.OK =>
+    case Some(temp) if temp > CommonConfig.ALERT_TEMP && state == GuardianStateEnum.IDLE =>
       log.info("PREALERT")
-      state = GuardianState.PREALERT
+      state = GuardianStateEnum.PRE_ALERT
       this.notifyStateToPatchGuardians()
       this.checkAlertState()
 
-    case Some(temp) if temp <= CommonConfig.ALERT_TEMP && state == GuardianState.PREALERT =>
+    case Some(temp) if temp <= CommonConfig.ALERT_TEMP && state == GuardianStateEnum.PRE_ALERT =>
       log.info("IDLE")
-      state = GuardianState.OK
+      state = GuardianStateEnum.IDLE
       this.notifyStateToPatchGuardians()
       if (this.patchAlertTimer != null) {
         this.patchAlertTimer.cancel()
       }
 
-    case None if state == GuardianState.PREALERT => // not very sure
-      state = GuardianState.OK
+    case None if state == GuardianStateEnum.PRE_ALERT => // not very sure
+      state = GuardianStateEnum.IDLE
       this.notifyStateToPatchGuardians()
 
     case _ =>
@@ -196,7 +190,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     * send state to all patch guardians
     */
   private def notifyStateToPatchGuardians(): Unit = {
-    val time: Option[Long] = if (this.state == GuardianState.PREALERT) Some(System.currentTimeMillis()) else None
+    val time: Option[Long] = if (this.state == GuardianStateEnum.PRE_ALERT) Some(System.currentTimeMillis()) else None
     patchGuardians.keySet.foreach(_ ! GuardianStateMesssage(this.state, time))
   }
 
@@ -205,7 +199,7 @@ class GuardianActor(val guardianId: String, val patch: Patch) extends Actor with
     this.patchAlertTimer = context.system.scheduler.scheduleOnce(CommonConfig.ALERT_MIN_TIME millis) {
       if (isMajorityOfGuardiansInPreAlertWithElapsedTime) {
         log.info(s"Patch ${patch.id} in alert")
-        this.state = GuardianState.ALERT
+        this.state = GuardianStateEnum.ALARM
         mediator ! Publish(PubSubMessages.ALARM_ENABLED, PatchAlarmEnabled(this.patch.id, enabled = true))
         broadcastGuardianInfos()
         this.alertedGuardian = Map()

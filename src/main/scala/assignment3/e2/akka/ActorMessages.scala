@@ -13,20 +13,13 @@ object ActorMessages {
 
   case object RequestGuardianInformations
 
-  case class PatchAlarmEnabled(patchId: Int, enabled:Boolean)
+  case class PatchAlarmEnabled(patchId: Int, enabled: Boolean)
 
   case class GuardianStateMesssage(state: GuardianStateEnum, alertTime: Option[Long])
-
 
   case class SensorData(sensorId: String, temperature: Option[Double], position: P2d)
 
   case object RegistrateSensor
-
-  case object RegistrateSensorWithCompleteData
-
-  case class SensorRegistrationData(sensorId: String, ref: ActorRef)
-
-  case class SensorRegistrationCompleteData(sensorId: String, ref: ActorRef, temperature: Option[Double], position: P2d)
 
 
 }

@@ -38,10 +38,6 @@ class SensorActor(val sensorId: String, var position: P2d) extends Actor with Ac
       log.info(s"Received registration data from $sender")
       sender() ! SensorData(sensorId, registeredTemperature, position)
 
-    case RegistrateSensorWithCompleteData =>
-      log.info(s"Received registration data from $sender")
-      sender() ! SensorRegistrationCompleteData(sensorId, self, registeredTemperature, position)
-
     case m =>
       log.info(s"Boh, received $m")
   }
